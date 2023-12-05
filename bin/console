@@ -2,10 +2,19 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "superset"
+
+require "active_support"
+require "faraday"
+require "active_support/core_ext/object"
+require "superset/credential/admin"
+require "superset/credential/embedded"
+
+Dir["./lib/**/*.rb"].each do |file|
+  require file
+end
 
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.
 
-require "irb"
-IRB.start(__FILE__)
+require "pry"
+Pry.start(__FILE__)
