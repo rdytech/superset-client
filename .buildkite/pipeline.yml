@@ -1,0 +1,16 @@
+steps:
+  - label: ":rspec:"
+    command: bin/setup && bundle exec rspec
+    plugins:
+      docker-compose#v3.0.3:
+        run: app
+        volumes:
+          - ./coverage:/app/coverage
+          - ./log:/app/log
+    timeout: 10
+    agents:
+      queue: docker-heavy
+    artifact_paths:
+      - "coverage/.resultset*.json"
+      - "log/*.log"
+      - "log/*.xml"
