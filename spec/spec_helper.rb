@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require "superset"
+require 'pry'
+require "active_support"
+require "active_support/core_ext/object"
+#require "faraday"
+
+Dir["./lib/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ["jonathon.batson@gmail.com"]
 
   spec.summary = "A Ruby Client for Apache Superset API"
-  # spec.homepage = "TODO: Put your gem's website or public repo URL here."
+  spec.homepage = "https://github.com/rdytech/superset-client"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.6.0"
 
@@ -27,8 +27,9 @@ Gem::Specification.new do |spec|
         f.start_with?(*%w[bin/ test/ spec/ features/ .git appveyor Gemfile])
     end
   end
-  spec.bindir = "exe"
-  spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+
+  #spec.bindir = "exe"
+  #spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
   # Uncomment to register a new dependency of your gem

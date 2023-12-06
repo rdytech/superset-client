@@ -9,9 +9,8 @@ require "active_support/core_ext/object"
 require "superset/credential/admin"
 require "superset/credential/embedded"
 
-Dir["./lib/**/*.rb"].each do |file|
-  require file
-end
+Dir["./lib/**/*.rb"].each { |f| require f }
+
 
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.

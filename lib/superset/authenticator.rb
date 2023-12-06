@@ -8,6 +8,9 @@ module Superset
       @credentials = credentials
     end
 
+    def self.call(credentials)
+      self.new(credentials)
+    end
 
     def access_token
       response_body['access_token']
@@ -27,7 +30,7 @@ module Superset
       ENV['SUPERSET_HOST']
     end
 
-    #private
+    private
 
     def response
       validate_credential_existance

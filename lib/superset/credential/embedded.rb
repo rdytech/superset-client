@@ -2,8 +2,6 @@ module Superset
   module Credential
     module Embedded
 
-      private
-
       def credentials
         {
           "username": embedded_username,
@@ -12,6 +10,8 @@ module Superset
           "refresh":  false
         }
       end
+
+      private
 
       def embedded_username
         ENV['SUPERSET_EMBEDDED_USERNAME']

@@ -6,11 +6,11 @@ source "https://rubygems.org"
 gemspec
 
 gem 'happi', git: 'https://github.com/rdytech/happi.git', tag: 'v0.5.0'
-#gem 'activesupport'
+gem 'activesupport'
 
 gem "rake", "~> 13.0"
 
 gem "rspec", "~> 3.0"
 gem "rubocop", "~> 1.21"
 gem "pry"
- 
+
