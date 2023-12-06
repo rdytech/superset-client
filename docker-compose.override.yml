@@ -1,0 +1,10 @@
+version: '3'
+
+volumes:
+  bundle-data:
+    driver: local
+
+services:
+  app:
+    volumes:
+      - bundle-data:/usr/local/bundle

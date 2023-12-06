@@ -47,10 +47,20 @@ RSpec.describe Superset::Authenticator do
   end
 
   describe '#validate_credential_existance' do
-    let(:credentials) { { username: 'test', password: '' } }
+    context 'when a password is not present' do
+      let(:credentials) { { username: 'test', password: '' } }
 
-    it 'raises an error if credentials are missing' do
-      expect { subject.validate_credential_existance }.to raise_error(Superset::Authenticator::CredentialMissingError)
+      it 'raises an error' do
+        expect { subject.validate_credential_existance }.to raise_error(Superset::Authenticator::CredentialMissingError)
+      end
+    end
+
+    context 'when a username is not present' do
+      let(:credentials) { { username: '', password: 'test' } }
+
+      it 'raises an error' do
+        expect { subject.validate_credential_existance }.to raise_error(Superset::Authenticator::CredentialMissingError)
+      end
     end
   end
 
