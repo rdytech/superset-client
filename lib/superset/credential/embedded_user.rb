@@ -1,6 +1,6 @@
 module Superset
   module Credential
-    module Embedded
+    module EmbeddedUser
 
       def credentials
         {

@@ -1,34 +1,75 @@
-# Superset
+# Superset Client
 
-TODO: Delete this and the text below, and describe your gem
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/superset`. To experiment with that code, run `bin/console` for an interactive prompt.
+[![Build status](https://badge.buildkite.com/fc7ee4a03e119a5d859472865fc0bdc9a6e46d51b7f5b8cd62.svg)](https://buildkite.com/jobready/superset-client)
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+```ruby
+gem 'superset-client'
+```
 
-Install the gem and add to the application's Gemfile by executing:
+And then execute:
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+    $ bundle
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+Or install it yourself as:
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+    $ gem install superset-client
+
 
 ## Usage
 
-TODO: Write usage instructions here
+Assumption is that this Gem would be used for general api calls and/or for guest token retrieval when setting up applications to use the superset embedded dashboard workflow.
+
+The Superset API useage would fall into 2 general categories
+- User for general api calls to endpoints for Dashboards, Datasets, Charts, Users, Roles etc
+- User for guest token api call to use when embedding dashboards in a host application
+
+Setup these users credential in env vars:
+- general api calls,   `ENV['SUPERSET_API_USERNAME']` and `ENV['SUPERSET_API_PASSWORD']` 
+- embedded user calls, `ENV['SUPERSET_EMBEDDED_USERNAME']` and `ENV['SUPERSET_EMBEDDED_PASSWORD']`
+
+### API calls
+
+WIP
+
+### Fetch a Guest Token
+
+WIP
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bundle exed rspec` to run the tests. You can also run `bin/console` for an interactive pry prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+### Docker Setup
+
+Use [Docker](https://docs.docker.com/docker-for-mac/install/) to run in containers.
+
+Once Docker is installed on your system, you can use the following commands from the root of the application folder, e.g `/var/www/elcapitan`:
+
+###### Build images:
+
+`docker-compose build`
+
+###### Bundle install and run specs:
+
+`docker-compose run --rm app`
+
+###### Bundle install:
+
+`docker-compose run --rm app bundle install`
+
+###### Run specs:
+
+```
+docker-compose run --rm app rspec
+# or
+docker-compose run --rm app /bin/bash      # then run rspec from inside the container.
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/superset.
+WIP
 
 ## License
 

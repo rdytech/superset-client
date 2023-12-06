@@ -1,23 +1,23 @@
 module Superset
   module Credential
-    module Admin
-
-      private
+    module ApiUser
 
       def credentials
         {
-          "username": admin_username,
-          "password": admin_password,
+          "username": api_username,
+          "password": api_password,
           "provider": "db",
           "refresh":  false
         }
       end
 
-      def admin_username
+      private
+
+      def api_username
         ENV['SUPERSET_API_USERNAME']
       end
 
-      def admin_password
+      def api_password
         ENV['SUPERSET_API_PASSWORD']
       end
     end
