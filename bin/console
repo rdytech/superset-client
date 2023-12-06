@@ -5,9 +5,10 @@ require "bundler/setup"
 
 require "active_support"
 require "faraday"
+require "happi"
 require "active_support/core_ext/object"
-require "superset/credential/admin"
-require "superset/credential/embedded"
+require "superset/credential/api_user"
+require "superset/credential/embedded_user"
 
 Dir["./lib/**/*.rb"].each { |f| require f }
 

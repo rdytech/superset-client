@@ -21,13 +21,15 @@ Or install it yourself as:
 
 Assumption is that this Gem would be used for general api calls and/or for guest token retrieval when setting up applications to use the superset embedded dashboard workflow.
 
-The Superset API useage would fall into 2 general categories
-- User for general api calls to endpoints for Dashboards, Datasets, Charts, Users, Roles etc
-- User for guest token api call to use when embedding dashboards in a host application
+The Superset API users could then fall into 2 categories
+- User for general api calls to endpoints for Dashboards, Datasets, Charts, Users, Roles etc.  ref Superset::Credential::ApiUser
+- User for guest token api call to use when embedding dashboards in a host application. ref  Superset::Credential::EmbeddedUser
 
-Setup these users credential in env vars:
-- general api calls,   `ENV['SUPERSET_API_USERNAME']` and `ENV['SUPERSET_API_PASSWORD']` 
-- embedded user calls, `ENV['SUPERSET_EMBEDDED_USERNAME']` and `ENV['SUPERSET_EMBEDDED_PASSWORD']`
+Credential setup is per following env vars:
+- for general api calls setup creds in  `ENV['SUPERSET_API_USERNAME']` and `ENV['SUPERSET_API_PASSWORD']`
+- for embedded user calls setup creds in `ENV['SUPERSET_EMBEDDED_USERNAME']` and `ENV['SUPERSET_EMBEDDED_PASSWORD']`
+
+Configure your superset host in `ENV['SUPERSET_HOST']`
 
 ### API calls
 

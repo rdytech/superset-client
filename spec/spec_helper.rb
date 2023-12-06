@@ -3,7 +3,7 @@
 require 'pry'
 require "active_support"
 require "active_support/core_ext/object"
-#require "faraday"
+require "faraday"
 
 Dir["./lib/**/*.rb"].each { |f| require f }
 

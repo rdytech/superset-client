@@ -1,11 +1,12 @@
 require 'spec_helper'
-require 'superset/authenticator'
 
 RSpec.describe Superset::Authenticator do
   subject { described_class.new(credentials) }
   let(:credentials) { { username: 'test', password: 'test' } }
 
   before do
+    allow(ENV).to receive(:[]).with(any_args).and_call_original
+    allow(ENV).to receive(:[]).with('SUPERSET_HOST').and_return('http://localhost:8088')
     allow(subject).to receive(:response_body).and_return({
       "access_token"=> "some-access-token",
       "refresh_token"=> "some-refresh-token"
@@ -29,8 +30,15 @@ RSpec.describe Superset::Authenticator do
   end
 
   describe '.call' do
+    before do
+      allow_any_instance_of(described_class).to receive(:response_body).and_return({
+        "access_token"=> "some-access-token",
+        "refresh_token"=> "some-refresh-token"
+      })
+    end
+
     it 'returns an instance of Authenticator' do
-      expect(described_class.call(credentials)).to be_an_instance_of(described_class)
+      expect(described_class.call(credentials)).to eq('some-access-token')
     end
   end
 
@@ -74,8 +82,6 @@ RSpec.describe Superset::Authenticator do
     end
     context 'when SUPERSET_HOST is set' do   
       it 'returns the host' do
-        allow(ENV).to receive(:[]).with('SUPERSET_HOST').and_return('http://localhost:8088')
-
         expect(subject.superset_host).to eq('http://localhost:8088')
       end  
     end 

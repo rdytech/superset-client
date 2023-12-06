@@ -9,7 +9,7 @@ module Superset
     end
 
     def self.call(credentials)
-      self.new(credentials)
+      self.new(credentials).access_token
     end
 
     def access_token
@@ -21,7 +21,8 @@ module Superset
     end
 
     def validate_credential_existance
-      raise CredentialMissingError unless credentials[:password].present? && credentials[:username].present?
+      raise CredentialMissingError, 'password not set' unless credentials[:password].present?
+      raise CredentialMissingError, 'username not set' unless credentials[:username].present?
     end
 
     def superset_host
