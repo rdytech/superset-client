@@ -38,6 +38,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "json", "~> 2.6"
   spec.add_dependency "terminal-table", "~> 1.5"
   spec.add_dependency "rake", "~> 13.0"
+  spec.add_dependency "rollbar", "~> 3.4"
 
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "rubocop", "~> 1.5"
