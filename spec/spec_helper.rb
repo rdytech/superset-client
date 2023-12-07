@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
 require 'pry'
-require "active_support"
-require "active_support/core_ext/object"
 require "faraday"
+require "happi"
+require "terminal-table"
+require "superset/credential/api_user"
+require "superset/credential/embedded_user"
+require "superset/client"
+require "superset/display"
+require "superset/request"
 
 Dir["./lib/**/*.rb"].each { |f| require f }
 
