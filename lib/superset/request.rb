@@ -38,9 +38,10 @@ module Superset
       false
     end
 
-    def current_tenant
-      @current_tenant ||= Tenant.current
-    end
+# Seeing what breaks .. ie we will need to pull out any refs to current_tenant
+#    def current_tenant
+#      @current_tenant ||= Tenant.current
+#    end
 
     def pagination
       "page:#{page_num},page_size:#{PAGE_SIZE}"
