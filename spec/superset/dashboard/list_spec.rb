@@ -50,14 +50,14 @@ RSpec.describe Superset::Dashboard::List do
   describe '#list' do
     specify do
       expect(subject.table.to_s).to eq(
-        "+------+----------------------------------+-----------+----------------------------------------------------------------+\n" \
-        "|                                              Superset::Dashboard::List                                               |\n" \
-        "+------+----------------------------------+-----------+----------------------------------------------------------------+\n" \
-        "| Id   | Dashboard title                  | Status    | Url                                                            |\n" \
-        "+------+----------------------------------+-----------+----------------------------------------------------------------+\n" \
-        "| 36   | Test Embedded 2                  | published | https://test.ready-superset.jobready.io/superset/dashboard/36/ |\n" \
-        "| 15   | Innovation Day: JobReady Staging | published | https://test.ready-superset.jobready.io/superset/dashboard/15/ |\n" \
-        "+------+----------------------------------+-----------+----------------------------------------------------------------+"
+        "+----+----------------------------------+-----------+----------------------------------------------------------------+\n" \
+        "|                                             Superset::Dashboard::List                                              |\n" \
+        "+----+----------------------------------+-----------+----------------------------------------------------------------+\n" \
+        "| Id | Dashboard title                  | Status    | Url                                                            |\n" \
+        "+----+----------------------------------+-----------+----------------------------------------------------------------+\n" \
+        "| 36 | Test Embedded 2                  | published | https://test.ready-superset.jobready.io/superset/dashboard/36/ |\n" \
+        "| 15 | Innovation Day: JobReady Staging | published | https://test.ready-superset.jobready.io/superset/dashboard/15/ |\n" \
+        "+----+----------------------------------+-----------+----------------------------------------------------------------+"
       )
     end
   end

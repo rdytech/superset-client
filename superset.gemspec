@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
 
   # Uncomment to register a new dependency of your gem
   spec.add_dependency "json", "~> 2.6"
-  spec.add_dependency "terminal-table", "~> 1.5"
+  spec.add_dependency "terminal-table", "~> 1.8"
   spec.add_dependency "rake", "~> 13.0"
   spec.add_dependency "rollbar", "~> 3.4"
 

@@ -34,14 +34,14 @@ module Superset
       @client ||= Superset::Client.new
     end
 
-    def security_api_request?
-      false
-    end
-
-# Seeing what breaks .. ie we will need to pull out any refs to current_tenant
-#    def current_tenant
-#      @current_tenant ||= Tenant.current
+#    def security_api_request?
+#      false
 #    end
+
+    # will need to be overridden in subclasses for public usage .. future commit coming
+    def current_tenant
+      @current_tenant ||= Tenant.current
+    end
 
     def pagination
       "page:#{page_num},page_size:#{PAGE_SIZE}"
