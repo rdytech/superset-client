@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'require_all'
 require_all "lib/superset/credential"
 require_relative "superset/authenticator"
 require_relative "superset/client"
