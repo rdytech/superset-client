@@ -6,14 +6,10 @@ require "json"
 require "faraday"
 require "happi"
 require "terminal-table"
-require "superset/credential/api_user"
-require "superset/credential/embedded_user"
-require "superset/client"
-require "superset/display"
-require "superset/request"
+require "require_all"
+require "superset"
 
 Dir["./lib/**/*.rb"].each { |f| require f }
-
 
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.
