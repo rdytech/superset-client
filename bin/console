@@ -6,7 +6,6 @@ require "json"
 require "faraday"
 require "happi"
 require "terminal-table"
-require "require_all"
 require "superset"
 
 Dir["./lib/**/*.rb"].each { |f| require f }
