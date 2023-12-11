@@ -17,7 +17,7 @@ RSpec.describe Superset::Security::User::Get do
         "changed_on"=>"2023-11-19T23:59:14.960962",
         "created_by"=>nil,
         "created_on"=>"2023-06-21T12:29:02.452271",
-        "email"=>"test@readytech.io",
+        "email"=>"test@somemail.io",
         "fail_login_count"=>0,
         "first_name"=>"Some",
         "id"=>9,
@@ -28,7 +28,7 @@ RSpec.describe Superset::Security::User::Get do
           [{"id"=>3, "name"=>"Role1"},
            {"id"=>6, "name"=>"Role2"},
            {"id"=>19, "name"=>"Role3"}],
-        "username"=>"4bf1xxxx-xxxx-xxxx-xxxx-xxxxxxxxe3f5"},
+        "username"=>"some-user-name"},
       "show_columns"=>
        ["id", "roles.id", "roles.name", "first_name", "last_name", "username", "active", "email", "last_login", "login_count", "fail_login_count",
         "created_on", "changed_on", "created_by.id", "changed_by.id"],
@@ -48,7 +48,7 @@ RSpec.describe Superset::Security::User::Get do
 
   describe '#rows' do
     it 'pulls only the list_attributes out' do
-      expect(subject.rows).to eq( [["9", "Some", "User", "test@readytech.io", "510", "2023-11-21T04:21:24.561309"]] )
+      expect(subject.rows).to eq( [["9", "Some", "User", "test@somemail.io", "510", "2023-11-21T04:21:24.561309"]] )
     end
   end
 end

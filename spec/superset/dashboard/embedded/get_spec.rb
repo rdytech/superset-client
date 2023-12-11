@@ -5,8 +5,8 @@ RSpec.describe Superset::Dashboard::Embedded::Get, type: :service do
   let(:dashboard_id) { 1 }
 
   describe 'with a dashboard that has embedded settings, ie has a result' do
-    let(:allowed_domains) { ['http://jobready.127.0.0.1.nip.io:9292/'] }
-    let(:uuid) { '631bxxxx-xxxx-xxxx-xxxx-xxxx7f221247' }
+    let(:allowed_domains) { ['http://test-domain.io/'] }
+    let(:uuid) { '631bxxxx-xxxx-xxxx-xxxx-xxxxxxxxx247' }
     let(:response) do
       {
         'result' =>
@@ -38,15 +38,15 @@ RSpec.describe Superset::Dashboard::Embedded::Get, type: :service do
 
     describe '#table' do
       it 'prints a table with the dashboard title and charts' do
-          expect(subject.table.to_s).to eq(
-            "+-----------+--------------------------------------+--------------------------------------------+----------------------------+\n" \
-            "|                                                     1: Test Dashboard                                                      |\n" \
-            "+-----------+--------------------------------------+--------------------------------------------+----------------------------+\n" \
-            "| Dashboard | Uuid                                 | Allowed domains                            | Changed on                 |\n" \
-            "+-----------+--------------------------------------+--------------------------------------------+----------------------------+\n" \
-            "| 1         | 631bxxxx-xxxx-xxxx-xxxx-xxxx7f221247 | [\"http://jobready.127.0.0.1.nip.io:9292/\"] | 2023-10-30T03:06:51.437527 |\n" \
-            "+-----------+--------------------------------------+--------------------------------------------+----------------------------+" \
-          )
+        expect(subject.table.to_s).to eq(
+          "+-----------+--------------------------------------+----------------------------+----------------------------+\n" \
+          "|                                             1: Test Dashboard                                              |\n" \
+          "+-----------+--------------------------------------+----------------------------+----------------------------+\n" \
+          "| Dashboard | Uuid                                 | Allowed domains            | Changed on                 |\n" \
+          "+-----------+--------------------------------------+----------------------------+----------------------------+\n" \
+          "| 1         | 631bxxxx-xxxx-xxxx-xxxx-xxxxxxxxx247 | [\"http://test-domain.io/\"] | 2023-10-30T03:06:51.437527 |\n" \
+          "+-----------+--------------------------------------+----------------------------+----------------------------+"
+        )
       end
     end
   end
@@ -83,14 +83,14 @@ RSpec.describe Superset::Dashboard::Embedded::Get, type: :service do
 
     describe '#table' do
       it 'prints a table with zero rows' do
-          expect(subject.table.to_s).to eq(
-            "+-----------+------+-----------------+------------+\n" \
-            "|                1: Test Dashboard                |\n" \
-            "+-----------+------+-----------------+------------+\n" \
-            "| Dashboard | Uuid | Allowed domains | Changed on |\n" \
-            "+-----------+------+-----------------+------------+\n" \
-            "+-----------+------+-----------------+------------+"
-          )
+        expect(subject.table.to_s).to eq(
+          "+-----------+------+-----------------+------------+\n" \
+          "|                1: Test Dashboard                |\n" \
+          "+-----------+------+-----------------+------------+\n" \
+          "| Dashboard | Uuid | Allowed domains | Changed on |\n" \
+          "+-----------+------+-----------------+------------+\n" \
+          "+-----------+------+-----------------+------------+"
+        )
       end
     end
   end

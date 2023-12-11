@@ -8,7 +8,7 @@ RSpec.describe Superset::Security::Role::Get do
       "description_columns"=>{},
       "id"=>9,
       "label_columns"=>{"id"=>"Id", "name"=>"Name"},
-      "result"=>{"id"=>9, "name"=>"JobReady Staging Tenant only (non TPES)"},
+      "result"=>{"id"=>9, "name"=>"Schema Access to ACME"},
       "show_columns"=>["id", "name"],
       "show_title"=>"Show Role"
     }.with_indifferent_access
@@ -20,13 +20,13 @@ RSpec.describe Superset::Security::Role::Get do
 
   describe '#result' do
     it 'returns the response result' do
-      expect(subject.result).to eq( [ { "id"=>9, "name"=>"JobReady Staging Tenant only (non TPES)" } ] )
+      expect(subject.result).to eq( [ { "id"=>9, "name"=>"Schema Access to ACME" } ] )
     end
   end
 
   describe '#id_and_name' do
     specify do
-      expect(subject.id_and_name).to eq("9: JobReady Staging Tenant only (non TPES)")
+      expect(subject.id_and_name).to eq("9: Schema Access to ACME")
     end
   end
 end

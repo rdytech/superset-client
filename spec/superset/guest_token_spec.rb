@@ -41,8 +41,8 @@ RSpec.describe Superset::GuestToken do
 
     context 'with a current_user' do
       let(:user) { double(id: 101) }
-      
-      specify 'passes user id and email to superset' do
+
+      specify 'passes user id to superset' do
         expect(subject.params).to eq(
           {
             "resources": [

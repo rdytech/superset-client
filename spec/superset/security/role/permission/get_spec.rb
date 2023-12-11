@@ -6,10 +6,8 @@ RSpec.describe Superset::Security::Role::Permission::Get do
   let(:response) do
     {
       "result"=>[
-        {"id"=>181, "permission_name"=>"menu_access", "view_menu_name"=>"Dashboards"},
-        {"id"=>180, "permission_name"=>"menu_access", "view_menu_name"=>"Datasets"},
-        {"id"=>455, "permission_name"=>"schema_access", "view_menu_name"=>"[Jobready-Staging].[jobready_stage]"},
-        {"id"=>355, "permission_name"=>"schema_access", "view_menu_name"=>"[Jobready-Staging].[jobready_stage_new]"}
+        {"id"=>455, "permission_name"=>"schema_access", "view_menu_name"=>"[DB1].[acme]"},
+        {"id"=>355, "permission_name"=>"schema_access", "view_menu_name"=>"[DB1].[coyote]"}
       ]
     }.with_indifferent_access
   end
@@ -26,21 +24,19 @@ RSpec.describe Superset::Security::Role::Permission::Get do
 
   describe '#list' do
     before do
-      allow(subject).to receive(:title).and_return("9: JobReady Staging Tenant only (non TPES)")
+      allow(subject).to receive(:title).and_return("9: DB1 Acme vs Coyote")
     end
 
     specify do
       expect(subject.table.to_s).to eq(
-        "+-----+-----------------+-----------------------------------------+\n" \
-        "|           9: JobReady Staging Tenant only (non TPES)            |\n" \
-        "+-----+-----------------+-----------------------------------------+\n" \
-        "| Id  | Permission name | View menu name                          |\n" \
-        "+-----+-----------------+-----------------------------------------+\n" \
-        "| 181 | menu_access     | Dashboards                              |\n" \
-        "| 180 | menu_access     | Datasets                                |\n" \
-        "| 455 | schema_access   | [Jobready-Staging].[jobready_stage]     |\n" \
-        "| 355 | schema_access   | [Jobready-Staging].[jobready_stage_new] |\n" \
-        "+-----+-----------------+-----------------------------------------+"
+        "+-----+-----------------+----------------+\n" \
+        "|         9: DB1 Acme vs Coyote          |\n" \
+        "+-----+-----------------+----------------+\n" \
+        "| Id  | Permission name | View menu name |\n" \
+        "+-----+-----------------+----------------+\n" \
+        "| 455 | schema_access   | [DB1].[acme]   |\n" \
+        "| 355 | schema_access   | [DB1].[coyote] |\n" \
+        "+-----+-----------------+----------------+"
       )
     end
   end

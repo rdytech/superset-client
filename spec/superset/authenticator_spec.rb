@@ -20,7 +20,7 @@ RSpec.describe Superset::Authenticator do
       end
     end
 
-    context 'with no credentials' do   
+    context 'with no credentials' do
       let(:credentials) { nil }
 
       it 'raises an error' do
@@ -44,13 +44,13 @@ RSpec.describe Superset::Authenticator do
 
   describe '#access_token' do
     it 'returns the access token' do
-      expect(subject.access_token).to eq('some-access-token')  
+      expect(subject.access_token).to eq('some-access-token')
     end
   end
 
   describe '#refresh_token' do
     it 'returns the refresh token' do
-      expect(subject.refresh_token).to eq('some-refresh-token')  
+      expect(subject.refresh_token).to eq('some-refresh-token')
     end
   end
 
@@ -73,17 +73,17 @@ RSpec.describe Superset::Authenticator do
   end
 
   describe '#superset_host' do
-    context 'when SUPERSET_HOST is not set' do   
+    context 'when SUPERSET_HOST is not set' do
       it 'raises an error' do
         allow(ENV).to receive(:[]).with('SUPERSET_HOST').and_return(nil)
 
         expect { subject.superset_host }.to raise_error(Superset::Authenticator::CredentialMissingError)
-      end  
+      end
     end
-    context 'when SUPERSET_HOST is set' do   
+    context 'when SUPERSET_HOST is set' do
       it 'returns the host' do
         expect(subject.superset_host).to eq('http://localhost:8088')
-      end  
-    end 
+      end
+    end
   end
 end

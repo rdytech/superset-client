@@ -10,7 +10,7 @@ RSpec.describe Superset::Client, type: :service do
     allow(Superset::Authenticator).to receive(:new) { authenticator }
     allow(authenticator).to receive(:access_token) { access_token }
     allow(authenticator).to receive(:superset_host) { host }
-    allow(subject).to receive(:credentials) { { username: 'api_username', password: 'api_password' } }  
+    allow(subject).to receive(:credentials) { { username: 'api_username', password: 'api_password' } }
   end
 
   describe "#access_token" do
