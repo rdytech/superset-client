@@ -71,7 +71,10 @@ docker-compose run --rm app /bin/bash      # then run rspec from inside the cont
 
 ## Releasing a new version
 
-On develop branch make sure to update `Superset::VERSION` and `CHANGELOG.md` with the new version number and changes
+On develop branch make sure to update `Superset::VERSION` and `CHANGELOG.md` with the new version number and changes.
+And of course that the lastest version is built and in the repo.
+
+`gem build superset.gemspec`
 
 ReadyTech hosts its own private gemfury remote repo. Add the repo, this only needs to be done once.
 
