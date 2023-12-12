@@ -1,33 +1,73 @@
 require 'spec_helper'
 
 RSpec.describe Superset::Security::User::Create do
-  subject { described_class.new(role_id) }
-  let(:role_id) { 101 }
+  subject { described_class.new(user_params: user_params) }
+  let(:role_ids) { [ 101 ] }
   let(:password) { 'some-password' }
   let(:tenant) { double('tenant', database: 'jobs_r_us')}
+  let(:user_params) do
+    {
+      :active     => true,
+      :email      => "teset@acme.com",
+      :first_name => "Firstname",
+      :last_name  => "Lastname",
+      :password   => password,
+      :roles      => role_ids,
+      :username   => "firstname_lastname"
+    }
+  end
 
   before do
     allow(subject).to receive(:current_tenant).and_return(tenant)
     allow(subject).to receive(:password).and_return(password)
   end
 
-  describe '#params' do
-    specify do
-      expect(subject.params).to eq({
-        :active     => true,
-        :email      => "jobready_jobs_r_us_embedded_user@ewp.readytech.io",
-        :first_name => "Jobready Application",
-        :last_name  => "jobready_jobs_r_us_embedded_user",
-        :password   => password,
-        :roles      => [ role_id ],
-        :username   => "jobready_jobs_r_us_embedded_user"
-      })
+  describe '#validate_user_params' do
+    context 'with valid params' do
+      specify do
+        expect { subject.validate_user_params }.not_to raise_error
+      end
     end
-  end
 
-  describe '#identifier' do
-    specify do
-      expect(subject.identifier).to eq("jobready_jobs_r_us_embedded_user")
+    context 'with invalid params' do
+      context 'when params are empty' do
+        let(:user_params) { {} }
+
+        specify do
+          expect { subject.validate_user_params }.to raise_error(Superset::Security::User::Create::InvalidParameterError)
+        end
+      end
+
+      context 'when params are missing' do
+        let(:user_params) do
+          {
+            :active     => true,
+            :password   => 'some-password',
+            :roles      => role_ids,
+            :username   => "firstname_lastnamer"
+          }
+        end
+
+        specify do
+          expect { subject.validate_user_params }.to raise_error(Superset::Security::User::Create::InvalidParameterError)
+        end
+      end
+
+      context 'when params are empty' do
+        let(:password) { '' }
+
+        specify do
+          expect { subject.validate_user_params }.to raise_error(Superset::Security::User::Create::InvalidParameterError)
+        end
+      end
+
+      context 'when role_ids is not an array' do
+        let(:role_ids) { '' }
+
+        specify do
+          expect { subject.validate_user_params }.to raise_error(Superset::Security::User::Create::InvalidParameterError)
+        end
+      end
     end
   end
 
@@ -41,14 +81,6 @@ RSpec.describe Superset::Security::User::Create do
 
       specify 'returns the id of the new user' do
         expect(subject.response).to eq response
-      end
-    end
-
-    context 'with an invalid role_id' do
-      let(:role_id) { '' }
-
-      specify 'raises an error' do
-        expect { subject.response }.to raise_error(Superset::Security::User::Create::InvalidParameterError)
       end
     end
   end
