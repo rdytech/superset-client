@@ -7,7 +7,7 @@ RSpec.describe Superset::Dashboard::Datasets::List do
     [
       {
         id: 101,
-        datasource_name: 'Acme Forcasts',
+        datasource_name: 'Acme Forecasts',
         database: { id: 1, name: 'DB1', backend: 'postgres' },
         schema: 'acme'
       },
@@ -63,7 +63,7 @@ RSpec.describe Superset::Dashboard::Datasets::List do
         "+-----+------------------+----------+---------------+------------------+--------+\n" \
         "| Id  | Datasource name  | Database | Database name | Database backend | Schema |\n" \
         "+-----+------------------+----------+---------------+------------------+--------+\n" \
-        "| 101 | Acme Forcasts    | 1        | DB1           | postgres         | acme   |\n" \
+        "| 101 | Acme Forecasts   | 1        | DB1           | postgres         | acme   |\n" \
         "| 102 | video_game_sales | 2        | examples      | postgres         | public |\n" \
         "+-----+------------------+----------+---------------+------------------+--------+"
       )

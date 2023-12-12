@@ -69,6 +69,30 @@ docker-compose run --rm app rspec
 docker-compose run --rm app /bin/bash      # then run rspec from inside the container.
 ```
 
+## Releasing a new version
+
+On develop branch make sure to update `Superset::VERSION` and `CHANGELOG.md` with the new version number and changes
+
+ReadyTech hosts its own private gemfury remote repo. Add the repo, this only needs to be done once.
+
+    git remote add fury https://git.fury.io/jobready/superset-client.git
+
+Get the latest develop into master
+
+    git checkout master
+    git pull
+    git fetch
+    git merge origin/develop
+
+Tag the version and push to github
+
+    git tag -a -m "Version 0.1.0" v0.1.0
+    git push origin master --tags
+
+Push to gemfury:
+
+    git push fury master
+
 ## Contributing
 
 WIP
