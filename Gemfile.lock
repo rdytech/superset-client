@@ -15,10 +15,13 @@ PATH
   remote: .
   specs:
     superset (0.1.0)
+      faraday (~> 1.0)
+      faraday-multipart (~> 1.0)
       json (~> 2.6)
       rake (~> 13.0)
       require_all (~> 3.0)
       rollbar (~> 3.4)
+      rubyzip (~> 2.3)
       terminal-table (~> 1.8)
 
 GEM
@@ -131,6 +134,7 @@ GEM
       parser (>= 3.2.1.0)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
+    rubyzip (2.3.2)
     terminal-table (1.8.0)
       unicode-display_width (~> 1.1, >= 1.1.1)
     tzinfo (2.0.6)

@@ -1,0 +1,182 @@
+--- !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+dashboard_title: JobReady EXPORT TEST
+description:
+css: ''
+slug:
+uuid: b1cd5db9-f9bf-4cc5-afd0-e0f082102318
+position: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+  CHART-RPXw-1xPUV: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children: []
+    id: CHART-RPXw-1xPUV
+    meta: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      chartId: 54222
+      height: 50
+      sliceName: JRStg User Roles Pie
+      uuid: 23b4591e-39d8-48e8-82a3-92b3430368ba
+      width: 4
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-s0QgSwAtb-
+    type: CHART
+  CHART-X4_wL-_LS3: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children: []
+    id: CHART-X4_wL-_LS3
+    meta: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      chartId: 54212
+      height: 50
+      sliceName: Current Users
+      uuid: 7fd4d120-3abe-4aee-a354-5ace09875b92
+      width: 4
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-SzLxT-drR9
+    - TAB-TUhDA40OZI
+    - ROW-MrdYlz6_uk
+    type: CHART
+  CHART-explore-54303-1: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children: []
+    id: CHART-explore-54303-1
+    meta: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      chartId: 54303
+      height: 50
+      sliceName: Table Counts
+      uuid: bcbfc1f8-4c6d-40ca-8e13-02ddc2696c2d
+      width: 4
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-SzLxT-drR9
+    - TAB-TUhDA40OZI
+    - ROW-MrdYlz6_uk
+    type: CHART
+  DASHBOARD_VERSION_KEY: v2
+  GRID_ID: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children:
+    - TABS-SzLxT-drR9
+    - ROW-s0QgSwAtb-
+    id: GRID_ID
+    parents:
+    - ROOT_ID
+    type: GRID
+  HEADER_ID: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    id: HEADER_ID
+    meta: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      text: JobReady EXPORT TEST
+    type: HEADER
+  ROOT_ID: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children:
+    - GRID_ID
+    id: ROOT_ID
+    type: ROOT
+  ROW-MrdYlz6_uk: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children:
+    - CHART-X4_wL-_LS3
+    - CHART-explore-54303-1
+    id: ROW-MrdYlz6_uk
+    meta: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-SzLxT-drR9
+    - TAB-TUhDA40OZI
+    type: ROW
+  ROW-s0QgSwAtb-: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children:
+    - CHART-RPXw-1xPUV
+    id: ROW-s0QgSwAtb-
+    meta: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: ROW
+  TAB-TUhDA40OZI: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children:
+    - ROW-MrdYlz6_uk
+    id: TAB-TUhDA40OZI
+    meta: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      defaultText: Tab title
+      placeholder: Tab title
+      text: Users
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-SzLxT-drR9
+    type: TAB
+  TAB-X2Wx2_0sE: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children: []
+    id: TAB-X2Wx2_0sE
+    meta: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      defaultText: Tab title
+      placeholder: Tab title
+      text: Placements
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-SzLxT-drR9
+    type: TAB
+  TAB-dDq3ub52d: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children: []
+    id: TAB-dDq3ub52d
+    meta: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      defaultText: Tab title
+      placeholder: Tab title
+      text: Jobseekers
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-SzLxT-drR9
+    type: TAB
+  TABS-SzLxT-drR9: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    children:
+    - TAB-TUhDA40OZI
+    - TAB-dDq3ub52d
+    - TAB-X2Wx2_0sE
+    id: TABS-SzLxT-drR9
+    meta: !ruby/hash:ActiveSupport::HashWithIndifferentAccess {}
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: TABS
+metadata: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+  chart_configuration: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    '54222': !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      id: 54222
+      crossFilters: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+        scope: global
+        chartsInScope:
+        - 54212
+        - 54303
+    '54303': !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      id: 54303
+      crossFilters: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+        scope: global
+        chartsInScope:
+        - 54212
+        - 54222
+  global_chart_configuration: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    scope: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    chartsInScope:
+    - 54212
+    - 54222
+    - 54303
+  color_scheme: ''
+  refresh_frequency: 0
+  shared_label_colors: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    user: "#1FA8C9"
+    admin: "#5AC189"
+    site_manager: "#666666"
+    finance: "#FCC700"
+  color_scheme_domain: []
+  expanded_slices: !ruby/hash:ActiveSupport::HashWithIndifferentAccess {}
+  label_colors: !ruby/hash:ActiveSupport::HashWithIndifferentAccess {}
+  timed_refresh_immune_slices: []
+  cross_filters_enabled: true
+  default_filters: "{}"
+version: 1.0.0

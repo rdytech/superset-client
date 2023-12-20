@@ -4,8 +4,10 @@
 require "bundler/setup"
 require "json"
 require "faraday"
+require 'faraday/multipart'
 require "happi"
 require "terminal-table"
+require "yaml"
 require "superset"
 
 Dir["./lib/**/*.rb"].each { |f| require f }

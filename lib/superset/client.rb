@@ -3,6 +3,7 @@ module Superset
     include Credential::ApiUser
 
     attr_reader :authenticator
+    attr_accessor :connection
 
     def initialize
       @authenticator = Superset::Authenticator.new(credentials)
@@ -17,7 +18,7 @@ module Superset
       @superset_host ||= authenticator.superset_host
     end
 
-    private
+    #private
 
     def connection
       @connection ||= Faraday.new(superset_host) do |f|
