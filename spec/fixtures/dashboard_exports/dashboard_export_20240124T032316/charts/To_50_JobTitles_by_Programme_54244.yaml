@@ -1,0 +1,37 @@
+slice_name: To 50 JobTitles by Programme
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  datasource: 115__table
+  viz_type: table
+  granularity_sqla: created_at
+  time_grain_sqla: P1D
+  time_range: No filter
+  query_mode: aggregate
+  groupby:
+  - job_title
+  - programme
+  metrics:
+  - count
+  all_columns: []
+  percent_metrics: []
+  adhoc_filters: []
+  order_by_cols: []
+  row_limit: 50
+  server_page_length: 10
+  order_desc: true
+  table_timestamp_format: smart_date
+  show_cell_bars: true
+  color_pn: true
+  extra_form_data: {}
+  dashboards:
+  - 15
+query_context: '{"datasource":{"id":115,"type":"table"},"force":false,"queries":[{"time_range":"No
+  filter","granularity":"created_at","filters":[],"extras":{"time_grain_sqla":"P1D","having":"","where":""},"applied_time_extras":{},"columns":["job_title","programme"],"metrics":["count"],"orderby":[["count",false]],"annotation_layers":[],"row_limit":50,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"post_processing":[]}],"form_data":{"adhoc_filters":[],"all_columns":[],"color_pn":true,"dashboards":[15],"datasource":"115__table","extra_form_data":{},"granularity_sqla":"created_at","groupby":["job_title","programme"],"metrics":["count"],"order_by_cols":[],"order_desc":true,"percent_metrics":[],"query_mode":"aggregate","row_limit":50,"server_page_length":10,"show_cell_bars":true,"slice_id":54244,"table_timestamp_format":"smart_date","time_grain_sqla":"P1D","time_range":"No
+  filter","viz_type":"table","force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: da08a556-0f65-46f0-bb69-eb24e72a78de
+version: 1.0.0
+dataset_uuid: 0074dc42-9b3e-4557-aa1b-8d4e10cc03f8

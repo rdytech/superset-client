@@ -10,8 +10,8 @@ module Superset
           @name_equals= name_equals
         end
 
-        def query_params
-          [filters, pagination].join
+        def self.call
+          self.new.list
         end
 
         private
