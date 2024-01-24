@@ -2,16 +2,16 @@ module Superset
   module Security
     module User
       class List < Superset::Request
-        attr_reader :page_num, :email_contains, :username_equals
+        attr_reader :email_contains, :username_equals
 
-        def initialize(page_num: 0, email_contains: '', username_equals: '')
-          @page_num = page_num
+        def initialize(email_contains: '', username_equals: '')
           @email_contains = email_contains
           @username_equals = username_equals
+          super()
         end
 
-        def query_params
-          [filters, pagination].join
+        def self.call
+          self.new.list
         end
 
         private
@@ -40,6 +40,7 @@ module Superset
         def list_attributes
           [:id, :first_name, :last_name, :email, :active, :login_count, :last_login]
         end
+
       end
     end
   end

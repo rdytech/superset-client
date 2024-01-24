@@ -1,0 +1,14 @@
+database_name: Jobready-Staging
+sqlalchemy_uri: postgresql+psycopg2://stagingtest01:XXXXXXXXXX@11.11.101.101:10001/acme_staging01?sslmode=require
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: false
+allow_ctas: false
+allow_cvas: false
+allow_dml: false
+allow_file_upload: false
+extra:
+  allows_virtual_table_explore: true
+  cost_estimate_enabled: true
+uuid: dbc74f28-2747-430a-b104-d65b2d1a06f6
+version: 1.0.0

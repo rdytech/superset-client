@@ -1,14 +1,13 @@
-
-
-# This class is responsible for copying, manipulating then saving the new configuration of a Superset dashboard.
-# It reads the existing configuration files, updates the UUIDs, changes the dataset schema, validates the new configuration,
-# and writes the updated configuration files to disk.
+# This class is responsible for taking an existing dashboard config
+# reading, manipulating then rewriting and ziping the new configuration of a Superset dashboard.
+# It reads the existing configuration files, updates the UUIDs, changes the dataset schema, validates the new configuration and over writes the updated configuration files.
 
 # Example call:
 # config_path = "/path/to/config"
 # target_schema = "new_schema"
-# copy_dashboard_config = Superset::Services::CopyDashboardConfig.new(config_path: config_path, target_schema: target_schema)
-# copy_dashboard_config.perform
+# Superset::Services::ReplicateDashboardConfig.new(config_path: config_path, target_schema: target_schema).perform
+
+# TODO: big refactor to happen soon
 
 module Superset
   module Services
@@ -17,19 +16,35 @@ module Superset
       attr_reader :config_path, :target_schema
 
       def initialize(config_path: , target_schema: )
-        @config_path = config_path
+        @config_path = config_path 
         @target_schema = target_schema
       end
 
       def perform
-        # read config files and store initial source_summary
-        configs && source_summary
+        configs && source_summary             # read dsbrd yaml config files and store initial source dsbrd summary
 
-        # update with new uuids and store target_summary
-        update_config_uuids && target_summary
+        update_config_uuids && target_summary # update with new uuids and store target dsbrd summary
 
-        validate_new_config? && write_config_files
+        validate_new_config                   # compare source_summary and target_summary and raise error if any uuids match
+        write_config_files
+        zip_new_config
+        import_new_dashboard
+      end
+  
+      def zip_file_name
+        "/tmp/superset_dashboards/#{target_schema}.zip"
+      end
 
+      def import_new_dashboard
+        raise "Zip File Not Found: #{zip_file_name}" unless File.exist?(zip_file_name)
+        Dashboard::Import.new(zip_file: zip_file_name).perform
+      end
+
+      def zip_new_config
+        # tried ruby zip .. superset would not accept it successfully there is a bug somewhere .. going quick and dirty for mvp
+        Dir.chdir('/tmp/superset_dashboards') do
+          system("zip -r #{zip_file_name} ./#{File.basename(config_path)}/")
+        end
       end
 
       def write_config_files
@@ -45,9 +60,7 @@ module Superset
         end
       end
 
-
-      def validate_new_config?
-        # compare source_summary and target_summary and raise error if any uuids match
+      def validate_new_config
         if target_summary[:dashboard_uuid] == source_summary[:dashboard_uuid]
           raise "Dashboard UUIDs should not match"
         # validate new dashboard chart layout uuids
@@ -132,6 +145,7 @@ module Superset
         result[:dashboard_uuid] = dashboard[:config][:uuid]
         # dashboard charts layout
         dashboard_charts_layout = dashboard[:config][:position].select { |item| item.include?('CHART') }
+        binding.pry
         result[:dashboard_charts_layout] =
           dashboard_charts_layout.map do |chart|
             { 
@@ -162,7 +176,8 @@ module Superset
               database_uuid: dataset[:config][:database_uuid]
             }
           end
-        # details for databases, UUID SHOULD NOT CHANGE FOR THE DATABASE !!!
+
+        # details for databases, JR STAGING Tests uuid should not change for the database
         # ie we point to the same database, just a different schema
         result[:databases] = 
           configs[:databases].map do |database|
@@ -183,7 +198,7 @@ module Superset
       end
 
       def configs
-        @configs ||= ReadDashboardConfig.new(config_path).perform
+        @configs ||= ReadDashboardConfig.new(File.join(config_path, '')).perform
       end
     end
   end

@@ -1,5 +1,8 @@
-# Use with DashboardExport.call(dashboard_id)
-# It will export the zip file to the current folder as 'test.zip'
+# Will export the zip file to /tmp/superset_dashboards with zip filename include dashboard_id
+# Example zipfile: dashboard_#{dashboard_id}_export_#{datestamp}.zip
+# Usage
+# Superset::Dashboard::Export.new(dashboard_id: 15).perform
+#
 
 require 'superset/file_utilities'
 
@@ -25,9 +28,9 @@ module Superset
 
       def response
         @response ||= client.call(
-          :get, 
-          client.url(route), 
-          client.param_check(build_params(dashboard_id)) 
+          :get,
+          client.url(route),
+          client.param_check(build_params(dashboard_id))
         )
       end
 
@@ -54,10 +57,7 @@ module Superset
         File.open(zip_file_name, 'wb') { |fp| fp.write(@response.body) }
 
         @extracted_files = unzip_file(zip_file_name, TMP_SUPERSET_DASHBOARD_PATH)
-        
-
       end
-
 
       def duplicate_export_files_to_import_folder
         FileUtils.cp_r(export_folder, import_folder)
@@ -69,7 +69,7 @@ module Superset
 
       def create_tmp_dir
         FileUtils.mkdir_p(TMP_SUPERSET_DASHBOARD_PATH) unless File.directory?(TMP_SUPERSET_DASHBOARD_PATH)
-      end 
+      end
 
       def extracted_files
         @extracted_files ||= []

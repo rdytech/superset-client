@@ -1,0 +1,41 @@
+slice_name: JRStg User Roles Pie
+description: null
+certified_by: null
+certification_details: null
+viz_type: pie
+params:
+  datasource: 90__table
+  viz_type: pie
+  slice_id: 54021
+  granularity_sqla: updated_at
+  time_range: No filter
+  groupby:
+  - role
+  metric: count
+  adhoc_filters: []
+  row_limit: 100
+  sort_by_metric: true
+  color_scheme: supersetColors
+  show_labels_threshold: 5
+  show_legend: true
+  legendType: scroll
+  legendOrientation: top
+  label_type: key_value_percent
+  number_format: SMART_NUMBER
+  date_format: smart_date
+  show_labels: true
+  labels_outside: true
+  label_line: true
+  show_total: true
+  outerRadius: 70
+  innerRadius: 30
+  extra_form_data: {}
+  dashboards:
+  - 15
+query_context: '{"datasource":{"id":90,"type":"table"},"force":false,"queries":[{"time_range":"No
+  filter","granularity":"updated_at","filters":[],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":["role"],"metrics":["count"],"orderby":[["count",false]],"annotation_layers":[],"row_limit":100,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"adhoc_filters":[],"color_scheme":"supersetColors","dashboards":[15],"datasource":"90__table","date_format":"smart_date","extra_form_data":{},"granularity_sqla":"updated_at","groupby":["role"],"innerRadius":30,"label_line":true,"label_type":"key_value_percent","labels_outside":true,"legendOrientation":"top","legendType":"scroll","metric":"count","number_format":"SMART_NUMBER","outerRadius":70,"row_limit":100,"show_labels":true,"show_labels_threshold":5,"show_legend":true,"show_total":true,"slice_id":54222,"sort_by_metric":true,"time_range":"No
+  filter","viz_type":"pie","force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 277ad0d1-5b0c-40f6-b3c9-384af8173649
+version: 1.0.0
+dataset_uuid: 476f6d3c-785a-4b96-8577-da287b7a89f4

@@ -17,17 +17,24 @@ module Superset
 
       def perform
         response
+
+        if response.env['status'] != 200
+          raise "Import Dashboard Failed for #{zip_file}", response.env['response_body']
+        else
+          puts "Dashboard Created! Zip File Successfully Imported to Superset: #{zip_file}"
+        end
       end
 
       def response
-        filename = '/tmp/superset_dashboards/dashboard_import_20231218T050708.zip'
+        # filename = '/tmp/superset_dashboards/dashboard_import_20231218T050708.zip'
+
         @response ||= client.post(route, {
-          formData: Faraday::UploadIO.new(filename, 'application/zip'),
+          formData: Faraday::UploadIO.new(zip_file, 'application/zip'),
           overwrite: false
         })
       end
 
-      # private
+      private
 
       def client
         @client ||= begin
@@ -41,11 +48,9 @@ module Superset
         end
       end
 
-
       def route
         "api/v1/dashboard/import/"
       end
-
     end
   end
 end
