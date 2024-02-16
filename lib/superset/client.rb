@@ -3,6 +3,7 @@ module Superset
     include Credential::ApiUser
 
     attr_reader :authenticator
+    attr_accessor :connection
 
     def initialize
       @authenticator = Superset::Authenticator.new(credentials)
