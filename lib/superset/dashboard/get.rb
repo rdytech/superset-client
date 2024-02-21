@@ -13,7 +13,15 @@ module Superset
       end
 
       def title
-        "#{id}: #{result['dashboard_title']}"
+        "#{result['dashboard_title']}"
+      end
+
+      def json_metadata
+        JSON.parse(result['json_metadata'])
+      end
+
+      def positions
+        JSON.parse(result['position_json'])
       end
 
       private

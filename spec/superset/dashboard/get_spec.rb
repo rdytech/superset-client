@@ -11,7 +11,9 @@ RSpec.describe Superset::Dashboard::Get do
       'dashboard_title' => dashboard_title,
       'published' => true,
       'changed_on_delta_humanized' => '1 day ago',
-      'charts' => dashboard_charts
+      'charts' => dashboard_charts,
+      'json_metadata' => { 'key1' => 'value1' }.to_json,
+      'position_json' => { 'key2' => 'value2' }.to_json,
     }
   end
 
@@ -28,7 +30,19 @@ RSpec.describe Superset::Dashboard::Get do
 
   describe '#title' do
     it 'returns the id and title of the dashboard' do
-      expect(subject.title).to eq('1: Test Dashboard')
+      expect(subject.title).to eq('Test Dashboard')
+    end
+  end
+
+  describe '#json_metadata' do
+    it 'returns the parsed json_metadata' do
+      expect(subject.json_metadata).to eq(JSON.parse(dashboard_result['json_metadata']))
+    end
+  end
+
+  describe '#positions' do
+    it 'returns the parsed positions' do
+      expect(subject.positions).to eq(JSON.parse(dashboard_result['position_json']))
     end
   end
 end
