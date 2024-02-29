@@ -6,7 +6,7 @@ module Superset
 
       def initialize(id: nil, duplicate_slices: false)
         @id = id
-        @duplicate_slices = duplicate_slices
+        @duplicate_slices = duplicate_slices # boolean indicates whether to duplicate charts OR keep the new dashboard pointing to the same charts as the original
       end
 
       def perform
@@ -38,12 +38,12 @@ module Superset
       def route
         "dashboard/#{id}/copy/"
       end
- 
+
       def source_dashboard_json_metadata_with_positions
         # when copying a DB via the API, chart positions need to be nested under json_metadata
         # according to the GUI copy function  (as per dev tools investigation in browser)
         source_dashboard.json_metadata.merge(
-          "positions" => source_dashboard.positions 
+          "positions" => source_dashboard.positions
         )
       end
 

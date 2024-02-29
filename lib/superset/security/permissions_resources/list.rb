@@ -2,10 +2,9 @@ module Superset
   module Security
     module PermissionsResources
       class List < Superset::Request
-        attr_reader :page_num
 
-        def initialize(page_num: 0)
-          @page_num = page_num
+        def initialize(page_num: 0)         
+          super(page_num: page_num)
         end
 
         private

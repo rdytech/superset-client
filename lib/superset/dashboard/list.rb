@@ -3,9 +3,9 @@ module Superset
     class List < Superset::Request
       attr_reader :title_contains
 
-      def initialize(title_contains: '')
+      def initialize(page_num: 0, title_contains: '')
         @title_contains = title_contains
-        super()
+        super(page_num: page_num)
       end
 
       def self.call
