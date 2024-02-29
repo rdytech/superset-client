@@ -21,7 +21,13 @@ module Superset
         )
       end
 
-#      private
+      def rows_with_dashboards
+        result.map do |d|
+          list_dashboard_attributes.map { |la| d[la].to_s }
+        end
+      end
+
+      private
 
       def route
         "chart/?q=(#{query_params})"
@@ -39,11 +45,7 @@ module Superset
         ['id', 'slice_name', 'dashboards']
       end
 
-      def rows_with_dashboards
-        result.map do |d|
-          list_dashboard_attributes.map { |la| d[la].to_s }
-        end
-      end  
+  
     end
   end
 end
