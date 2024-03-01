@@ -7,15 +7,16 @@ RSpec.describe Superset::Dataset::Get do
     {
       "always_filter_main_dttm"=>false,
       "cache_timeout"=>nil,
-      "changed_by"=>{"first_name"=>"Jonathon", "last_name"=>"Batson"},
+      "changed_by"=>{"first_name"=>"Jonathon", "last_name"=>"B"},
       "changed_on"=>"2023-09-15T03:27:49.854983",
       "changed_on_humanized"=>"5 months ago",
       "name"=>"public.Birth Names Counts",
-      "owners"=>[{"first_name"=>"Jonathon", "id"=>9, "last_name"=>"Batson"}],
+      "owners"=>[{"first_name"=>"Jonathon", "id"=>9, "last_name"=>"B"}],
       "schema"=>"public",
       "select_star"=>"SELECT *\nFROM public.\"Birth Names Counts\"\nLIMIT 100",
       "sql"=>"-- select * from birth_names;\n\n\nSELECT \n  name,\n  count(*)\nFROM \n  birth_names\nGroup by name\norder by name asc;",
       "table_name"=>"Birth Names Counts",
+      "database"=>{"backend"=>"postgresql", "database_name"=>"examples", "id"=>1},
       "uid"=>"83__table",
       "url"=>"/tablemodelview/edit/83"
     }
@@ -34,7 +35,7 @@ RSpec.describe Superset::Dataset::Get do
 
   describe '#rows' do
     specify do
-      [["public.Birth Names Counts", "public", "examples", 1]]
+      expect(subject.rows).to eq [["public.Birth Names Counts", "public", "examples", 1]]
     end
   end
 end

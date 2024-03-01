@@ -18,6 +18,12 @@ module Superset
       @superset_host ||= authenticator.superset_host
     end
 
+    # TODO: Temporary fix for the issue with the API .. ticket coming soon
+    def put(resource, params = {})
+      call(:put, url(resource), param_check(params))
+        .body.with_indifferent_access
+    end
+
     private
 
     def connection

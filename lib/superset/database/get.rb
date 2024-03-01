@@ -1,5 +1,5 @@
 module Superset
-  module Chart
+  module Database
     class Get < Superset::Request
 
       attr_reader :id
@@ -19,13 +19,12 @@ module Superset
       private
 
       def route
-        "chart/#{id}"
+        "database/#{id}"
       end
 
       def list_attributes
-        %w(id slice_name owners dashboards)
+        %w(id database_name backend driver expose_in_sqllab cache_timeout allow_file_upload)
       end
-
     end
   end
 end

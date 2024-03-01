@@ -25,7 +25,7 @@ RSpec.describe Superset::Chart::Get do
   end
 
   before do
-    allow(subject).to receive(:result).and_return([result])
+    allow(subject).to receive(:result).and_return(result)
   end
 
   describe '.call' do
@@ -37,7 +37,7 @@ RSpec.describe Superset::Chart::Get do
 
   describe '#rows' do
     specify do
-      [["54507", "JRStg DoB per Year", "[{\"first_name\"=>\"Jonathon\", \"id\"=>9, \"last_name\"=>\"Batson\"}]", "[]"]]
+      expect(subject.rows).to eq [["54507", "JRStg DoB per Year", "[{\"first_name\"=>\"Jonathon\", \"id\"=>9, \"last_name\"=>\"Batson\"}]", "[]"]]
     end
   end
 end
