@@ -25,7 +25,6 @@ RSpec.describe Superset::Database::GetSchemas do
 
   describe '#schemas' do
     specify do
-      binding.pry
       expect(subject.schemas).to eq result_schemas
     end
   end
