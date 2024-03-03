@@ -1,6 +1,6 @@
 module Superset
   module Dataset
-    class ChangeSchema < Superset::Request
+    class UpdateSchema < Superset::Request
 
       attr_reader :source_dataset_id, :target_database_id, :target_schema
 
@@ -34,6 +34,7 @@ module Superset
           # primary database and schema changes
           new_params.merge!("database_id": target_database_id)  # add the target database id
           new_params['schema'] = target_schema
+          new_params['owners'] = new_params['owners'].map {|o| o['id'] } # expects an array of user ids
 
           # remove unwanted fields from metrics and columns arrays
           new_params['metrics'].each {|m| m.delete('changed_on') }
@@ -72,28 +73,28 @@ module Superset
 
       # attrs as per swagger docs for dataset patch
       def acceptable_attributes
-        [
-          :always_filter_main_dttm,
-          :cache_timeout,
-          :columns,
-          :database_id,
-          :default_endpoint,
-          :description,
-          :extra,
-          :fetch_values_predicate,
-          :filter_select_enabled,
-          :is_managed_externally,
-          :is_sqllab_view,
-          :main_dttm_col,
-          :metrics,
-          :normalize_columns,
-          :offset,
-          :owners,
-          :schema,
-          :sql,
-          :table_name,
-          :template_params
-      ].map(&:to_s)
+        %w(
+          always_filter_main_dttm
+          cache_timeout
+          columns
+          database_id
+          default_endpoint
+          description
+          extra
+          fetch_values_predicate
+          filter_select_enabled
+          is_managed_externally
+          is_sqllab_view
+          main_dttm_col
+          metrics
+          normalize_columns
+          offset
+          owners
+          schema
+          sql
+          table_name
+          template_params
+        )
       end
 
       def route

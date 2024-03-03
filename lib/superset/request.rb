@@ -12,6 +12,10 @@ module Superset
       @page_num = page_num
     end
 
+    def logger
+      @logger ||= Logger.new('superset-api.log')
+    end
+
     def self.call
       self.new.response
     end

@@ -71,7 +71,7 @@ RSpec.describe Superset::Dataset::List do
       subject { described_class.new(title_contains: 'birth') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:table_name,opr:ct,value:birth)),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:table_name,opr:ct,value:'birth')),page:0,page_size:100")
       end
     end
 
@@ -79,7 +79,7 @@ RSpec.describe Superset::Dataset::List do
       subject { described_class.new(title_equals: 'birth_days') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:table_name,opr:eq,value:birth_days)),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:table_name,opr:eq,value:'birth_days')),page:0,page_size:100")
       end
     end
 

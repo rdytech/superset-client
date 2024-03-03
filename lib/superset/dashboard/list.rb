@@ -42,7 +42,7 @@ module Superset
       end
 
       def filters
-        "filters:!((col:dashboard_title,opr:ct,value:#{title_contains}))," if title_contains.present?
+        "filters:!((col:dashboard_title,opr:ct,value:'#{title_contains}'))," if title_contains.present?
       end
 
       def list_attributes

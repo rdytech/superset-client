@@ -22,8 +22,8 @@ module Superset
       def filters
         raise 'ERROR: only one filter supported currently' if  title_contains.present? && title_equals.present?
 
-        return "filters:!((col:table_name,opr:ct,value:#{title_contains}))," if title_contains.present?
-        return "filters:!((col:table_name,opr:eq,value:#{title_equals}))," if title_equals.present?
+        return "filters:!((col:table_name,opr:ct,value:'#{title_contains}'))," if title_contains.present?
+        return "filters:!((col:table_name,opr:eq,value:'#{title_equals}'))," if title_equals.present?
       end
 
       def list_attributes

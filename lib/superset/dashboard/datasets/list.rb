@@ -25,6 +25,12 @@ module Superset
           end
         end
 
+        def datasets_details
+          result.map do |details|
+            details.slice('id', 'datasource_name', 'schema').merge(database: details[:database].slice('id', 'name', 'backend'))
+          end
+        end
+
         private
 
         def route
@@ -50,7 +56,7 @@ module Superset
 
         # when displaying a list of datasets, show dashboard title as well
         def title
-          Superset::Dashboard::Get.new(id).title
+          @title ||= Superset::Dashboard::Get.new(id).title
         end
       end
     end

@@ -34,7 +34,7 @@ module Superset
       end
 
       def filters
-        "filters:!((col:slice_name,opr:ct,value:#{name_contains}))," if name_contains.present?
+        "filters:!((col:slice_name,opr:ct,value:'#{name_contains}'))," if name_contains.present?
       end
 
       def list_attributes

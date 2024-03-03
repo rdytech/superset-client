@@ -1,10 +1,14 @@
+
+# TODO: some work to happen around TAGS still .. ie 'template' tag would indicate it tested and availalbe to be copied.
+# TODO: also need to ensoure tha the embedded details are not duplicated across to the new dashboard
+
 module Superset
   module Dashboard
     class Copy < Superset::Request
 
       attr_reader :id, :duplicate_slices
 
-      def initialize(id: nil, duplicate_slices: false)
+      def initialize(id: , duplicate_slices: false)
         @id = id
         @duplicate_slices = duplicate_slices # boolean indicates whether to duplicate charts OR keep the new dashboard pointing to the same charts as the original
       end
@@ -25,8 +29,6 @@ module Superset
         }
       end
 
-      private
-
       def response
         @response ||= client.post(route, params)
       end
@@ -34,6 +36,8 @@ module Superset
       def new_dashboard_id
         response["result"]["id"]
       end
+
+      private
 
       def route
         "dashboard/#{id}/copy/"

@@ -113,7 +113,7 @@ RSpec.describe Superset::Chart::List do
       subject { described_class.new(name_contains: 'birth') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:slice_name,opr:ct,value:birth)),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:slice_name,opr:ct,value:'birth')),page:0,page_size:100")
       end
     end
 

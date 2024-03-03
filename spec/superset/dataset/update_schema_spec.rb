@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Superset::Dataset::ChangeSchema do
+RSpec.describe Superset::Dataset::UpdateSchema do
   subject { described_class.new(
               source_dataset_id:  source_dataset_id, 
               target_database_id: target_database_id, 

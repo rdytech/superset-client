@@ -1,3 +1,6 @@
+# The API demands that the new_dataset_name be uniq within the schema it points to.
+# same behaviour as in the GUI
+
 module Superset
   module Dataset
     class Duplicate < Superset::Request
