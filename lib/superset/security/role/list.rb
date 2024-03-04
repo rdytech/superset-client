@@ -2,12 +2,12 @@ module Superset
   module Security
     module Role
       class List < Superset::Request
-        attr_reader :page_num, :name_contains, :name_equals
+        attr_reader :name_contains, :name_equals
 
         def initialize(page_num: 0, name_contains: nil, name_equals: nil)
-          @page_num = page_num
           @name_contains= name_contains
           @name_equals= name_equals
+          super(page_num: page_num)
         end
 
         def query_params

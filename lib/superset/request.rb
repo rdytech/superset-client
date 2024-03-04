@@ -6,7 +6,15 @@ module Superset
 
     PAGE_SIZE = 100
 
-    attr_accessor :client
+    attr_accessor :page_num
+
+    def initialize(page_num: 0)
+      @page_num = page_num
+    end
+
+    def logger
+      @logger ||= Logger.new('superset-api.log')
+    end
 
     def self.call
       self.new.response
@@ -24,6 +32,10 @@ module Superset
       client.superset_host
     end
 
+    def query_params
+      [filters, pagination].join
+    end
+
     private
 
     def route
@@ -34,17 +46,12 @@ module Superset
       @client ||= Superset::Client.new
     end
 
-#    def security_api_request?
-#      false
-#    end
-
-    # will need to be overridden in subclasses for public usage .. future commit coming
-    def current_tenant
-      @current_tenant ||= Tenant.current
-    end
-
     def pagination
       "page:#{page_num},page_size:#{PAGE_SIZE}"
+    end
+
+    def filters
+      ""
     end
   end
 end
