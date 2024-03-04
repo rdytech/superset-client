@@ -39,17 +39,16 @@ Env Var Credentials setup as follows
 
 Copy the `env.sample` to `.env` and add edit values where applicable.  In your ruby console load the env vars with `load '.env'`
 
-### API calls
+## API calls
 
-Generally they follow the convention/path of the Superset API strucuture.
+Generally they follow the convention/path of the Superset API strucuture.  
 
 ```
 # some examples
-Superset::Dashboard::List.call
 Superset::Dashboard::Get.new(1).result
 Superset::Dashboard::Export.new(1).perform
 Superset::Dashboard::Import.new(zip_file: 'my_dashboard.zip').perform
-
+```
 
 All List endpoints have a `.call` method to pull the first 100 records or the ability to search.
 
@@ -66,9 +65,11 @@ DEBUG -- : Happi: GET https://your-superset-host.com/api/v1/dashboard/?q=(page:0
 | 69 | Overview: Acme Stage              | draft     | https://your-superset-host.com/superset/dashboard/59/   |
 ...................
 +----+-----------------------------------+-----------+-----------------------------------------------------------------------------+
+```
 
-# Optionally can add a search term to most list endpoints
+### Optionally can add a search term to most list endpoints
 
+```
 Superset::Dashboard::List.new(title_contains: 'innov').list
 DEBUG -- : Happi: GET https://your-superset-host.com/api/v1/dashboard/?q=(filters:!((col:dashboard_title,opr:ct,value:innov)),page:0,page_size:100), {}
 +----+-----------------------------------+-----------+-----------------------------------------------------------------+
@@ -86,6 +87,7 @@ D, [2024-01-23T09:23:32.345514 #14893] DEBUG -- : Happi: GET https://your-supers
   "changed_on"=>"2023-12-19T05:38:06.923548",
   "dashboard_id"=>"15",
   "uuid"=>"some-superset-dashboard-uuid"}]
+```
 
 ### Fetch a Guest Token
 
@@ -94,12 +96,15 @@ Assuming you have setup your Dashboard in Superset to be embedded and that your 
 ```
 Superset::GuestToken.new(embedded_dashboard_id: '15').guest_token
 => "eyJ0eXAiOi............VV4mrMfsvg"
+```
 
 ## Development
 
-After checking out the repo, run `bundle exec rspec` to run the tests.
+After checking out the repo, run tests with  
+`bundle exec rspec`
 
-You can also run `bin/console` for an interactive pry prompt that will allow you to experiment.
+You can also run for an interactive pry prompt that will allow you to experiment.  
+`bin/console`
 
 Docker setup is also an option.
 

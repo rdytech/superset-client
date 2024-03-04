@@ -1,6 +1,6 @@
 
-# TODO: some work to happen around TAGS still .. ie 'template' tag would indicate it tested and availalbe to be copied.
-# TODO: also need to ensoure tha the embedded details are not duplicated across to the new dashboard
+# TODO: some work to happen around TAGS still .. ie 'template' tag would indicate it tested and available to be copied.
+# TODO: also need to ensoure that the embedded details are not duplicated across to the new dashboard
 
 module Superset
   module Dashboard

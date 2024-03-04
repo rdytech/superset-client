@@ -6,7 +6,7 @@ module Superset
 
       attr_reader :chart_id, :target_dataset_id
 
-      def initialize(chart_id: 135, target_dataset_id: 54093)
+      def initialize(chart_id: :chart_id, target_dataset_id: :target_dataset_id)
         @chart_id = chart_id
         @target_dataset_id = target_dataset_id
       end
