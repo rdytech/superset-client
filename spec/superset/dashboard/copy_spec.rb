@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Superset::Dashboard::Copy do
-  subject { described_class.new(id: dashboard_id, duplicate_slices: dup_slices) }
+  subject { described_class.new(source_dashboard_id: dashboard_id, duplicate_slices: dup_slices) }
   let(:dashboard_id) { 1 }
   let(:dup_slices) { true }
 
@@ -23,28 +23,28 @@ RSpec.describe Superset::Dashboard::Copy do
   describe 'perform' do
     context 'with valid params' do
       it 'returns the new dashboard id' do
-        expect(subject.perform).to eq(2)
+        expect(subject.perform).to be_an_instance_of(described_class)
       end
     end
 
     context 'with invalid params' do
-      context 'when id is not an integer' do
+      context 'when source_dashboard_id is not an integer' do
         let(:dashboard_id) { 'q' }
         
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: id integer is required")
+          expect { subject.perform }.to raise_error("Error: source_dashboard_id integer is required")
         end
       end
 
-      context 'when id is not present' do
+      context 'when source_dashboard_id is not present' do
         let(:dashboard_id) { nil }
         
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: id integer is required")
+          expect { subject.perform }.to raise_error("Error: source_dashboard_id integer is required")
         end
       end
 
-      context 'when id duplicate_slices not a boolean' do
+      context 'when source_dashboard_id duplicate_slices not a boolean' do
         let(:dup_slices) { 'q' }
         
         it 'raises an error' do

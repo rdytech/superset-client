@@ -12,6 +12,10 @@ module Superset
           @id = id
         end
 
+        def chart_ids
+          result.map { |c| c[:id] }
+        end
+
         private
 
         def route

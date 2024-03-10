@@ -6,17 +6,17 @@ RSpec.describe Superset::Dashboard::Datasets::List do
   let(:result) do
     [
       {
-        id: 101,
-        datasource_name: 'Acme Forecasts',
-        database: { id: 1, name: 'DB1', backend: 'postgres' },
-        schema: 'acme'
-      },
+        'id' => 101,
+        'datasource_name' => 'Acme Forecasts',
+        'database' => { 'id' => 1, 'name' => 'DB1', 'backend' => 'postgres' },
+        'schema' => 'acme'
+      }.with_indifferent_access,
       {
-        id: 102,
-        datasource_name: 'video_game_sales',
-        database: { id: 2, name: 'examples', backend: 'postgres' },
-        schema: 'public'
-      }
+        'id' => 102,
+        'datasource_name' => 'video_game_sales',
+        'database' => { 'id' => 2, 'name' => 'examples', 'backend' => 'postgres' },
+        'schema' => 'public'
+      }.with_indifferent_access
     ]
   end
 
@@ -28,6 +28,7 @@ RSpec.describe Superset::Dashboard::Datasets::List do
   describe '#schemas' do
     context 'when the dashboard has dastasets from multiple schemas' do
       it 'returns a list of schemas' do
+
         expect(subject.schemas).to eq(['acme', 'public'])
       end
 
@@ -51,6 +52,15 @@ RSpec.describe Superset::Dashboard::Datasets::List do
         expect(Rollbar).to_not receive(:error)
         subject.schemas
       end
+    end
+  end
+
+  describe '#datasets_details' do
+    it 'returns a list of datasets' do
+      expect(subject.datasets_details).to eq([
+        {"id"=>101, "datasource_name"=>"Acme Forecasts", "schema"=>"acme", "database"=>{"id"=>1, "name"=>"DB1", "backend"=>"postgres"}},
+        {"id"=>102, "datasource_name"=>"video_game_sales", "schema"=>"public", "database"=>{"id"=>2, "name"=>"examples", "backend"=>"postgres"}}
+      ])
     end
   end
 

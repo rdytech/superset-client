@@ -117,5 +117,16 @@ RSpec.describe Superset::Chart::List do
       end
     end
 
+    context 'with multiple filter set' do
+      subject { described_class.new(name_contains: 'birth', dashboard_id_eq: 3) }
+
+      specify do
+        expect(subject.query_params).to eq(
+          "filters:!(" \
+          "(col:slice_name,opr:ct,value:'birth')," \
+          "(col:datasource_id,opr:eq,value:3)" \
+          "),page:0,page_size:100")
+      end
+    end
   end
 end

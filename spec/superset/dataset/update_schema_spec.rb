@@ -88,7 +88,6 @@ RSpec.describe Superset::Dataset::UpdateSchema do
 
   before do
     allow(subject).to receive(:response).and_return(response)
-    #allow(subject).to receive(:result).and_return(result)
     allow(subject).to receive(:source_dataset).and_return(source_dataset['result'])
     allow(subject).to receive(:target_database_available_schemas).and_return(target_database_available_schemas)
   end

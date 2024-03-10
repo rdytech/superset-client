@@ -7,7 +7,8 @@ RSpec.describe Superset::Chart::UpdateDataset do
 
   let(:chart_id) { 226 }
   let(:target_dataset_id) { 242 }
-  let(:chart) do
+  let(:chart) { instance_double(Superset::Chart::Get) }
+  let(:chart_response) do
     {
       "cache_timeout"=>nil,
       "certification_details"=>nil,
@@ -15,9 +16,9 @@ RSpec.describe Superset::Chart::UpdateDataset do
       "changed_on_delta_humanized"=>"14 days ago",
       "dashboards"=>[],
       "description"=>nil,
-      "id"=>226,
+      "id"=>chart_id,
       "is_managed_externally"=>false,
-      "owners"=>[{"first_name"=>"Jonathon", "id"=>9, "last_name"=>"Batson"}],
+      "owners"=>[{"first_name"=>"Jay", "id"=>9, "last_name"=>"Bee"}],
       "query_context"=>nil,
       "slice_name"=>"JRStg DoB per Year",
       "tags"=>[{"id"=>1, "name"=>"owner:9", "type"=>3}, {"id"=>28, "name"=>"type:chart", "type"=>2}],
@@ -31,12 +32,12 @@ RSpec.describe Superset::Chart::UpdateDataset do
 
   let(:response) do
     {
-      "id"=>226,
+      "id"=>chart_id,
       "result"=>
        {
           "datasource_id"=>242,
           "datasource_type"=>"table",
-          "owners"=>[22, 104],
+          "owners"=>[9],
           "params"=>
           "{\"datasource\":\"242__table\",\"viz_type\":\"table\",\"slice_id\":54738,\"query_mode\":\"raw\",\"groupby\":[],\"time_grain_sqla\":\"P1D\",\"temporal_columns_lookup\":{\"started_on\":true,\"job_ended_on\":true,\"centrelink_outcome_started_on\":true},\"all_columns\":[\"started_on\",\"job_ended_on\",\"job_title\",\"company_name\"],\"percent_metrics\":[],\"adhoc_filters\":[{\"clause\":\"WHERE\",\"comparator\":\"No filter\",\"expressionType\":\"SIMPLE\",\"operator\":\"TEMPORAL_RANGE\",\"subject\":\"started_on\"}],\"order_by_cols\":[],\"row_limit\":50,\"server_page_length\":10,\"order_desc\":true,\"table_timestamp_format\":\"smart_date\",\"show_cell_bars\":true,\"color_pn\":true,\"extra_form_data\":{},\"dashboards\":[122]}",
           "query_context"=>
@@ -49,6 +50,11 @@ RSpec.describe Superset::Chart::UpdateDataset do
 
   before do
     allow(subject).to receive(:response).and_return(response)
+    allow(chart).to receive(:response).and_return(chart_response)
+    allow(chart).to receive(:owner_ids).and_return([9])
+    allow(chart).to receive(:datasource_id).and_return(243)
+    allow(chart).to receive(:params).and_return(JSON.parse(chart_response['params']))
+    allow(chart).to receive(:query_context).and_return(JSON.parse(chart_response['query_context']))
     allow(subject).to receive(:chart).and_return(chart)
   end
 

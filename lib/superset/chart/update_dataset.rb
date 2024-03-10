@@ -6,7 +6,7 @@ module Superset
 
       attr_reader :chart_id, :target_dataset_id
 
-      def initialize(chart_id: :chart_id, target_dataset_id: :target_dataset_id)
+      def initialize(chart_id: , target_dataset_id: )
         @chart_id = chart_id
         @target_dataset_id = target_dataset_id
       end
@@ -31,61 +31,49 @@ module Superset
       def params_updated
         @params_updated ||= begin
           new_params = {}
-          
           # chart updates to point to the new target dataset
           new_params.merge!("datasource_id": target_dataset_id)          # point to the new dataset id
           new_params.merge!("datasource_type": 'table')                  # type of dataset ?? not sure of other options
-          new_params.merge!("owners": chart['owners'].map{|o| o['id']} ) # expects an array of user ids
+          new_params.merge!("owners": chart.owner_ids )                  # expects an array of user ids
 
-          new_params.merge!("params": updated_source_attribute_params_to_new_dataset_id.to_json) # updated to point to the new dataset
-          new_params.merge!("query_context": updated_source_attribute_query_context_to_new_dataset_id.to_json) # update to point to the new dataset
-          new_params.merge!("query_context_generation": true)            # new param set to true to regenerate the query context .. unsure of the impact of this
+          new_params.merge!("params": updated_chart_params.to_json)      # updated to point to the new params
+          new_params.merge!("query_context": updated_chart_query_context.to_json) # update to point to the new query context
+          new_params.merge!("query_context_generation": true)            # new param set to true to regenerate the query context
          
           new_params
         end
       end
 
-      # private
+      private
 
       def chart
-        # will raise an error if the chart does not exist
-        @chart ||= begin
-          chart = Superset::Chart::Get.new(chart_id)
-          chart.result[0]
-        end
+        @chart ||= Superset::Chart::Get.new(chart_id).perform
       end
 
       def validate_proposed_changes
         raise "Error: chart_id integer is required" unless chart_id.present? && chart_id.is_a?(Integer)
         raise "Error: target_dataset_id integer is required" unless target_dataset_id.present? && target_dataset_id.is_a?(Integer)
+        # validate schema ???
       end
 
-      def source_attribute_params
-        @source_attribute_params ||= JSON.parse(chart['params'])
+      def updated_chart_params
+        chart_params = chart.params # init with source chart params
+        chart_params['datasource'] = chart_params['datasource'].sub(source_dataset_id.to_s, target_dataset_id.to_s) # update to point to the new dataset
+        chart_params
       end
 
-      def updated_source_attribute_params_to_new_dataset_id
-        source_attribute_params['datasource'] = source_attribute_params['datasource'].
-          sub(source_dataset_id.to_s, target_dataset_id.to_s)
-          
-        source_attribute_params
+      def updated_chart_query_context
+        if chart.query_context.present?                                           # not all charts have a query context
+          chart_query_context = chart.query_context                               # init with source chart query context
+          chart_query_context['datasource']['id'] = target_dataset_id             # update to point to the new dataset
+          chart_query_context['form_data']['datasource'] = chart_query_context['form_data']['datasource']
+            .sub(source_dataset_id.to_s, target_dataset_id.to_s) # update to point to the new dataset
+          chart_query_context
+        end
       end
-
-      def source_attribute_query_context
-        @source_attribute_query_context ||= JSON.parse(chart['query_context'])
-      end
-
-      def updated_source_attribute_query_context_to_new_dataset_id
-        source_attribute_query_context['datasource']['id'] = target_dataset_id
-        source_attribute_query_context['form_data']['datasource'] = source_attribute_query_context['form_data']['datasource'].
-          sub(source_dataset_id.to_s, target_dataset_id.to_s)
-
-        source_attribute_query_context
-      end
-
 
       def source_dataset_id
-        JSON.parse(chart['query_context'])['datasource']['id']
+        chart.datasource_id
       end
 
       def route
