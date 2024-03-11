@@ -6,18 +6,19 @@ module Superset
   module Dashboard
     class Copy < Superset::Request
 
-      attr_reader :id, :duplicate_slices
+      attr_reader :source_dashboard_id, :duplicate_slices
 
-      def initialize(id: , duplicate_slices: false)
-        @id = id
+      def initialize(source_dashboard_id: , duplicate_slices: false)
+        @source_dashboard_id = source_dashboard_id
         @duplicate_slices = duplicate_slices # boolean indicates whether to duplicate charts OR keep the new dashboard pointing to the same charts as the original
       end
 
       def perform
-        raise "Error: id integer is required" unless id.present? && id.is_a?(Integer)
+        raise "Error: source_dashboard_id integer is required" unless source_dashboard_id.present? && source_dashboard_id.is_a?(Integer)
         raise "Error: duplicate_slices must be a boolean" unless duplicate_slices_is_boolean?
 
-        new_dashboard_id
+        response
+        self
       end
 
       def params
@@ -33,14 +34,14 @@ module Superset
         @response ||= client.post(route, params)
       end
 
-      def new_dashboard_id
+      def id
         response["result"]["id"]
       end
 
       private
 
       def route
-        "dashboard/#{id}/copy/"
+        "dashboard/#{source_dashboard_id}/copy/"
       end
 
       def source_dashboard_json_metadata_with_positions
@@ -53,7 +54,7 @@ module Superset
 
       def source_dashboard
         @source_dashboard ||= begin
-          dash = Get.new(id)
+          dash = Get.new(source_dashboard_id)
           dash.response
           dash
         rescue => e
