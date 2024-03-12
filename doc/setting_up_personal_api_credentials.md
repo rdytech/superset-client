@@ -23,7 +23,7 @@ Once you have your user id value, open the Swagger API page on you superset host
 
 ```
 {
-  "password": "nsrI8d2fEkIf3B7oJSZ4ca*ATaqCq7z9PY#x"
+  "password": "{some-complex-password}"
 }
 ```
 
