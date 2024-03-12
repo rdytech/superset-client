@@ -27,7 +27,7 @@ Or install it yourself as:
 Experiment with the API calls directly by open a pry console using  
 `bin/console`
 
-The assumption is that this Gem would be used for general api calls and/or for guest token retrieval when setting up applications to use the superset embedded dashboard workflow.
+Primary usage is for general api calls and/or for guest token retrieval when setting up applications to use the superset embedded dashboard workflow.
 
 The Superset API users may then fall into 2 categories
 - a user for general api calls to endpoints for Dashboards, Datasets, Charts, Users, Roles etc.  ref `Superset::Credential::ApiUser`
@@ -51,7 +51,7 @@ The Env vars are then loaded in the credential classes.
 https://github.com/rdytech/superset-client/tree/develop/lib/superset/credential
 
 Process for setting up your personal API creds is here  
-https://github.com/rdytech/superset-client/tree/develop/lib/superset/credential
+https://github.com/rdytech/superset-client/tree/develop/doc/setting_up_personal_api_credentials.md
 
 
 ## API calls
