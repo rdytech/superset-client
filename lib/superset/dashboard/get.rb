@@ -24,6 +24,10 @@ module Superset
         JSON.parse(result['position_json'])
       end
 
+      def url
+        "#{superset_host}#{result['url']}"
+      end
+
       private
 
       def route

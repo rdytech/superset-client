@@ -31,6 +31,9 @@ module Superset
         # Update the Charts on the New Dashboard with the New Datasets
         update_charts_with_new_datasets
 
+        # return the new dashboard id and url and return the new_dashboard_id
+        { new_dashboard_id: new_dashboard.id,
+          new_dashboard_url: Superset::Dashboard::Get.new(new_dashboard.id).url }
       end
 
       # private
@@ -40,7 +43,6 @@ module Superset
       end
 
       def update_charts_with_new_datasets
-
         # get all chart ids for the new dashboard
         chart_ids_list = Superset::Dashboard::Charts::List.new(new_dashboard.id).chart_ids
 
@@ -59,31 +61,34 @@ module Superset
         end
       end
 
-      
-
       def duplicate_source_dashboard_datasets
         source_dashboard_datasets.each do |dataset|
           # duplicate the dataset
           new_dataset = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: "#{dataset[:datasource_name]} #{target_schema} DUPLICATION")
           new_dataset_id = new_dataset.perform
+
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
 
           # update the new dataset with the target schema and target database
-          update_dataset = Superset::Dataset::UpdateSchema.new(source_dataset_id: new_dataset_id, target_database_id: target_database_id, target_schema: target_schema)
-          update_dataset.response
+          Superset::Dataset::UpdateSchema.new(source_dataset_id: new_dataset_id, target_database_id: target_database_id, target_schema: target_schema).response
         end
       end
 
       def new_dashboard
-        @new_dashboard ||= Superset::Dashboard::Copy.new(
+        @new_dashboard ||=
+          copy = Superset::Dashboard::Copy.new(
             source_dashboard_id: source_dashboard_id,
             duplicate_slices:    true
           ).perform
+      rescue => e
+        raise "Error: Dashboard not found: #{e.message}"
       end
 
       # retrieve the datasets for the that we will duplicate
       def source_dashboard_datasets
         @source_dashboard_datasets ||= Superset::Dashboard::Datasets::List.new(source_dashboard_id).datasets_details
+      rescue => e
+        raise "Error: Unable to retrieve datasets for source dashboard #{source_dashboard_id}: #{e.message}"
       end
 
       def validate_params

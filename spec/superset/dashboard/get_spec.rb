@@ -14,11 +14,14 @@ RSpec.describe Superset::Dashboard::Get do
       'charts' => dashboard_charts,
       'json_metadata' => { 'key1' => 'value1' }.to_json,
       'position_json' => { 'key2' => 'value2' }.to_json,
+      'url' => '',
+
     }
   end
 
   before do
     allow(subject).to receive(:result).and_return(dashboard_result)
+    allow(subject).to receive(:superset_host).and_return('http://superset-host.com')  
   end
 
   describe '.call' do
@@ -45,4 +48,10 @@ RSpec.describe Superset::Dashboard::Get do
       expect(subject.positions).to eq(JSON.parse(dashboard_result['position_json']))
     end
   end
+
+  describe '#url' do
+    it 'returns the url of the dashboard' do
+      expect(subject.url).to eq("http://superset-host.com#{dashboard_result['url']}")
+    end
+  end 
 end
