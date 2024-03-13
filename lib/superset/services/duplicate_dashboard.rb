@@ -56,17 +56,17 @@ module Superset
           new_dataset_id = dataset_duplication_tracker.find { |dataset| dataset[:source_dataset_id] == current_chart_dataset_id }&.fetch(:new_dataset_id, nil)
 
           # update the chart to target the new dataset_id
-          chart_update = Superset::Chart::UpdateDataset.new(chart_id: chart_id, target_dataset_id: new_dataset_id)
-          chart_update.response
+          Superset::Chart::UpdateDataset.new(chart_id: chart_id, target_dataset_id: new_dataset_id).response
+
         end
       end
 
       def duplicate_source_dashboard_datasets
         source_dashboard_datasets.each do |dataset|
           # duplicate the dataset
-          new_dataset = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: "#{dataset[:datasource_name]} #{target_schema} DUPLICATION")
-          new_dataset_id = new_dataset.perform
+          new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: "#{dataset[:datasource_name]} #{target_schema} DUPLICATION").perform
 
+          # keep track of the previous dataset and the matching new dataset_id
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
 
           # update the new dataset with the target schema and target database
