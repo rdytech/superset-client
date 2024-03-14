@@ -41,24 +41,19 @@ RSpec.describe Superset::Dashboard::List do
       expect(dashboards.first.dashboard_title).to eq(result.first[:dashboard_title])
       expect(dashboards.first.status).to eq(result.first[:status])
       expect(dashboards.first.url).to eq(result.first[:url])
-# coming in next commit
-#      expect(dashboards.first.schemas).to eq(['acme'])
-#      expect(dashboards.first.allowed_embedded_domains).to eq(['https://test-acme.io/'])
-#      expect(dashboards.first.uuid).to eq('some-uuid-for-36')
+      expect(dashboards.first.schemas).to eq(['acme'])
+      expect(dashboards.first.allowed_embedded_domains).to eq(['https://test-acme.io/'])
+      expect(dashboards.first.uuid).to eq('some-uuid-for-36')
     end
   end
 
-  describe '#list' do
+  describe '#rows' do
     specify do
-      expect(subject.table.to_s).to eq(
-        "+----+-----------------+-----------+-------------------------------------------------------+\n" \
-        "|                                Superset::Dashboard::List                                 |\n" \
-        "+----+-----------------+-----------+-------------------------------------------------------+\n" \
-        "| Id | Dashboard title | Status    | Url                                                   |\n" \
-        "+----+-----------------+-----------+-------------------------------------------------------+\n" \
-        "| 36 | Test Embedded 2 | published | https://test.superset.host.com/superset/dashboard/36/ |\n" \
-        "| 15 | Test Embedded 1 | published | https://test.superset.host.com/superset/dashboard/15/ |\n" \
-        "+----+-----------------+-----------+-------------------------------------------------------+"
+      expect(subject.rows).to match_array(
+        [
+          [15, "Test Embedded 1", "published", "https://test.superset.host.com/superset/dashboard/15/"],
+          [36, 'Test Embedded 2', 'published', "https://test.superset.host.com/superset/dashboard/36/"]
+        ]
       )
     end
   end

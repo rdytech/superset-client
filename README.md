@@ -31,27 +31,20 @@ Primary usage is for general api calls and/or for guest token retrieval when set
 
 The Superset API users may then fall into 2 categories
 - a user for general api calls to endpoints for Dashboards, Datasets, Charts, Users, Roles etc.  ref `Superset::Credential::ApiUser`
+which pulls credentials from  
+`ENV['SUPERSET_API_USERNAME']` and `ENV['SUPERSET_API_PASSWORD']`
+
 - a user for guest token api call to use when embedding dashboards in a host application. ref `Superset::Credential::EmbeddedUser`
+which pulls credentials from  
+`ENV['SUPERSET_EMBEDDED_USERNAME']` and `ENV['SUPERSET_EMBEDDED_PASSWORD']`
 
-Credential setup is per following env vars:
-Env Var Credentials setup as follows
-- for general api calls setup creds in  
-  `ENV['SUPERSET_API_USERNAME']` and `ENV['SUPERSET_API_PASSWORD']`
-
-- for embedded user (if needed) calls setup creds in  
-  `ENV['SUPERSET_EMBEDDED_USERNAME']` and `ENV['SUPERSET_EMBEDDED_PASSWORD']`
-
-- configure your superset host in  
+Configure your superset host in  
   `ENV['SUPERSET_HOST']`
 
 Copy the `env.sample` to `.env` and add edit values where applicable.  
 Opening a console with `bin/console` will then auto load the `.env` file.
 
-The Env vars are then loaded in the credential classes.
-https://github.com/rdytech/superset-client/tree/develop/lib/superset/credential
-
-Process for setting up your personal API creds is here  
-https://github.com/rdytech/superset-client/tree/develop/doc/setting_up_personal_api_credentials.md
+See here to setup your users API creds [setting_up_personal_api_credentials](https://github.com/rdytech/superset-client/tree/develop/doc/setting_up_personal_api_credentials.md)
 
 
 ## API calls
@@ -60,11 +53,11 @@ Generally they follow the convention/path of the Superset API strucuture as per 
 
 ref https://superset.apache.org/docs/api/
 
-Limited support for filters is enabled.  Pagination is supported.
+Limited support for filters is available on some list pages.  Pagination is supported.
 
 Primary methods across majority of api calls are
-- response : list the full API response
-- result : list just the result attr array
+- response : the full API response
+- result : just the result attribute array
 - list : displays a formatted output to console, handy for quick investigation of objects
 - call : is a alias to list on Get and List requests
 
