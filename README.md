@@ -176,13 +176,13 @@ Tag the version and push to github
     git tag -a -m "Version 0.1.0" v0.1.0
     git push origin master --tags
 
-Push to gemfury:
+Build the gem
+
+    gem build superset.gemspec
+
+Push to gemfury or upload the build manually
 
     git push fury master
-
-## Contributing
-
-WIP
 
 ## License
 
