@@ -9,8 +9,5 @@
 # rspec failure tracking
 .rspec_status
 
-# for local development published gem spec
-superset-*.gem
-
 # ignore local .env variables
 .env

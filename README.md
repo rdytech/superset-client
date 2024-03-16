@@ -152,7 +152,7 @@ docker-compose run --rm app /bin/bash      # then run rspec from inside the cont
 ## Releasing a new version
 
 On develop branch make sure to update `Superset::VERSION` and `CHANGELOG.md` with the new version number and changes.
-And of course that the lastest version is built and in the repo.
+Build the new version and upload to gemfury.
 
 `gem build superset.gemspec`
 
@@ -176,13 +176,9 @@ Tag the version and push to github
     git tag -a -m "Version 0.1.0" v0.1.0
     git push origin master --tags
 
-Push to gemfury:
+Push to gemfury or upload the build manually in the gemfury site.
 
     git push fury master
-
-## Contributing
-
-WIP
 
 ## License
 
