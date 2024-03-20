@@ -31,9 +31,14 @@ module Superset
         # Update the Charts on the New Dashboard with the New Datasets
         update_charts_with_new_datasets
 
-        # return the new dashboard id and url and return the new_dashboard_id
-        { new_dashboard_id: new_dashboard.id,
-          new_dashboard_url: Superset::Dashboard::Get.new(new_dashboard.id).url }
+        end_log_message
+
+        # return the new dashboard id and url
+        { new_dashboard_id: new_dashboard.id, new_dashboard_url: new_dashboard.url }
+
+      rescue => e
+        logger.error("#{e.message}")
+        raise e
       end
 
       # private
@@ -57,7 +62,6 @@ module Superset
 
           # update the chart to target the new dataset_id
           Superset::Chart::UpdateDataset.new(chart_id: chart_id, target_dataset_id: new_dataset_id).response
-
         end
       end
 
@@ -75,34 +79,38 @@ module Superset
       end
 
       def new_dashboard
-        @new_dashboard ||=
+        @new_dashboard ||= begin
           copy = Superset::Dashboard::Copy.new(
             source_dashboard_id: source_dashboard_id,
             duplicate_slices:    true
           ).perform
+          logger.info("  Copy Dashboard/Charts Completed - New Dashboard ID: #{copy.id}")
+          copy
+        end
       rescue => e
-        raise "Error: Dashboard not found: #{e.message}"
+        raise "Dashboard::Copy error: #{e.message}"
       end
 
       # retrieve the datasets for the that we will duplicate
       def source_dashboard_datasets
         @source_dashboard_datasets ||= Superset::Dashboard::Datasets::List.new(source_dashboard_id).datasets_details
       rescue => e
-        raise "Error: Unable to retrieve datasets for source dashboard #{source_dashboard_id}: #{e.message}"
+        raise "Unable to retrieve datasets for source dashboard #{source_dashboard_id}: #{e.message}"
       end
 
       def validate_params
+        start_log_msg
         # params validations
-        raise "Error: source_dashboard_id integer is required" unless source_dashboard_id.present? && source_dashboard_id.is_a?(Integer)
-        raise "Error: target_schema string is required" unless target_schema.present? && target_schema.is_a?(String)
-        raise "Error: target_database_id integer is required" unless target_database_id.present? && target_database_id.is_a?(Integer)
+        raise  InvalidParameterError, "source_dashboard_id integer is required" unless source_dashboard_id.present? && source_dashboard_id.is_a?(Integer)
+        raise  InvalidParameterError, "target_schema string is required" unless target_schema.present? && target_schema.is_a?(String)
+        raise  InvalidParameterError, "target_database_id integer is required" unless target_database_id.present? && target_database_id.is_a?(Integer)
 
         # dashboard validations
         # Validation of source dashboard existance will occur inside the new_dashboard call
 
         # schema validations
-        raise "Error: Schema #{target_schema} does not exist in target database: #{target_database_id}" unless target_database_available_schemas.include?(target_schema)
-        raise "Error: The souce_dashboard_id #{source_dashboard_id} datasets point to more than one schema. Schema list is #{source_dashboard_schemas.join(',')}" if source_dashboard_has_more_than_one_schema?
+        raise ValidationError, "Schema #{target_schema} does not exist in target database: #{target_database_id}" unless target_database_available_schemas.include?(target_schema)
+        raise ValidationError, "The source_dashboard_id #{source_dashboard_id} datasets are required to point to one schema only. Actual schema list is #{source_dashboard_schemas.join(',')}" if source_dashboard_has_more_than_one_schema?
       end
 
       def target_database_available_schemas
@@ -115,6 +123,22 @@ module Superset
 
       def source_dashboard_schemas
         source_dashboard_datasets.map { |dataset| dataset[:schema] }.uniq
+      end
+
+      def logger
+        @logger ||= Superset::Logger.new
+      end
+
+      def start_log_msg
+        logger.info ""
+        logger.info ">>>>>>>>>>>>>>>>> Starting DuplicateDashboard Service <<<<<<<<<<<<<<<<<<<<<<"
+        logger.info "Ready Superset Host: #{ENV['SUPERSET_HOST']}"
+        logger.info "Duplicating dashboard #{source_dashboard_id} into Target Schema: #{target_schema} in database #{target_database_id}"
+      end
+
+      def end_log_message
+        logger.info "Duplication Successful. New Dashboard URL: #{[superset_host, new_dashboard.url].join} "
+        logger.info ">>>>>>>>>>>>>>>>> Finished DuplicateDashboard Service <<<<<<<<<<<<<<<<<<<<<<"
       end
     end
   end

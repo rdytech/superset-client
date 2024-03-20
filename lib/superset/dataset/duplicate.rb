@@ -16,6 +16,8 @@ module Superset
         raise "Error: source_dataset_id integer is required" unless source_dataset_id.present? && source_dataset_id.is_a?(Integer)
         raise "Error: new_dataset_name string is required" unless new_dataset_name.present? && new_dataset_name.is_a?(String)
         raise "Error: new_dataset_name already in use" if new_dataset_name_already_in_use?
+
+        logger.info("  Start Duplicate Source Dataset Id: #{source_dataset_id} to New Dataset Name: #{new_dataset_name}")
         
         new_dataset_id
       end
@@ -39,7 +41,13 @@ module Superset
       end
 
       def new_dataset_id
-        response["id"]
+        if response["id"].present?
+          logger.info("  Finish Duplicate Dataset. New Dataset Id: #{response['id']}")
+          response["id"]
+        else
+          logger.error("Error: Unable to duplicate dataset: #{response}")
+          raise "Error: Unable to duplicate dataset: #{response}"
+        end
       end
 
       def route

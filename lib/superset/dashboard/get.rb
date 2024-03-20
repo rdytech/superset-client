@@ -12,6 +12,11 @@ module Superset
         self.new(id).list
       end
 
+      def perform
+        response
+        self
+      end
+
       def title
         "#{result['dashboard_title']}"
       end
