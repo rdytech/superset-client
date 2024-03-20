@@ -57,10 +57,6 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         # updating the new charts to point to the new datasets
         expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_1, target_dataset_id: new_dataset_1).and_return(double(response: true))
         expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_2, target_dataset_id: new_dataset_2).and_return(double(response: true))
-
-        # final step, getting the new dashboard url
-        #expect(Superset::Dashboard::Get).to receive(:new).with(new_dashboard_id).and_return(double(response: true))
-
       end
 
       specify do
