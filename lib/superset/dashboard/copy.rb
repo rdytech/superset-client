@@ -18,7 +18,7 @@ module Superset
         raise "Error: duplicate_slices must be a boolean" unless duplicate_slices_is_boolean?
 
         response
-        self
+        Superset::Dashboard::Get.new(id).perform  # return the full new dashboard object
       end
 
       def params

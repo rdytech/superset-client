@@ -3,10 +3,10 @@ require 'superset/services/duplicate_dashboard'
 
 RSpec.describe Superset::Services::DuplicateDashboard do
   subject { described_class.new(
-              source_dashboard_id: source_dashboard_id, 
-              target_schema:       target_schema, 
+              source_dashboard_id: source_dashboard_id,
+              target_schema:       target_schema,
               target_database_id:  target_database_id) }
-  
+
   let(:source_dashboard_id) { 1 }
   let(:target_schema) { 'schema_one' }
   let(:target_database_id) { 6 }
@@ -20,7 +20,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
   ]}
 
   let(:new_dashboard_id) { 2 }
-  let(:new_dashboard) { double('new_dashboard', id: new_dashboard_id) }
+  let(:new_dashboard) { double('new_dashboard', id: new_dashboard_id, url: "http://superset-host.com/superset/dashboard/#{new_dashboard_id}") }
 
   let(:new_dataset_1) { 201 }
   let(:new_dataset_2) { 202 }
@@ -57,39 +57,35 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         # updating the new charts to point to the new datasets
         expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_1, target_dataset_id: new_dataset_1).and_return(double(response: true))
         expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_2, target_dataset_id: new_dataset_2).and_return(double(response: true))
-
-        # final step, getting the new dashboard url
-        expect(Superset::Dashboard::Get).to receive(:new).with(new_dashboard_id).and_return(double(url: "http://superset-host.com/dashboard/2"))
-
       end
 
       specify do
-        expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/dashboard/2" })
+        expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" })
       end
     end
 
     context 'with invalid params' do
       context 'source_dashboard_id is empty' do
         let(:source_dashboard_id) { nil }
-        
+
         specify do
-          expect { subject.perform }.to raise_error(RuntimeError, "Error: source_dashboard_id integer is required")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "source_dashboard_id integer is required")
         end
       end
-  
+
       context 'target_schema is empty' do
         let(:target_schema) { nil }
 
         specify do
-          expect { subject.perform }.to raise_error(RuntimeError, "Error: target_schema string is required")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "target_schema string is required")
         end
       end
 
       context 'target_database_id is empty' do
         let(:target_database_id) { nil }
-        
+
         specify do
-          expect { subject.perform }.to raise_error(RuntimeError, "Error: target_database_id integer is required")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "target_database_id integer is required")
         end
       end
 
@@ -97,7 +93,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         let(:target_schema) { 'schema_four' }
 
         specify do
-          expect { subject.perform }.to raise_error(RuntimeError, "Error: Schema schema_four does not exist in target database: 6")
+          expect { subject.perform }.to raise_error(Superset::Request::ValidationError, "Schema schema_four does not exist in target database: 6")
         end
       end
 
@@ -105,9 +101,9 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         before do
           allow(subject).to receive(:source_dashboard_schemas).and_return(['schema_one', 'schema_five'])
         end
-   
+
         specify do
-          expect { subject.perform }.to raise_error(RuntimeError, "Error: The souce_dashboard_id #{source_dashboard_id} datasets point to more than one schema. Schema list is schema_one,schema_five")
+          expect { subject.perform }.to raise_error(Superset::Request::ValidationError, "The source_dashboard_id #{source_dashboard_id} datasets are required to point to one schema only. Actual schema list is schema_one,schema_five")
         end
       end
     end

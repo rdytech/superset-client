@@ -6,6 +6,7 @@ require_rel "superset/credential"
 require_relative "superset/authenticator"
 require_relative "superset/client"
 require_relative "superset/display"
+require_relative "superset/logger"
 require_relative "superset/request"
 
 require_rel "superset"

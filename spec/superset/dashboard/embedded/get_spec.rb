@@ -95,4 +95,3 @@ RSpec.describe Superset::Dashboard::Embedded::Get, type: :service do
     end
   end
 end
-

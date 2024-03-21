@@ -3,6 +3,8 @@ module Superset
     include Display
 
     class InvalidParameterError < StandardError; end
+    class ValidationError < StandardError; end
+
 
     PAGE_SIZE = 100
 
@@ -12,16 +14,15 @@ module Superset
       @page_num = page_num
     end
 
-    def logger
-      @logger ||= Logger.new('superset-api.log')
-    end
-
     def self.call
       self.new.response
     end
 
     def response
       @response ||= client.get(route)
+    rescue => e
+      logger.error("#{e.message}")
+      raise e
     end
 
     def result
@@ -52,6 +53,10 @@ module Superset
 
     def filters
       ""
+    end
+
+    def logger
+      @logger ||= Superset::Logger.new
     end
   end
 end

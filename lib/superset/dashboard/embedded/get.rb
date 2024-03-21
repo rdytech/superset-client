@@ -54,4 +54,3 @@ module Superset
     end
   end
 end
-

@@ -13,17 +13,25 @@ RSpec.describe Superset::Dashboard::Copy do
     )
   end
 
+  let(:new_dashboard_id) { 2 }
+  let(:new_dashboard_instance) { instance_double("Superset::Dashboard::Get") }
+
   before do
     allow(subject).to receive(:source_dashboard).and_return(source_dashboard)
     allow(subject).to receive(:response).and_return( { "result" => 
-      {"id"=>2, "last_modified_time"=>1708484547.0} }
+      {"id"=>new_dashboard_id, "last_modified_time"=>1708484547.0} }
     )
   end
 
   describe 'perform' do
     context 'with valid params' do
-      it 'returns the new dashboard id' do
-        expect(subject.perform).to be_an_instance_of(described_class)
+      before do
+        allow(Superset::Dashboard::Get).to receive(:new).with(new_dashboard_id).and_return(new_dashboard_instance)
+        allow(new_dashboard_instance).to receive(:perform).and_return(new_dashboard_instance)
+      end
+
+      it 'returns the new dashboard object' do
+        expect(subject.perform).to be new_dashboard_instance
       end
     end
 
