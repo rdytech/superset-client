@@ -12,8 +12,17 @@ module Superset
         self.new(id).list
       end
 
+      def perform
+        response
+        self
+      end
+
       def rows
         [ [title, schema, database_name, database_id] ]
+      end
+
+      def schema
+        result['schema']
       end
 
       private
@@ -39,9 +48,6 @@ module Superset
         result['name']
       end
 
-      def schema
-        result['schema']
-      end
 
       def sql
         ['sql']

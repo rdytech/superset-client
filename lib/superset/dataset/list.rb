@@ -1,11 +1,12 @@
 module Superset
   module Dataset
     class List < Superset::Request
-      attr_reader :title_contains, :title_equals
+      attr_reader :title_contains, :title_equals, :schema_equals
 
-      def initialize(page_num: 0, title_contains: '', title_equals: '')
+      def initialize(page_num: 0, title_contains: '', title_equals: '', schema_equals: '')
         @title_contains = title_contains
         @title_equals = title_equals
+        @schema_equals = schema_equals
         super(page_num: page_num)
       end
 
@@ -20,10 +21,14 @@ module Superset
       end
 
       def filters
-        raise 'ERROR: only one filter supported currently' if  title_contains.present? && title_equals.present?
-
-        return "filters:!((col:table_name,opr:ct,value:'#{title_contains}'))," if title_contains.present?
-        return "filters:!((col:table_name,opr:eq,value:'#{title_equals}'))," if title_equals.present?
+        # TODO filtering across all list classes can be refactored to support multiple options in a more flexible way
+        filters = []
+        filters << "(col:table_name,opr:ct,value:'#{title_contains}')" if title_contains.present?
+        filters << "(col:table_name,opr:eq,value:'#{title_equals}')" if title_equals.present?
+        filters << "(col:schema,opr:eq,value:'#{schema_equals}')" if schema_equals.present?
+        unless filters.empty?
+          "filters:!(" + filters.join(',') + "),"
+        end
       end
 
       def list_attributes

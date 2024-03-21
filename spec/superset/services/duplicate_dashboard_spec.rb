@@ -27,12 +27,14 @@ RSpec.describe Superset::Services::DuplicateDashboard do
 
   let(:new_chart_1) { 3001 }
   let(:new_chart_2) { 3002 }
+  let(:existing_target_datasets_list) {[]}
 
   before do
     allow(subject).to receive(:superset_host).and_return('http://superset-host.com')
     allow(subject).to receive(:target_database_available_schemas).and_return(target_database_available_schemas)
     allow(subject).to receive(:new_dashboard).and_return(new_dashboard)
     allow(subject).to receive(:source_dashboard_datasets).and_return(source_dashboard_datasets)
+    allow(subject).to receive(:target_schema_matching_dataset_names).and_return(existing_target_datasets_list)
   end
 
   describe '#perform' do
@@ -40,8 +42,8 @@ RSpec.describe Superset::Services::DuplicateDashboard do
 
       before do
         # duplicating the current datasets
-        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1 schema_one DUPLICATION").and_return(double(perform: new_dataset_1))
-        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2 schema_one DUPLICATION").and_return(double(perform: new_dataset_2))
+        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1 (COPY)").and_return(double(perform: new_dataset_1))
+        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2 (COPY)").and_return(double(perform: new_dataset_2))
 
         # updating the new datasets to point to the target schema and target database
         expect(Superset::Dataset::UpdateSchema).to receive(:new).with(source_dataset_id: new_dataset_1, target_database_id: target_database_id, target_schema: target_schema).and_return(double(response: true))
@@ -104,6 +106,14 @@ RSpec.describe Superset::Services::DuplicateDashboard do
 
         specify do
           expect { subject.perform }.to raise_error(Superset::Request::ValidationError, "The source_dashboard_id #{source_dashboard_id} datasets are required to point to one schema only. Actual schema list is schema_one,schema_five")
+        end
+      end
+
+      context 'target schema already has matching dataset names' do
+        let(:existing_target_datasets_list) {[ 'Dataset 1 (COPY)', 'Dataset 2 (COPY)' ]}
+        specify do
+          expect { subject.perform }.to raise_error(Superset::Request::ValidationError, 
+            "DATASET NAME CONFLICT: The Target Schema schema_one already has existing datasets named: Dataset 1 (COPY),Dataset 2 (COPY)")
         end
       end
     end

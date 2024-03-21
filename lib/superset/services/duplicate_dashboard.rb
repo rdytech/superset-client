@@ -7,29 +7,34 @@ module Superset
   module Services
     class DuplicateDashboard < Superset::Request
 
-      attr_reader :source_dashboard_id, :target_schema, :target_database_id
+      DUPLICATED_DATASET_SUFFIX = ' (COPY)'
 
-      def initialize(source_dashboard_id:, target_schema:, target_database_id: )
+      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :embedded_domain
+
+      def initialize(source_dashboard_id:, target_schema:, target_database_id: , embedded_domain: '')
         @source_dashboard_id = source_dashboard_id
         @target_schema = target_schema
         @target_database_id = target_database_id
+        @embedded_domain = embedded_domain
       end
 
       def perform
         validate_params
 
-        # create a new_dashboard by copying the source_dashboard using with 'duplicate_slices: true' to get a new set of charts.
-        new_dashboard
-
-        # Pull the Datasets for all charts on the source dashboard  
-        # currently the new_dashboard charts(slices) all point to these same datasets from the orig source dashboard 
+        # Pull the Datasets for all charts on the source dashboard
         source_dashboard_datasets
+
+        # create a new_dashboard by copying the source_dashboard using with 'duplicate_slices: true' to get a new set of charts.
+        # The new_dashboard will have a copy of charts from the source_dashboard, but with the same datasets as the source_dashboard
+        new_dashboard
 
         # Duplicate these Datasets to the new target schema and target database
         duplicate_source_dashboard_datasets
 
         # Update the Charts on the New Dashboard with the New Datasets
         update_charts_with_new_datasets
+
+        created_embedded_config
 
         end_log_message
 
@@ -41,7 +46,16 @@ module Superset
         raise e
       end
 
-      # private
+      #private
+
+      def created_embedded_config
+        return unless embedded_domain.present?
+
+        result = Dashboard::Embedded::Put.new(dashboard_id: new_dashboard.id, embedded_domain: embedded_domain).result
+        logger.info "  Embedded Domain Added to New Dashboard #{new_dashboard.id}:"
+        logger.info "  Embedded Domain allowed_domains: #{result['allowed_domains']}"
+        logger.info "  Embedded Domain uuid: #{result['uuid']}"
+      end
 
       def dataset_duplication_tracker
         @dataset_duplication_tracker ||= []
@@ -68,7 +82,7 @@ module Superset
       def duplicate_source_dashboard_datasets
         source_dashboard_datasets.each do |dataset|
           # duplicate the dataset
-          new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: "#{dataset[:datasource_name]} #{target_schema} DUPLICATION").perform
+          new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: "#{dataset[:datasource_name]}#{DUPLICATED_DATASET_SUFFIX}").perform
 
           # keep track of the previous dataset and the matching new dataset_id
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
@@ -111,6 +125,10 @@ module Superset
         # schema validations
         raise ValidationError, "Schema #{target_schema} does not exist in target database: #{target_database_id}" unless target_database_available_schemas.include?(target_schema)
         raise ValidationError, "The source_dashboard_id #{source_dashboard_id} datasets are required to point to one schema only. Actual schema list is #{source_dashboard_schemas.join(',')}" if source_dashboard_has_more_than_one_schema?
+ 
+        # new dataset validations
+        raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
+
       end
 
       def target_database_available_schemas
@@ -121,8 +139,27 @@ module Superset
         source_dashboard_schemas.count > 1
       end
 
+      # Pull the Datasets for all charts on the source dashboard
       def source_dashboard_schemas
         source_dashboard_datasets.map { |dataset| dataset[:schema] }.uniq
+      end
+
+      def source_dashboard_dataset_names
+        source_dashboard_datasets.map { |dataset| dataset[:datasource_name] }.uniq
+      end
+
+      # identify any already existing datasets in the target schema that have the same name as the source dashboard datasets
+      # note this is prior to adding the (COPY) suffix
+      # here we will need to decide if we want to use the existing dataset or not see NEP-????
+      # for now we will exit with an error if we find any existing datasets of the same name
+      def target_schema_matching_dataset_names
+        source_dashboard_dataset_names.map do |source_dataset_name|
+          existing_names = Superset::Dataset::List.new(title_contains: source_dataset_name, schema_equals: target_schema).result.map{|t|t['table_name']}.uniq # contains match to cover with suffix as well
+          unless existing_names.flatten.empty?
+            logger.error "  HALTING PROCESS: Schema #{target_schema} already has Dataset called #{existing_names}"
+          end
+          existing_names
+        end.flatten.compact
       end
 
       def logger
