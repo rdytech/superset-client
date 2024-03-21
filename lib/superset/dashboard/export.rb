@@ -1,7 +1,8 @@
 # Will export the zip file to /tmp/superset_dashboards with zip filename adjusted to include the dashboard_id
 # Example zipfile: dashboard_#{dashboard_id}_export_#{datestamp}.zip
+#
 # Usage
-# Superset::Dashboard::Export.new(dashboard_id: 15).perform
+# Superset::Dashboard::Export.new(dashboard_id: 15, destination_path: '/tmp/superset_dashboard_backups/').perform
 #
 
 require 'superset/file_utilities'
