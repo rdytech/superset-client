@@ -137,7 +137,7 @@ module Superset
       end
 
       def end_log_message
-        logger.info "Duplication Successful. New Dashboard URL: #{[superset_host, new_dashboard.url].join} "
+        logger.info "Duplication Successful. New Dashboard URL: #{new_dashboard.url} "
         logger.info ">>>>>>>>>>>>>>>>> Finished DuplicateDashboard Service <<<<<<<<<<<<<<<<<<<<<<"
       end
     end
