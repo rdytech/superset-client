@@ -18,13 +18,13 @@ module Superset
 
       def initialize(dashboard_id: , destination_path: )
         @dashboard_id = dashboard_id
-        @destination_path = destination_path
-        @download_path = TMP_SUPERSET_DASHBOARD_PATH
+        @destination_path = destination_path.chomp('/')
       end
 
       def perform
-        response
-        write_file_and_unzip
+        create_tmp_dir
+        save_exported_zip_file
+        unzip_files
         copy_export_files_to_destination_path if destination_path
       end
 
@@ -43,18 +43,15 @@ module Superset
 
       private
 
-      def route
-        "dashboard/export/"
-      end
-
       def params
         { "q": "!(#{dashboard_id})" }   # pulled off chrome dev tools doing a GUI export.  Swagger interface not helpfull with this endpoint.
       end
 
-      def write_file_and_unzip
-        create_tmp_dir
-        File.open(zip_file_name, 'wb') { |fp| fp.write(@response.body) }
+      def save_exported_zip_file
+        File.open(zip_file_name, 'wb') { |fp| fp.write(response.body) }
+      end
 
+      def unzip_files
         @extracted_files = unzip_file(zip_file_name, tmp_uniq_dashboard_path)
       end
 
@@ -87,6 +84,10 @@ module Superset
 
       def extracted_files
         @extracted_files ||= []
+      end
+
+      def route
+        "dashboard/export/"
       end
 
       def datestamp

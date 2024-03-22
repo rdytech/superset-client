@@ -17,3 +17,6 @@ superset-*.gem
 
 # ignore local log file
 log/superset-client.log
+
+# ignore local ./tmp directory
+./tmp/
