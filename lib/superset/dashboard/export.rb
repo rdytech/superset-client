@@ -1,5 +1,6 @@
 # Will export the zip file to /tmp/superset_dashboards with zip filename adjusted to include the dashboard_id
 # Example zipfile: dashboard_#{dashboard_id}_export_#{datestamp}.zip
+# Will then unzip and copy the files into the destination_path with the dashboard_id as a subfolder
 #
 # Usage
 # Superset::Dashboard::Export.new(dashboard_id: 15, destination_path: '/tmp/superset_dashboard_backups/').perform
@@ -28,17 +29,12 @@ module Superset
         copy_export_files_to_destination_path if destination_path
       end
 
-      # overriding the current happi get request as the returned packet is as string, ie not the usual hash
       def response
         @response ||= client.call(
           :get,
           client.url(route),
           client.param_check(params)
         )
-      end
-
-      def download_folder
-        File.dirname(extracted_files[0])
       end
 
       private
@@ -53,6 +49,10 @@ module Superset
 
       def unzip_files
         @extracted_files = unzip_file(zip_file_name, tmp_uniq_dashboard_path)
+      end
+
+      def download_folder
+        File.dirname(extracted_files[0])
       end
 
       def copy_export_files_to_destination_path
