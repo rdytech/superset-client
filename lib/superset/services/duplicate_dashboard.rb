@@ -46,7 +46,7 @@ module Superset
         raise e
       end
 
-      #private
+      private
 
       def created_embedded_config
         return unless embedded_domain.present?
