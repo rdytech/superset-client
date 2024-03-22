@@ -1,5 +1,9 @@
 ## Change Log
 
+## 0.1.2 - 2024-03-22
+
+* adds export endpoint
+
 ## 0.1.1 - 2024-03-14
 
 * superset pipeline part 1 with supported endpoints by @jbat in https://github.com/rdytech/superset-client/pull/4
