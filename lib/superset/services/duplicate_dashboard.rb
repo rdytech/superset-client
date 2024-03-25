@@ -98,19 +98,16 @@ module Superset
       def duplicate_source_dashboard_filters
         return unless source_dashboard_filter_ids.length.positive?
 
-        source_filters_hash = source_allowed_filters.map { |x| [x['id'], x['datasource_name']] }.to_h
-        target_filters_hash = allowed_filters(new_dashboard.id).map { |x| [x['datasource_name'], x['id']] }.to_h
-        dashboard_response = Superset::Dashboard::Get.new(new_dashboard.id)
-        json_metadata = JSON.parse(dashboard_response.result['json_metadata'])
+        json_metadata = JSON.parse(new_dashboard.result['json_metadata'])
         configuration = dashboard_native_filter_configuration(new_dashboard.id).map do |filter_config|
           targets = filter_config['targets']
-          target_filter_dataset_id = target_filters_hash[source_filters_hash[targets.first["datasetId"]]]
+          target_filter_dataset_id = dataset_duplication_tracker.find { |d| d[:source_dataset_id] == targets.first["datasetId"] }[:new_dataset_id]
           filter_config['targets'] = [targets.first.merge({ "datasetId"=> target_filter_dataset_id })]
           filter_config
         end
 
         json_metadata['native_filter_configuration'] = configuration
-        Superset::Dashboard::Update.new(target_dashboard_id: new_dashboard.id, params: { json_metadata: json_metadata })
+        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => json_metadata.to_json }).perform
       end
 
       def new_dashboard
@@ -188,23 +185,19 @@ module Superset
       end
 
       def source_allowed_filters
-        @source_allowed_filters ||= allowed_filters(source_dashboard_id)
-      end
-
-      def source_allowed_filter_ids
-        source_allowed_filters.map { |r| r["id"] }.uniq
+        @source_allowed_filters ||= Superset::Dashboard::Datasets::List.new(source_dashboard_id).result
       end
 
       def dashboard_native_filter_configuration(dashboard_id)
         dashboard_response = Superset::Dashboard::Get.new(source_dashboard_id)
         raise "Error: source_dashboard returns no response" unless dashboard_response
 
-        JSON.parse(dashboard_response.result['json_metadata'])['native_filter_configuration']
+        JSON.parse(dashboard_response.result['json_metadata'])['native_filter_configuration'] || []
       end
 
       def dashboard_filters(dashboard_id)
         filters = dashboard_native_filter_configuration(dashboard_id)
-        return Array.new unless filters
+        return Array.new unless filters && filters.any?
 
         filters.map { |c| c['targets'] }.flatten.compact
       end
@@ -215,19 +208,13 @@ module Superset
 
       def source_dashboard_filter_ids
         filters = source_dashboard_filters
-        return Array.new unless filters.any?
-
-        filters.map { |t| t["datasetId"] }.compact.uniq
-      end
-
-      def destination_dashboard_filter_ids
-        filters = dashboard_filters(new_dashboard.id)
-        return Array.new unless filters.any?
+        return Array.new unless filters&.any?
 
         filters.map { |t| t["datasetId"] }.compact.uniq
       end
 
       def any_unpermitted_filters?
+        source_allowed_filter_ids = source_allowed_filters.map { |r| r["id"] }.compact.uniq
         (source_dashboard_filter_ids - source_allowed_filter_ids).any?
       end
 

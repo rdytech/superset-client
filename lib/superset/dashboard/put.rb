@@ -1,19 +1,20 @@
 
-# TODO: some work to happen around TAGS still .. ie 'template' tag would indicate it tested and available to be copied.
-# TODO: also need to ensoure that the embedded details are not duplicated across to the new dashboard
+# frozen_string_literal: true
 
 module Superset
   module Dashboard
-    class Update < Superset::Request
+    class Put < Superset::Request
 
-      attr_reader :target_dashboard_id, :duplicate_slices
+      attr_reader :target_dashboard_id, :params
 
       def initialize(target_dashboard_id:, params:)
         @target_dashboard_id = target_dashboard_id
+        @params = params
       end
 
       def perform
         raise "Error: target_dashboard_id integer is required" unless target_dashboard_id.present? && target_dashboard_id.is_a?(Integer)
+        raise "Error: params hash is required" unless params.present? && params.is_a?(Hash)
 
         response
         self
@@ -30,7 +31,7 @@ module Superset
       private
 
       def route
-        "dashboard/#{target_dashboard_id}/update/"
+        "dashboard/#{target_dashboard_id}"
       end
     end
   end
