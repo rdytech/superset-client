@@ -9,13 +9,13 @@ module Superset
 
       DUPLICATED_DATASET_SUFFIX = ' (COPY)'
 
-      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :embedded_domain
+      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :allowed_domains
 
-      def initialize(source_dashboard_id:, target_schema:, target_database_id: , embedded_domain: '')
+      def initialize(source_dashboard_id:, target_schema:, target_database_id: , allowed_domains: nil)
         @source_dashboard_id = source_dashboard_id
         @target_schema = target_schema
         @target_database_id = target_database_id
-        @embedded_domain = embedded_domain
+        @allowed_domains = allowed_domains
       end
 
       def perform
@@ -49,9 +49,9 @@ module Superset
       private
 
       def created_embedded_config
-        return unless embedded_domain.present?
+        return unless allowed_domains.present?
 
-        result = Dashboard::Embedded::Put.new(dashboard_id: new_dashboard.id, embedded_domain: embedded_domain).result
+        result = Dashboard::Embedded::Put.new(dashboard_id: new_dashboard.id, allowed_domains: allowed_domains).result
         logger.info "  Embedded Domain Added to New Dashboard #{new_dashboard.id}:"
         logger.info "  Embedded Domain allowed_domains: #{result['allowed_domains']}"
         logger.info "  Embedded Domain uuid: #{result['uuid']}"
