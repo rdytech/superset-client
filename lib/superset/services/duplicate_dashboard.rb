@@ -34,6 +34,9 @@ module Superset
         # Update the Charts on the New Dashboard with the New Datasets
         update_charts_with_new_datasets
 
+        # Duplicate filters to the new target schema and target database
+        duplicate_source_dashboard_filters
+
         created_embedded_config
 
         end_log_message
@@ -92,6 +95,24 @@ module Superset
         end
       end
 
+      def duplicate_source_dashboard_filters
+        return unless source_dashboard_filter_ids.length.positive?
+
+        source_filters_hash = source_allowed_filters.map { |x| [x['id'], x['datasource_name']] }.to_h
+        target_filters_hash = allowed_filters(new_dashboard.id).map { |x| [x['datasource_name'], x['id']] }.to_h
+        dashboard_response = Superset::Dashboard::Get.new(new_dashboard.id)
+        json_metadata = JSON.parse(dashboard_response.result['json_metadata'])
+        configuration = dashboard_native_filter_configuration(new_dashboard.id).map do |filter_config|
+          targets = filter_config['targets']
+          target_filter_dataset_id = target_filters_hash[source_filters_hash[targets.first["datasetId"]]]
+          filter_config['targets'] = [targets.first.merge({ "datasetId"=> target_filter_dataset_id })]
+          filter_config
+        end
+
+        json_metadata['native_filter_configuration'] = configuration
+        Superset::Dashboard::Update.new(target_dashboard_id: new_dashboard.id, params: { json_metadata: json_metadata })
+      end
+
       def new_dashboard
         @new_dashboard ||= begin
           copy = Superset::Dashboard::Copy.new(
@@ -125,10 +146,10 @@ module Superset
         # schema validations
         raise ValidationError, "Schema #{target_schema} does not exist in target database: #{target_database_id}" unless target_database_available_schemas.include?(target_schema)
         raise ValidationError, "The source_dashboard_id #{source_dashboard_id} datasets are required to point to one schema only. Actual schema list is #{source_dashboard_schemas.join(',')}" if source_dashboard_has_more_than_one_schema?
+        raise ValidationError, "Error: The souce_dashboard_id #{source_dashboard_id} filters point to more than one schema. Filter ID list is #{source_dashboard_filters.join(',')}" if any_unpermitted_filters?
  
         # new dataset validations
         raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
-
       end
 
       def target_database_available_schemas
@@ -160,6 +181,54 @@ module Superset
           end
           existing_names
         end.flatten.compact
+      end
+
+      def allowed_filters(dashboard_id)
+        Superset::Dashboard::Datasets::List.new(dashboard_id).result
+      end
+
+      def source_allowed_filters
+        @source_allowed_filters ||= allowed_filters(source_dashboard_id)
+      end
+
+      def source_allowed_filter_ids
+        source_allowed_filters.map { |r| r["id"] }.uniq
+      end
+
+      def dashboard_native_filter_configuration(dashboard_id)
+        dashboard_response = Superset::Dashboard::Get.new(source_dashboard_id)
+        raise "Error: source_dashboard returns no response" unless dashboard_response
+
+        JSON.parse(dashboard_response.result['json_metadata'])['native_filter_configuration']
+      end
+
+      def dashboard_filters(dashboard_id)
+        filters = dashboard_native_filter_configuration(dashboard_id)
+        return Array.new unless filters
+
+        filters.map { |c| c['targets'] }.flatten.compact
+      end
+
+      def source_dashboard_filters
+        @source_dashboard_filters ||= dashboard_filters(source_dashboard_id)
+      end
+
+      def source_dashboard_filter_ids
+        filters = source_dashboard_filters
+        return Array.new unless filters.any?
+
+        filters.map { |t| t["datasetId"] }.compact.uniq
+      end
+
+      def destination_dashboard_filter_ids
+        filters = dashboard_filters(new_dashboard.id)
+        return Array.new unless filters.any?
+
+        filters.map { |t| t["datasetId"] }.compact.uniq
+      end
+
+      def any_unpermitted_filters?
+        (source_dashboard_filter_ids - source_allowed_filter_ids).any?
       end
 
       def logger
