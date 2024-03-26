@@ -15,9 +15,9 @@ module Superset
       def perform
         raise "Error: source_dataset_id integer is required" unless source_dataset_id.present? && source_dataset_id.is_a?(Integer)
         raise "Error: new_dataset_name string is required" unless new_dataset_name.present? && new_dataset_name.is_a?(String)
-        raise "Error: new_dataset_name already in use" if new_dataset_name_already_in_use?
+        raise "Error: new_dataset_name already in use in this schema: #{new_dataset_name}. Suggest you add (COPY) as a suffix to the name" if new_dataset_name_already_in_use?
 
-        logger.info("  Start Duplicate Source Dataset Id: #{source_dataset_id} to New Dataset Name: #{new_dataset_name}")
+        logger.info("  Duplicating Source Dataset in schema #{source_dataset.schema}. Source Dataset Id: #{source_dataset_id} to New Dataset Name: #{new_dataset_name}")
         
         new_dataset_id
       end
@@ -34,10 +34,14 @@ module Superset
       end
 
       private
-      
+
+      def source_dataset
+        @source_dataset ||= Dataset::Get.new(source_dataset_id).perform
+      end
+
+      # The API demands that the new_dataset_name be uniq within the schema it points to.
       def new_dataset_name_already_in_use?
-        existing_datasets = List.new(title_equals: new_dataset_name)
-        existing_datasets.result.any?
+        Dataset::List.new(title_equals: new_dataset_name, schema_equals: source_dataset.schema).result.any?
       end
 
       def new_dataset_id

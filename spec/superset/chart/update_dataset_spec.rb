@@ -19,7 +19,6 @@ RSpec.describe Superset::Chart::UpdateDataset do
       "id"=>chart_id,
       "is_managed_externally"=>false,
       "owners"=>[{"first_name"=>"Jay", "id"=>9, "last_name"=>"Bee"}],
-      "query_context"=>nil,
       "slice_name"=>"JRStg DoB per Year",
       "tags"=>[{"id"=>1, "name"=>"owner:9", "type"=>3}, {"id"=>28, "name"=>"type:chart", "type"=>2}],
       "thumbnail_url"=>"/api/v1/chart/54507/thumbnail/1595a10937091faff0aed5df628a1292/",

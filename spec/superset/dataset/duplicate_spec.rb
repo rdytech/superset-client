@@ -15,6 +15,7 @@ RSpec.describe Superset::Dataset::Duplicate do
   before do
     allow(subject).to receive(:response).and_return(response)
     allow(subject).to receive(:new_dataset_name_already_in_use?).and_return(false)
+    allow(subject).to receive(:source_dataset).and_return(double(schema: 'public'))
   end
 
   describe '#perform' do

@@ -2,12 +2,13 @@ module Superset
   module Dataset
     class UpdateSchema < Superset::Request
 
-      attr_reader :source_dataset_id, :target_database_id, :target_schema
+      attr_reader :source_dataset_id, :target_database_id, :target_schema, :remove_copy_suffix
 
-      def initialize(source_dataset_id: :source_dataset_id, target_database_id: :target_database_id, target_schema: :target_schema)
+      def initialize(source_dataset_id: :source_dataset_id, target_database_id: :target_database_id, target_schema: :target_schema, remove_copy_suffix: false)
         @source_dataset_id = source_dataset_id
         @target_database_id = target_database_id
         @target_schema = target_schema
+        @remove_copy_suffix = remove_copy_suffix
       end
 
       def perform
@@ -35,6 +36,7 @@ module Superset
           new_params.merge!("database_id": target_database_id)  # add the target database id
           new_params['schema'] = target_schema
           new_params['owners'] = new_params['owners'].map {|o| o['id'] } # expects an array of user ids
+          new_params['table_name'] = new_params['table_name'].gsub(/ \(COPY\)/, '') if remove_copy_suffix
 
           # remove unwanted fields from metrics and columns arrays
           new_params['metrics'].each {|m| m.delete('changed_on') }

@@ -83,5 +83,14 @@ RSpec.describe Superset::Dataset::List do
       end
     end
 
+
+    context 'with title_contains and schema_contains' do
+      subject { described_class.new(title_equals: 'birth_days', schema_equals: 'schema_one') }
+
+      specify do
+        expect(subject.query_params).to eq("filters:!((col:table_name,opr:eq,value:'birth_days'),(col:schema,opr:eq,value:'schema_one')),page:0,page_size:100")
+      end
+    end
+
   end
 end

@@ -2,19 +2,22 @@ module Superset
   module Dashboard
     module Embedded
       class Put < Superset::Request
-        attr_reader :dashboard_id, :embedded_domain
+        attr_reader :dashboard_id, :allowed_domains
 
-        def initialize(dashboard_id: , embedded_domain: )
+        def initialize(dashboard_id: , allowed_domains: )
           @dashboard_id = dashboard_id
-          @embedded_domain = embedded_domain
+          @allowed_domains = allowed_domains
         end
 
         def response
+          raise  InvalidParameterError, 'dashboard_id integer is required' if dashboard_id.nil? || dashboard_id.class != Integer
+          raise  InvalidParameterError, 'allowed_domains array is required' if allowed_domains.nil? || allowed_domains.class != Array
+
           @response ||= client.put(route, params)
         end
 
         def params
-          { "allowed_domains": [embedded_domain] }
+          { "allowed_domains": allowed_domains }
         end
 
         def uuid
