@@ -66,10 +66,13 @@ module Superset
 
       def update_charts_with_new_datasets
         # get all chart ids for the new dashboard
-        chart_ids_list = Superset::Dashboard::Charts::List.new(new_dashboard.id).chart_ids
+        new_charts_list = Superset::Dashboard::Charts::List.new(new_dashboard.id).result
+        chart_ids_list = new_charts_list&.map { |r| r['id'] }&.compact
         original_charts = Superset::Dashboard::Charts::List.new(source_dashboard_id).result.map { |r| [r['slice_name'], r['id']] }.to_h
-        new_charts = Superset::Dashboard::Charts::List.new(new_dashboard.id).result.map { |r| [r['id'], r['slice_name']] }.to_h
+        new_charts = new_charts_list.map { |r| [r['id'], r['slice_name']] }.to_h
         json_metadata = new_dashboard.result['json_metadata']
+
+        return unless chart_ids_list.any?
 
         # for each chart, update the charts current dataset_id with the new dataset_id
         chart_ids_list.each do |chart_id|
@@ -81,14 +84,14 @@ module Superset
           new_dataset_id = dataset_duplication_tracker.find { |dataset| dataset[:source_dataset_id] == current_chart_dataset_id }&.fetch(:new_dataset_id, nil)
 
           # update the chart to target the new dataset_id
-          Superset::Chart::UpdateDataset.new(chart_id: chart_id, target_dataset_id: new_dataset_id).response
+          Superset::Chart::UpdateDataset.new(chart_id: chart_id, target_dataset_id: new_dataset_id).perform
 
           # update json metadata
           original_chart_id = original_charts[new_charts[chart_id]]
           json_metadata.gsub!(original_chart_id.to_s, chart_id.to_s)
         end
 
-        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => json_metadata }).response
+        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => json_metadata }).perform
       end
 
       def duplicate_source_dashboard_datasets
@@ -100,7 +103,7 @@ module Superset
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
 
           # update the new dataset with the target schema and target database
-          Superset::Dataset::UpdateSchema.new(source_dataset_id: new_dataset_id, target_database_id: target_database_id, target_schema: target_schema).response
+          Superset::Dataset::UpdateSchema.new(source_dataset_id: new_dataset_id, target_database_id: target_database_id, target_schema: target_schema).perform
         end
       end
 
@@ -116,7 +119,7 @@ module Superset
         end
 
         json_metadata['native_filter_configuration'] = configuration || []
-        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => json_metadata.to_json }).response
+        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => json_metadata.to_json }).perform
       end
 
       def new_dashboard

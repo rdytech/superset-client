@@ -18,10 +18,10 @@ RSpec.describe Superset::Services::DuplicateDashboard do
     {id: source_dataset_2, datasource_name: "Dataset 2", schema: "schema1", database: {id: 9, name: "db_9", backend: "postgresql"}}
   ]}
   let(:json_metadata) { { 'native_filter_configuration' => [{ 'targets' => [{ 'datasetId' => 201 }]}]} }
-  let(:new_json_metadata) { { 'native_filter_configuration' => [{ 'targets' => [{ 'datasetId' => 202 }]}]} }
+  let(:new_json_metadata) { { 'native_filter_configuration' => [{ 'targets' => [{ 'datasetId' => 201 }]}]} }
   let(:source_allowed_filters) { [{'id' => 201}] }
   let(:source_dashboard_filters) {[{ 'datasetId' => 201 }]}
-  let(:dataset_duplication_tracker) { [{ source_dataset_id: 201, new_dataset_id: 202 }] }
+  let(:dataset_duplication_tracker) { [{ source_dataset_id: 201, new_dataset_id: 201 }] }
 
   let(:new_dashboard_id) { 2 }
   let(:new_dashboard) { double('new_dashboard', id: new_dashboard_id, url: "http://superset-host.com/superset/dashboard/#{new_dashboard_id}", json_metadata: json_metadata) }
@@ -53,22 +53,23 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2 (COPY)").and_return(double(perform: new_dataset_2))
 
         # updating the new datasets to point to the target schema and target database
-        expect(Superset::Dataset::UpdateSchema).to receive(:new).with(source_dataset_id: new_dataset_1, target_database_id: target_database_id, target_schema: target_schema).and_return(double(response: true))
-        expect(Superset::Dataset::UpdateSchema).to receive(:new).with(source_dataset_id: new_dataset_2, target_database_id: target_database_id, target_schema: target_schema).and_return(double(response: true))
+        expect(Superset::Dataset::UpdateSchema).to receive(:new).with(source_dataset_id: new_dataset_1, target_database_id: target_database_id, target_schema: target_schema).and_return(double(perform: new_dataset_1))
+        expect(Superset::Dataset::UpdateSchema).to receive(:new).with(source_dataset_id: new_dataset_2, target_database_id: target_database_id, target_schema: target_schema).and_return(double(perform: new_dataset_2))
 
         # getting the list of charts for the source dashboard
-        allow(Superset::Dashboard::Charts::List).to receive(:new).with(new_dashboard_id).and_return(double(chart_ids: [new_chart_1, new_chart_2]))
+        allow(Superset::Dashboard::Charts::List).to receive(:new).with(source_dashboard_id).and_return(double(result: [{ 'slice_name' => "test", "id" => 3001}, { 'slice_name' => "test", "id" => 3002}], chart_ids: [new_chart_1, new_chart_2]))
+        allow(Superset::Dashboard::Charts::List).to receive(:new).with(new_dashboard_id).and_return(double(result: [{ 'slice_name' => "test", "id" => 3001}, { 'slice_name' => "test", "id" => 3002}]))
 
         # getting the current dataset_id for the new charts .. still pointing to the old datasets
         expect(Superset::Chart::Get).to receive(:new).with(3001).and_return(double(datasource_id: source_dataset_1))
         expect(Superset::Chart::Get).to receive(:new).with(3002).and_return(double(datasource_id: source_dataset_2))
 
         # updating the new charts to point to the new datasets
-        expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_1, target_dataset_id: new_dataset_1).and_return(double(response: true))
-        expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_2, target_dataset_id: new_dataset_2).and_return(double(response: true))
+        expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_1, target_dataset_id: new_dataset_1).and_return(double(perform: true))
+        expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_2, target_dataset_id: new_dataset_2).and_return(double(perform: true))
 
         # update dashboard json metadata
-        expect(Superset::Dashboard::Put).to receive(:new).with(target_dashboard_id: new_dashboard_id, params: { 'json_metadata' => new_json_metadata.to_json }).and_return(double(response: true))
+        expect(Superset::Dashboard::Put).to receive(:new).twice.with(target_dashboard_id: new_dashboard_id, params: { 'json_metadata' => new_json_metadata.to_json }).and_return(double(perform: true))
       end
 
       specify do
