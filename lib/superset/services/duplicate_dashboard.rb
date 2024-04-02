@@ -67,6 +67,9 @@ module Superset
       def update_charts_with_new_datasets
         # get all chart ids for the new dashboard
         chart_ids_list = Superset::Dashboard::Charts::List.new(new_dashboard.id).chart_ids
+        original_charts = Superset::Dashboard::Charts::List.new(source_dashboard_id).result.map { |r| [r['slice_name'], r['id']] }.to_h
+        new_charts = Superset::Dashboard::Charts::List.new(new_dashboard.id).result.map { |r| [r['id'], r['slice_name']] }.to_h
+        json_metadata = new_dashboard.result['json_metadata']
 
         # for each chart, update the charts current dataset_id with the new dataset_id
         chart_ids_list.each do |chart_id|
@@ -79,7 +82,13 @@ module Superset
 
           # update the chart to target the new dataset_id
           Superset::Chart::UpdateDataset.new(chart_id: chart_id, target_dataset_id: new_dataset_id).response
+
+          # update json metadata
+          original_chart_id = original_charts[new_charts[chart_id]]
+          json_metadata.gsub!(original_chart_id.to_s, chart_id.to_s)
         end
+
+        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => json_metadata }).response
       end
 
       def duplicate_source_dashboard_datasets
@@ -101,7 +110,7 @@ module Superset
         json_metadata = JSON.parse(new_dashboard.result['json_metadata'])
         configuration = json_metadata['native_filter_configuration']&.map do |filter_config|
           targets = filter_config['targets']
-          target_filter_dataset_id = dataset_duplication_tracker.find { |d| d[:source_dataset_id] == targets.first["datasetId"] }[:new_dataset_id]
+          target_filter_dataset_id = dataset_duplication_tracker.find { |d| d[:source_dataset_id] == targets.first["datasetId"] }&.fetch(:new_dataset_id, nil)
           filter_config['targets'] = [targets.first.merge({ "datasetId"=> target_filter_dataset_id })]
           filter_config
         end
