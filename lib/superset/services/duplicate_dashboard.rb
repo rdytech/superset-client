@@ -110,7 +110,7 @@ module Superset
       def duplicate_source_dashboard_filters
         return unless source_dashboard_filters.length.positive?
 
-        json_metadata = JSON.parse(new_dashboard.result['json_metadata'])
+        json_metadata = Superset::Dashboard::Get.new(new_dashboard.id).json_metadata
         configuration = json_metadata['native_filter_configuration']&.map do |filter_config|
           targets = filter_config['targets']
           target_filter_dataset_id = dataset_duplication_tracker.find { |d| d[:source_dataset_id] == targets.first["datasetId"] }&.fetch(:new_dataset_id, nil)
