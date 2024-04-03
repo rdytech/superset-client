@@ -37,8 +37,11 @@ module Superset
           new_params.merge!("owners": chart.owner_ids )                  # expects an array of user ids
 
           new_params.merge!("params": updated_chart_params.to_json)      # updated to point to the new params
-          new_params.merge!("query_context": updated_chart_query_context.to_json) # update to point to the new query context
-          new_params.merge!("query_context_generation": true)            # new param set to true to regenerate the query context
+          query_context = updated_chart_query_context
+          if query_context
+            new_params.merge!("query_context": query_context.to_json) # update to point to the new query context
+            new_params.merge!("query_context_generation": true)            # new param set to true to regenerate the query context
+          end
          
           new_params
         end
