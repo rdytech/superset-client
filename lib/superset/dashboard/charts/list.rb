@@ -37,9 +37,9 @@ module Superset
           end
         end
 
-        # when displaying a list of datasets, show dashboard title as well
+        # when displaying a list of datasets, show dashboard id and title as well
         def title
-          @title ||= Superset::Dashboard::Get.new(id).title
+          @title ||= [id, Superset::Dashboard::Get.new(id).title].join(' ')
         end
       end
     end

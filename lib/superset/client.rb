@@ -3,11 +3,18 @@ module Superset
     include Credential::ApiUser
 
     attr_reader :authenticator
-    attr_accessor :connection
+    #attr_accessor :connection
 
     def initialize
       @authenticator = Superset::Authenticator.new(credentials)
       super(log_level: :debug, host: superset_host)
+    end
+
+    # temp override Happi call .. so as to not log requests to console
+    def call(method, url, params)
+      response = connection.send(method, url, params)
+      raise_error(response) if errors[response.status]
+      response
     end
 
     def access_token
