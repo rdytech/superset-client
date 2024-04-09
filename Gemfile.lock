@@ -14,7 +14,7 @@ GIT
 PATH
   remote: .
   specs:
-    superset (0.1.1)
+    superset (0.1.2)
       faraday (~> 1.0)
       faraday-multipart (~> 1.0)
       json (~> 2.6)
@@ -144,6 +144,7 @@ GEM
 PLATFORMS
   aarch64-linux
   arm64-darwin-22
+  arm64-darwin-23
 
 DEPENDENCIES
   happi!
