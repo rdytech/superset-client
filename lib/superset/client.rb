@@ -33,7 +33,7 @@ module Superset
       end
 
       puts "API Error: #{message}"  # display the error message for console debugging
-      # binding.pry                 # helpfull to debug the response
+      binding.pry                 # helpfull to debug the response
 
       raise errors[response.status].new(message, response)  # message is not being surfaced from Happi correctly, :(
     end
