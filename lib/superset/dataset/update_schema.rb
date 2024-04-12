@@ -16,11 +16,14 @@ module Superset
 
         response
 
-        if result['schema'] == target_schema
+        msg = if result['schema'] == target_schema
           "Successfully updated dataset schema to #{target_schema} on Database: #{target_database_id}"
         else
           "Error: Failed to update dataset schema to #{target_schema} on Database: #{target_database_id}"
         end
+
+        logger.info "  #{msg}"
+        msg
 
       end
 

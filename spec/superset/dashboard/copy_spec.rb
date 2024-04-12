@@ -1,14 +1,15 @@
 require 'spec_helper'
 
 RSpec.describe Superset::Dashboard::Copy do
-  subject { described_class.new(source_dashboard_id: dashboard_id, duplicate_slices: dup_slices) }
+  subject { described_class.new(source_dashboard_id: dashboard_id, duplicate_slices: dup_slices, clear_shared_label_colors: clear_shared_label_colors) }
   let(:dashboard_id) { 1 }
   let(:dup_slices) { true }
+  let(:clear_shared_label_colors) { false }
 
   let(:source_dashboard) do
     OpenStruct.new(
       title: 'My Dashboard',
-      json_metadata: { "key1" => "value1" },
+      json_metadata: { "key1" => "value1", "shared_label_colors" => { "Kitchen Crew" => "#1FA8C9" } },
       positions: { "key2" => "value2" }
     )
   end
@@ -63,14 +64,34 @@ RSpec.describe Superset::Dashboard::Copy do
   end
 
   describe '#params' do
-    it 'returns the correct params' do
-      expect(subject.params).to eq({
-        "css" => "{}",
-        "dashboard_title" => "My Dashboard (COPY)",
-        "duplicate_slices" => true,
-        "json_metadata" => { "key1" => "value1", 
-                              "positions" => { "key2" => "value2" } }.to_json
-      })
+    before { subject.send(:adjust_json_metadata) }
+
+    context 'positions' do
+      specify 'are placed in the json_metadata' do
+        expect(subject.params).to eq({
+          "css" => "{}",
+          "dashboard_title" => "My Dashboard (COPY)",
+          "duplicate_slices" => true,
+          "json_metadata" => { "key1" => "value1", 
+                               "shared_label_colors" => { "Kitchen Crew" => "#1FA8C9" },
+                               "positions" => { "key2" => "value2" } }.to_json
+        })
+      end
+    end
+
+    context 'clear_shared_label_colors' do
+      let!(:clear_shared_label_colors) { true }
+
+      specify 'are cleared when option is true' do
+        expect(subject.params).to eq({
+          "css" => "{}",
+          "dashboard_title" => "My Dashboard (COPY)",
+          "duplicate_slices" => true,
+          "json_metadata" => { "key1" => "value1",
+                               "shared_label_colors" => {},
+                               "positions" => { "key2" => "value2" } }.to_json
+        })
+      end
     end
   end
 end

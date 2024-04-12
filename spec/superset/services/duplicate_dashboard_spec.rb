@@ -49,8 +49,8 @@ RSpec.describe Superset::Services::DuplicateDashboard do
     context 'with valid params' do
       before do
         # duplicating the current datasets
-        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1 (COPY)").and_return(double(perform: new_dataset_1))
-        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2 (COPY)").and_return(double(perform: new_dataset_2))
+        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1-schema_one").and_return(double(perform: new_dataset_1))
+        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2-schema_one").and_return(double(perform: new_dataset_2))
 
         # updating the new datasets to point to the target schema and target database
         expect(Superset::Dataset::UpdateSchema).to receive(:new).with(source_dataset_id: new_dataset_1, target_database_id: target_database_id, target_schema: target_schema).and_return(double(perform: new_dataset_1))

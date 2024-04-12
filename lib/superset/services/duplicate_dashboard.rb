@@ -7,8 +7,6 @@ module Superset
   module Services
     class DuplicateDashboard < Superset::Request
 
-      DUPLICATED_DATASET_SUFFIX = ' (COPY)'
-
       attr_reader :source_dashboard_id, :target_schema, :target_database_id, :allowed_domains
 
       def initialize(source_dashboard_id:, target_schema:, target_database_id: , allowed_domains: nil)
@@ -96,8 +94,9 @@ module Superset
 
       def duplicate_source_dashboard_datasets
         source_dashboard_datasets.each do |dataset|
-          # duplicate the dataset
-          new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: "#{dataset[:datasource_name]}#{DUPLICATED_DATASET_SUFFIX}").perform
+          # duplicate the dataset, renaming to use of suffix as the target_schema
+          # reason: there is a bug in the SS API where a dataset name must be uniq when duplicating.  ( however renaming in the GUI to same name works fine)
+          new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: "#{dataset[:datasource_name]}-#{target_schema}").perform
 
           # keep track of the previous dataset and the matching new dataset_id
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
@@ -125,8 +124,9 @@ module Superset
       def new_dashboard
         @new_dashboard ||= begin
           copy = Superset::Dashboard::Copy.new(
-            source_dashboard_id: source_dashboard_id,
-            duplicate_slices:    true
+            source_dashboard_id:       source_dashboard_id,
+            duplicate_slices:          true,
+            clear_shared_label_colors: true
           ).perform
           logger.info("  Copy Dashboard/Charts Completed - New Dashboard ID: #{copy.id}")
           copy
