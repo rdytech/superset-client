@@ -25,6 +25,10 @@ module Superset
         result['schema']
       end
 
+      def title
+        result['name']
+      end
+
       private
 
       def route
@@ -43,11 +47,6 @@ module Superset
       def database_id
         result['database']['id']
       end
-
-      def title
-        result['name']
-      end
-
 
       def sql
         ['sql']
