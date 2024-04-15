@@ -19,7 +19,7 @@ module Superset
       private
 
       def list_attributes
-        ['id', 'name', 'description']
+        ['id', 'name', 'type', 'description']
       end
 
       def route
