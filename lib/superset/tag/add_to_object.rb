@@ -4,16 +4,17 @@ module Superset
   module Tag
     class AddToObject < Superset::Request
 
-      attr_reader :object_type, :object_id, :tags
+      attr_reader :object_type_id, :object_id, :tags
 
-      def initialize(object_type:, object_id:, tags: [])
-        @object_type = object_type
+      def initialize(object_type_id:, object_id:, tags: [])
+        @object_type_id = object_type_id
         @object_id = object_id
         @tags = tags
       end
 
       def perform
-        raise "Error: object_type integer is required" unless object_type.present? && object_type.is_a?(Integer)
+        raise "Error: object_type_id integer is required" unless object_type_id.present? && object_type_id.is_a?(Integer)
+        raise "Error: object_type_id is not a known value" unless ObjectType.list.include?(object_type_id)
         raise "Error: object_id integer is required" unless object_id.present? && object_id.is_a?(Integer)
         raise "Error: tags array is required" unless tags.present? && tags.is_a?(Array)
         raise "Error: tags array must contin string only values" unless tags.all? { |item| item.is_a?(String) }
@@ -34,8 +35,7 @@ module Superset
       private
 
       def route
-        "dashboard/#{object_type}"
-        "tag/#{object_type}/#{object_id}/"
+        "tag/#{object_type_id}/#{object_id}/"
       end
     end
   end

@@ -1,14 +1,14 @@
 require 'spec_helper'
 
 RSpec.describe Superset::Tag::AddToObject do
-  subject { described_class.new(object_type: object_type, object_id: object_id, tags: tags) }
+  subject { described_class.new(object_type_id: object_type_id, object_id: object_id, tags: tags) }
   let(:dashboard_id) { 1 }
   let(:response) { {} }   # not a very helpful response from the api on this endpoint
   
 
   describe 'perform' do
     context 'with valid params' do
-      let(:object_type) { 1 }
+      let(:object_type_id) { 1 }
       let(:object_id) { 1 }
       let(:tags) { ['tag1', 'tag2'] }
 
@@ -22,28 +22,38 @@ RSpec.describe Superset::Tag::AddToObject do
     end
 
     context 'with invalid params' do
-      context 'when object_type is not an integer' do
-        let(:object_type) { 'q' }
+      context 'when object_type_id is not an integer' do
+        let(:object_type_id) { 'q' }
         let(:object_id) { 1 }
         let(:tags) { ['tag1', 'tag2'] }
 
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: object_type integer is required")
+          expect { subject.perform }.to raise_error("Error: object_type_id integer is required")
         end
       end
 
-      context 'when object_type is not present' do
-        let(:object_type) { nil }
+      context 'when object_type_id is not a known value' do
+        let(:object_type_id) { 5 }
         let(:object_id) { 1 }
         let(:tags) { ['tag1', 'tag2'] }
 
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: object_type integer is required")
+          expect { subject.perform }.to raise_error("Error: object_type_id is not a known value")
+        end
+      end
+
+      context 'when object_type_id is not present' do
+        let(:object_type_id) { nil }
+        let(:object_id) { 1 }
+        let(:tags) { ['tag1', 'tag2'] }
+
+        it 'raises an error' do
+          expect { subject.perform }.to raise_error("Error: object_type_id integer is required")
         end
       end
 
       context 'when object_id is not an integer' do
-        let(:object_type) { 1 }
+        let(:object_type_id) { 1 }
         let(:object_id) { 'q' }
         let(:tags) { ['tag1', 'tag2'] }
 
@@ -53,7 +63,7 @@ RSpec.describe Superset::Tag::AddToObject do
       end
 
       context 'when object_id is not present' do
-        let(:object_type) { 1 }
+        let(:object_type_id) { 1 }
         let(:object_id) { nil }
         let(:tags) { ['tag1', 'tag2'] }
 
@@ -63,7 +73,7 @@ RSpec.describe Superset::Tag::AddToObject do
       end
 
       context 'when tags is not an array' do
-        let(:object_type) { 1 }
+        let(:object_type_id) { 1 }
         let(:object_id) { 1 }
         let(:tags) { 'q' }
 
@@ -73,7 +83,7 @@ RSpec.describe Superset::Tag::AddToObject do
       end
 
       context 'when tags array contains non-string values' do
-        let(:object_type) { 1 }
+        let(:object_type_id) { 1 }
         let(:object_id) { 1 }
         let(:tags) { [1, 2] }
 
