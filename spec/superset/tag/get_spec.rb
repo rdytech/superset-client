@@ -30,7 +30,7 @@ RSpec.describe Superset::Tag::Get do
 
   describe '#rows' do
     specify do
-      expect(subject.rows).to match_array([["2", "embedded", "Used to reference dashboards that are embedded in an external application"]])
+      expect(subject.rows).to match_array([["2", "embedded", "1", "Used to reference dashboards that are embedded in an external application"]])
     end
   end 
 end
