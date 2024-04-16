@@ -13,11 +13,7 @@ module Superset
       end
 
       def perform
-        raise "Error: object_type_id integer is required" unless object_type_id.present? && object_type_id.is_a?(Integer)
-        raise "Error: object_type_id is not a known value" unless ObjectType.list.include?(object_type_id)
-        raise "Error: object_id integer is required" unless object_id.present? && object_id.is_a?(Integer)
-        raise "Error: tags array is required" unless tags.present? && tags.is_a?(Array)
-        raise "Error: tags array must contin string only values" unless tags.all? { |item| item.is_a?(String) }
+        validate_constructor_args
 
         response  # NOTE API response for success is {} .. not particularly informative
       end
@@ -30,6 +26,14 @@ module Superset
         {
           "properties": { "tags": tags }
         }
+      end
+
+      def validate_constructor_args
+        raise InvalidParameterError, "object_type_id integer is required" unless object_type_id.present? && object_type_id.is_a?(Integer)
+        raise InvalidParameterError, "object_type_id is not a known value" unless ObjectType.list.include?(object_type_id)
+        raise InvalidParameterError, "object_id integer is required" unless object_id.present? && object_id.is_a?(Integer)
+        raise InvalidParameterError, "tags array is required" unless tags.present? && tags.is_a?(Array)
+        raise InvalidParameterError, "tags array must contin string only values" unless tags.all? { |item| item.is_a?(String) }
       end
 
       private

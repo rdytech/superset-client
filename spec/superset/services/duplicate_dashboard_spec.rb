@@ -5,11 +5,15 @@ RSpec.describe Superset::Services::DuplicateDashboard do
   subject { described_class.new(
               source_dashboard_id: source_dashboard_id,
               target_schema:       target_schema,
-              target_database_id:  target_database_id) }
+              target_database_id:  target_database_id,
+              allowed_domains:     allowed_domains,
+              tags:                tags ) }
 
   let(:source_dashboard_id) { 1 }
   let(:target_schema) { 'schema_one' }
   let(:target_database_id) { 6 }
+  let(:allowed_domains) { [] }
+  let(:tags) { [] }
   let(:target_database_available_schemas) { ['schema_one', 'schema_two', 'schema_three'] }
   let(:source_dataset_1) { 101 }
   let(:source_dataset_2) { 102 }
@@ -75,9 +79,47 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         expect(Superset::Dashboard::Put).to receive(:new).twice.with(target_dashboard_id: new_dashboard_id, params: { 'json_metadata' => new_json_metadata.to_json }).and_return(double(perform: true))
       end
 
-      specify do
-        expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" })
+      context 'returns the new dashboard details' do
+        specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" }) }
       end
+
+      context 'and embedded domains' do
+        context 'are empty' do
+          before do
+            expect(Superset::Dashboard::Embedded::Put).to_not receive(:new)
+          end
+
+          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" }) }
+        end
+
+        context 'are not empty' do
+          let(:allowed_domains) { ['domain1.com', 'domain2.com'] }
+
+          before do
+            expect(Superset::Dashboard::Embedded::Put).to receive(:new).with(dashboard_id: new_dashboard_id, allowed_domains: allowed_domains).and_return(double(result: { allowed_domains: allowed_domains }))
+          end
+
+          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" }) }
+        end
+      end
+
+      context 'and tags' do
+        context 'are empty' do
+          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" }) }
+        end
+
+        context 'are not empty' do
+          let!(:tags) {  ["embedded", "product:some-product-name", "client:#{target_schema}"] }
+
+          before do
+            expect(Superset::Tag::AddToObject).to receive(:new).with(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard_id, tags: tags).and_return(double(validate_constructor_args: true))
+            expect(Superset::Tag::AddToObject).to receive(:new).with(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard_id, tags: tags).and_return(double(perform: true))
+          end
+
+          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" }) }
+        end
+      end
+
     end
 
     context 'with invalid params' do

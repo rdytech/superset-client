@@ -7,16 +7,18 @@ module Superset
   module Services
     class DuplicateDashboard < Superset::Request
 
-      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :allowed_domains
+      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :allowed_domains, :tags
 
-      def initialize(source_dashboard_id:, target_schema:, target_database_id: , allowed_domains: nil)
+      def initialize(source_dashboard_id:, target_schema:, target_database_id: , allowed_domains: [], tags: [])
         @source_dashboard_id = source_dashboard_id
         @target_schema = target_schema
         @target_database_id = target_database_id
         @allowed_domains = allowed_domains
+        @tags = tags
       end
 
       def perform
+        # validate all params before starting the process
         validate_params
 
         # Pull the Datasets for all charts on the source dashboard
@@ -37,6 +39,8 @@ module Superset
 
         created_embedded_config
 
+        add_tags_to_new_dashboard
+
         end_log_message
 
         # return the new dashboard id and url
@@ -49,13 +53,21 @@ module Superset
 
       private
 
+      def add_tags_to_new_dashboard
+        return unless tags.present?
+
+        Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD,
+                                       object_id: new_dashboard.id,
+                                       tags: tags).perform
+      end
+
       def created_embedded_config
         return unless allowed_domains.present?
 
         result = Dashboard::Embedded::Put.new(dashboard_id: new_dashboard.id, allowed_domains: allowed_domains).result
         logger.info "  Embedded Domain Added to New Dashboard #{new_dashboard.id}:"
         logger.info "  Embedded Domain allowed_domains: #{result['allowed_domains']}"
-        logger.info "  Embedded Domain uuid: #{result['uuid']}"
+        logger.info "  Embedded UUID: #{result['uuid']}"
       end
 
       def dataset_duplication_tracker
@@ -159,6 +171,13 @@ module Superset
  
         # new dataset validations
         raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
+
+        # embedded allowed_domain validations
+        raise  InvalidParameterError, 'allowed_domains array is required' if allowed_domains.nil? || allowed_domains.class != Array
+
+        # tags validations
+        Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard.id, tags: tags).validate_constructor_args if tags.present?
+
       end
 
       def source_dashboard

@@ -28,7 +28,7 @@ RSpec.describe Superset::Tag::AddToObject do
         let(:tags) { ['tag1', 'tag2'] }
 
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: object_type_id integer is required")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "object_type_id integer is required")
         end
       end
 
@@ -38,7 +38,7 @@ RSpec.describe Superset::Tag::AddToObject do
         let(:tags) { ['tag1', 'tag2'] }
 
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: object_type_id is not a known value")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "object_type_id is not a known value")
         end
       end
 
@@ -48,7 +48,7 @@ RSpec.describe Superset::Tag::AddToObject do
         let(:tags) { ['tag1', 'tag2'] }
 
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: object_type_id integer is required")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "object_type_id integer is required")
         end
       end
 
@@ -58,7 +58,7 @@ RSpec.describe Superset::Tag::AddToObject do
         let(:tags) { ['tag1', 'tag2'] }
 
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: object_id integer is required")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "object_id integer is required")
         end
       end
 
@@ -68,7 +68,7 @@ RSpec.describe Superset::Tag::AddToObject do
         let(:tags) { ['tag1', 'tag2'] }
 
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: object_id integer is required")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "object_id integer is required")
         end
       end
 
@@ -78,7 +78,7 @@ RSpec.describe Superset::Tag::AddToObject do
         let(:tags) { 'q' }
 
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: tags array is required")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "tags array is required")
         end
       end
 
@@ -88,7 +88,7 @@ RSpec.describe Superset::Tag::AddToObject do
         let(:tags) { [1, 2] }
 
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: tags array must contin string only values")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "tags array must contin string only values")
         end
       end
     end
