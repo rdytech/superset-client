@@ -22,7 +22,7 @@ module Superset
           "Error: Failed to update dataset schema to #{target_schema} on Database: #{target_database_id}"
         end
 
-        logger.info "  #{msg}"
+        logger.info "    #{msg}"
         msg
 
       end

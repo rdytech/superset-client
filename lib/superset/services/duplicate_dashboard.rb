@@ -59,6 +59,7 @@ module Superset
         Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD,
                                        object_id: new_dashboard.id,
                                        tags: tags).perform
+        logger.info "  Added tags to dashboard #{new_dashboard.id}: #{tags}"
       end
 
       def created_embedded_config
@@ -75,6 +76,7 @@ module Superset
       end
 
       def update_charts_with_new_datasets
+        logger.info "  Updating Charts with New Datasets ..."
         # get all chart ids for the new dashboard
         new_charts_list = Superset::Dashboard::Charts::List.new(new_dashboard.id).result
         chart_ids_list = new_charts_list&.map { |r| r['id'] }&.compact
@@ -93,15 +95,19 @@ module Superset
           # find the new dataset_id for the chart, based on the current_chart_dataset_id
           new_dataset_id = dataset_duplication_tracker.find { |dataset| dataset[:source_dataset_id] == current_chart_dataset_id }&.fetch(:new_dataset_id, nil)
 
-          # update the chart to target the new dataset_id
-          Superset::Chart::UpdateDataset.new(chart_id: chart_id, target_dataset_id: new_dataset_id).perform
+          # update the chart to target the new dataset_id and to the reference the new target_dashboard_id
+          Superset::Chart::UpdateDataset.new(chart_id: chart_id, target_dataset_id: new_dataset_id, target_dashboard_id: new_dashboard.id).perform
+          logger.info "    Update Chart #{chart_id} to new dataset_id #{new_dataset_id}"
 
           # update json metadata
           original_chart_id = original_charts[new_charts[chart_id]]
           json_metadata.gsub!(original_chart_id.to_s, chart_id.to_s)
+          # TODO: this gsub could be flawed, as it is a string replace.
+          # ie replacing 20 would also replace 200, 201, 202 etc which could cause disastorous results .. see NEP-17737
         end
 
         Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => json_metadata }).perform
+        logger.info "  Updated new Dashboard json_metadata"
       end
 
       def duplicate_source_dashboard_datasets
@@ -144,6 +150,7 @@ module Superset
           copy
         end
       rescue => e
+        logger.info("  Dashboard::Copy error: #{e.message}")
         raise "Dashboard::Copy error: #{e.message}"
       end
 
