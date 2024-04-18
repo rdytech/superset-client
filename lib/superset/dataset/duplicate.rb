@@ -46,7 +46,7 @@ module Superset
 
       def new_dataset_id
         if response["id"].present?
-          logger.info("  Finished. Duplicate Dataset Name #{new_dataset_name} with id #{response['id']}")
+          logger.info("    Finished. Duplicate Dataset Name #{new_dataset_name} with id #{response['id']}")
           response["id"]
         else
           logger.error("Error: Unable to duplicate dataset: #{response}")

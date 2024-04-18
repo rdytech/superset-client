@@ -124,7 +124,7 @@ RSpec.describe Superset::Chart::List do
         expect(subject.query_params).to eq(
           "filters:!(" \
           "(col:slice_name,opr:ct,value:'birth')," \
-          "(col:datasource_id,opr:eq,value:3)" \
+          "(col:dashboards,opr:rel_m_m,value:3)" \
           "),page:0,page_size:100")
       end
     end
