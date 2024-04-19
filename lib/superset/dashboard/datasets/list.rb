@@ -35,7 +35,7 @@ module Superset
 
         def datasets_details
           result.map do |details|
-            details.slice('id', 'datasource_name', 'schema').merge('database' => details['database'].slice('id', 'name', 'backend'))
+            details.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => details['database'].slice('id', 'name', 'backend')).with_indifferent_access
           end
         end
 

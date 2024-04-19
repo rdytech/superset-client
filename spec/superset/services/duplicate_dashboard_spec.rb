@@ -10,7 +10,9 @@ RSpec.describe Superset::Services::DuplicateDashboard do
               tags:                tags ) }
 
   let(:source_dashboard_id) { 1 }
-  let(:target_schema) { 'schema_one' }
+  let(:source_dashboard) { double('source_dashboard', id: source_dashboard_id, url: "http://superset-host.com/superset/dashboard/#{source_dashboard_id}", json_metadata: json_metadata) }
+
+  let(:target_schema) { 'schema_two' }
   let(:target_database_id) { 6 }
   let(:allowed_domains) { [] }
   let(:tags) { [] }
@@ -18,14 +20,14 @@ RSpec.describe Superset::Services::DuplicateDashboard do
   let(:source_dataset_1) { 101 }
   let(:source_dataset_2) { 102 }
   let(:source_dashboard_datasets) {[
-    {id: source_dataset_1, datasource_name: "Dataset 1", schema: "schema1", database: {id: 9, name: "db_9", backend: "postgresql"}},
-    {id: source_dataset_2, datasource_name: "Dataset 2", schema: "schema1", database: {id: 9, name: "db_9", backend: "postgresql"}}
+    {id: source_dataset_1, datasource_name: "Dataset 1", schema: "schema_one", database: {id: 9, name: "db_9", backend: "postgresql"}, sql: 'SELECT * FROM table1'},
+    {id: source_dataset_2, datasource_name: "Dataset 2", schema: "schema_one", database: {id: 9, name: "db_9", backend: "postgresql"}, sql: 'SELECT * FROM table1'}
   ]}
-  let(:json_metadata) { { 'native_filter_configuration' => [{ 'targets' => [{ 'datasetId' => 201 }]}]} }
+  let(:json_metadata) { { 'native_filter_configuration' => [{ 'targets' => [{ 'datasetId' => 101 }]}]} }
   let(:new_json_metadata) { { 'native_filter_configuration' => [{ 'targets' => [{ 'datasetId' => 201 }]}]} }
-  let(:source_allowed_filters) { [{'id' => 201}] }
-  let(:source_dashboard_filters) {[{ 'datasetId' => 201 }]}
-  let(:dataset_duplication_tracker) { [{ source_dataset_id: 201, new_dataset_id: 201 }] }
+  let(:source_dashboard_filter_dataset_ids) { [source_dataset_1, source_dataset_2] }
+  let(:source_dashboard_dataset_ids) {[source_dataset_1, source_dataset_2 ]}
+  let(:dataset_duplication_tracker) { [{ source_dataset_id: 101, new_dataset_id: 201 }] }
 
   let(:new_dashboard_id) { 2 }
   let(:new_dashboard) { double('new_dashboard', id: new_dashboard_id, url: "http://superset-host.com/superset/dashboard/#{new_dashboard_id}", json_metadata: json_metadata) }
@@ -40,11 +42,12 @@ RSpec.describe Superset::Services::DuplicateDashboard do
   before do
     allow(subject).to receive(:superset_host).and_return('http://superset-host.com')
     allow(subject).to receive(:target_database_available_schemas).and_return(target_database_available_schemas)
+    allow(subject).to receive(:source_dashboard).and_return(source_dashboard)
     allow(subject).to receive(:new_dashboard).and_return(new_dashboard)
     allow(subject).to receive(:source_dashboard_datasets).and_return(source_dashboard_datasets)
     allow(subject).to receive(:target_schema_matching_dataset_names).and_return(existing_target_datasets_list)
-    allow(subject).to receive(:source_allowed_filters).and_return(source_allowed_filters)
-    allow(subject).to receive(:source_dashboard_filters).and_return(source_dashboard_filters)
+    allow(subject).to receive(:source_dashboard_filter_dataset_ids).and_return(source_dashboard_filter_dataset_ids)
+    allow(subject).to receive(:source_dashboard_dataset_ids).and_return(source_dashboard_dataset_ids)
     allow(subject).to receive(:dataset_duplication_tracker).and_return(dataset_duplication_tracker)
     allow(new_dashboard).to receive(:result).and_return({ 'json_metadata' => json_metadata.to_json })
   end
@@ -53,8 +56,8 @@ RSpec.describe Superset::Services::DuplicateDashboard do
     context 'with valid params' do
       before do
         # duplicating the current datasets
-        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1-schema_one").and_return(double(perform: new_dataset_1))
-        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2-schema_one").and_return(double(perform: new_dataset_2))
+        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1-schema_two").and_return(double(perform: new_dataset_1))
+        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2-schema_two").and_return(double(perform: new_dataset_2))
 
         # updating the new datasets to point to the target schema and target database
         expect(Superset::Dataset::UpdateSchema).to receive(:new).with(source_dataset_id: new_dataset_1, target_database_id: target_database_id, target_schema: target_schema).and_return(double(perform: new_dataset_1))
@@ -73,10 +76,13 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_2, target_dataset_id: new_dataset_2, target_dashboard_id: new_dashboard_id).and_return(double(perform: true))
 
         # get json metadata
-        expect(Superset::Dashboard::Get).to receive(:new).with(new_dashboard_id).and_return(double(json_metadata: json_metadata))
+        #expect(Superset::Dashboard::Get).to receive(:new).with(new_dashboard_id).and_return(double(json_metadata: json_metadata))
+        #expect(Superset::Dashboard::Get).to receive(:new).with(source_dashboard_id).and_return(double(url: 'test.com', result: { 'json_metadata' => json_metadata.to_json }))
 
-        # update dashboard json metadata
-        expect(Superset::Dashboard::Put).to receive(:new).twice.with(target_dashboard_id: new_dashboard_id, params: { 'json_metadata' => new_json_metadata.to_json }).and_return(double(perform: true))
+        # update dashboard json metadata chart datasets -- TODO add the chart config expected change here
+        expect(Superset::Dashboard::Put).to receive(:new).once.with(target_dashboard_id: new_dashboard_id, params: { 'json_metadata' => json_metadata.to_json }).and_return(double(perform: true))
+        # update dashboard json metadata filter datasets
+        expect(Superset::Dashboard::Put).to receive(:new).once.with(target_dashboard_id: new_dashboard_id, params: { 'json_metadata' => new_json_metadata.to_json }).and_return(double(perform: true))
       end
 
       context 'returns the new dashboard details' do
@@ -112,7 +118,6 @@ RSpec.describe Superset::Services::DuplicateDashboard do
           let!(:tags) {  ["embedded", "product:some-product-name", "client:#{target_schema}"] }
 
           before do
-            expect(Superset::Tag::AddToObject).to receive(:new).with(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard_id, tags: tags).and_return(double(validate_constructor_args: true))
             expect(Superset::Tag::AddToObject).to receive(:new).with(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard_id, tags: tags).and_return(double(perform: true))
           end
 
@@ -156,11 +161,11 @@ RSpec.describe Superset::Services::DuplicateDashboard do
       end
 
       context 'filters set is outside source schema' do
-        let(:target_schema) { 'schema_one' }
-        let(:source_dashboard_filters) { [{ 'datasetId' => 201 }, { 'datasetId' => 203 }] }
+        let(:target_schema) { 'schema_two' }
+        let(:source_dashboard_filter_dataset_ids) { [101, 202] }
 
         specify do
-          expect { subject.perform }.to raise_error(Superset::Request::ValidationError, "The source_dashboard_id #{source_dashboard_id} filters point to more than one schema.")
+          expect { subject.perform }.to raise_error(Superset::Request::ValidationError, "One or more source dashboard filters point to a different dataset than the dashboard charts. Identified Unpermittied Filter Dataset Ids are [202]")
         end
       end
 
@@ -170,7 +175,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         end
 
         specify do
-          expect { subject.perform }.to raise_error(Superset::Request::ValidationError, "The source_dashboard_id #{source_dashboard_id} datasets are required to point to one schema only. Actual schema list is schema_one,schema_five")
+          expect { subject.perform }.to raise_error(Superset::Request::ValidationError, "The source dashboard datasets are required to point to one schema only. Actual schema list is schema_one,schema_five")
         end
       end
 
@@ -178,7 +183,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         let(:existing_target_datasets_list) {[ 'Dataset 1 (COPY)', 'Dataset 2 (COPY)' ]}
         specify do
           expect { subject.perform }.to raise_error(Superset::Request::ValidationError, 
-            "DATASET NAME CONFLICT: The Target Schema schema_one already has existing datasets named: Dataset 1 (COPY),Dataset 2 (COPY)")
+            "DATASET NAME CONFLICT: The Target Schema schema_two already has existing datasets named: Dataset 1 (COPY),Dataset 2 (COPY)")
         end
       end
     end

@@ -51,22 +51,24 @@ module Superset
         raise e
       end
 
-      private
+      #private
 
       def add_tags_to_new_dashboard
         return unless tags.present?
 
-        Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD,
-                                       object_id: new_dashboard.id,
-                                       tags: tags).perform
+        Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard.id, tags: tags).perform
         logger.info "  Added tags to dashboard #{new_dashboard.id}: #{tags}"
+      rescue => e
+        # catching tag error and display in log .. but also alowing the process to finish logs as tag error is fairly insignificant
+        logger.error("  FAILED to add tags to new dashboard id: #{new_dashboard.id}. Error is #{e.message}")
+        logger.error("  Missing Tags Values are #{tags}")
       end
 
       def created_embedded_config
         return unless allowed_domains.present?
 
         result = Dashboard::Embedded::Put.new(dashboard_id: new_dashboard.id, allowed_domains: allowed_domains).result
-        logger.info "  Embedded Domain Added to New Dashboard #{new_dashboard.id}:"
+        logger.info "Added Embedded Settings to New Dashboard #{new_dashboard.id}:"
         logger.info "  Embedded Domain allowed_domains: #{result['allowed_domains']}"
         logger.info "  Embedded UUID: #{result['uuid']}"
       end
@@ -76,14 +78,13 @@ module Superset
       end
 
       def update_charts_with_new_datasets
-        logger.info "  Updating Charts with New Datasets ..."
+        logger.info "Updating Charts with New Datasets ..."
         # get all chart ids for the new dashboard
         new_charts_list = Superset::Dashboard::Charts::List.new(new_dashboard.id).result
         chart_ids_list = new_charts_list&.map { |r| r['id'] }&.compact
         original_charts = Superset::Dashboard::Charts::List.new(source_dashboard_id).result.map { |r| [r['slice_name'], r['id']] }.to_h
         new_charts = new_charts_list.map { |r| [r['id'], r['slice_name']] }.to_h
         json_metadata = new_dashboard.result['json_metadata']
-
         return unless chart_ids_list.any?
 
         # for each chart, update the charts current dataset_id with the new dataset_id
@@ -97,23 +98,26 @@ module Superset
 
           # update the chart to target the new dataset_id and to the reference the new target_dashboard_id
           Superset::Chart::UpdateDataset.new(chart_id: chart_id, target_dataset_id: new_dataset_id, target_dashboard_id: new_dashboard.id).perform
-          logger.info "    Update Chart #{chart_id} to new dataset_id #{new_dataset_id}"
+          logger.info "  Update Chart #{chart_id} to new dataset_id #{new_dataset_id}"
 
           # update json metadata
           original_chart_id = original_charts[new_charts[chart_id]]
+
           json_metadata.gsub!(original_chart_id.to_s, chart_id.to_s)
           # TODO: this gsub could be flawed, as it is a string replace.
           # ie replacing 20 would also replace 200, 201, 202 etc which could cause disastorous results .. see NEP-17737
         end
 
+        # TODO: bring in the filter json update here as well .. to save on another API call, see duplicate_source_dashboard_filters
         Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => json_metadata }).perform
-        logger.info "  Updated new Dashboard json_metadata"
+        logger.info "  Updated new Dashboard json_metadata charts with new dataset ids"
       end
 
       def duplicate_source_dashboard_datasets
         source_dashboard_datasets.each do |dataset|
           # duplicate the dataset, renaming to use of suffix as the target_schema
-          # reason: there is a bug in the SS API where a dataset name must be uniq when duplicating.  ( however renaming in the GUI to same name works fine)
+          # reason: there is a bug(or feature) in the SS API where a dataset name must be uniq when duplicating.  
+          # (note however renaming in the GUI to a dup name works fine)
           new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: "#{dataset[:datasource_name]}-#{target_schema}").perform
 
           # keep track of the previous dataset and the matching new dataset_id
@@ -125,9 +129,10 @@ module Superset
       end
 
       def duplicate_source_dashboard_filters
-        return unless source_dashboard_filters.length.positive?
+        return unless source_dashboard_filter_dataset_ids.length.positive?
 
-        json_metadata = Superset::Dashboard::Get.new(new_dashboard.id).json_metadata
+        logger.info "Updating Filters to point to new dataset targets ..."
+        json_metadata = new_dashboard.json_metadata
         configuration = json_metadata['native_filter_configuration']&.map do |filter_config|
           targets = filter_config['targets']
           target_filter_dataset_id = dataset_duplication_tracker.find { |d| d[:source_dataset_id] == targets.first["datasetId"] }&.fetch(:new_dataset_id, nil)
@@ -154,7 +159,7 @@ module Superset
         raise "Dashboard::Copy error: #{e.message}"
       end
 
-      # retrieve the datasets for the that we will duplicate
+      # retrieve the datasets that will be duplicated
       def source_dashboard_datasets
         @source_dashboard_datasets ||= Superset::Dashboard::Datasets::List.new(source_dashboard_id).datasets_details
       rescue => e
@@ -173,18 +178,28 @@ module Superset
 
         # schema validations
         raise ValidationError, "Schema #{target_schema} does not exist in target database: #{target_database_id}" unless target_database_available_schemas.include?(target_schema)
-        raise ValidationError, "The source_dashboard_id #{source_dashboard_id} datasets are required to point to one schema only. Actual schema list is #{source_dashboard_schemas.join(',')}" if source_dashboard_has_more_than_one_schema?
-        raise ValidationError, "The source_dashboard_id #{source_dashboard_id} filters point to more than one schema." if any_unpermitted_filters?
- 
+        raise ValidationError, "The source dashboard datasets are required to point to one schema only. Actual schema list is #{source_dashboard_schemas.join(',')}" if source_dashboard_has_more_than_one_schema?
+        raise ValidationError, "One or more source dashboard filters point to a different dataset than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s}" if unpermitted_filter_dataset_ids.any?
+
+        #raise ValidationError, "One or more source dashboard filters point to a different dataset than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s} " if unpermitted_filter_dataset_ids.any?
+
+
         # new dataset validations
         raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
+        validate_source_dashboard_datasets_sql_does_not_hard_code_schema
 
         # embedded allowed_domain validations
         raise  InvalidParameterError, 'allowed_domains array is required' if allowed_domains.nil? || allowed_domains.class != Array
 
-        # tags validations
-        Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard.id, tags: tags).validate_constructor_args if tags.present?
 
+      end
+
+      def validate_source_dashboard_datasets_sql_does_not_hard_code_schema
+        errors = source_dashboard_datasets.map do |dataset|
+          "The Dataset ID #{dataset[:id]} SQL query is hard coded with the schema value and can not be duplicated cleanly.  " +
+            "Remove all direct embedded schema calls from the Dataset SQL query before continuing." if dataset[:sql].include?("#{dataset[:schema]}.")
+        end.compact
+        raise ValidationError, errors.join("\n") unless errors.empty?
       end
 
       def source_dashboard
@@ -199,7 +214,6 @@ module Superset
         source_dashboard_schemas.count > 1
       end
 
-      # Pull the Datasets for all charts on the source dashboard
       def source_dashboard_schemas
         source_dashboard_datasets.map { |dataset| dataset[:schema] }.uniq
       end
@@ -222,25 +236,22 @@ module Superset
         end.flatten.compact
       end
 
-      def allowed_filters(dashboard_id)
-        Superset::Dashboard::Datasets::List.new(dashboard_id).result
+      def source_dashboard_dataset_ids
+        source_dashboard_datasets.map{|d|d['id']}
       end
 
-      def source_allowed_filters
-        @source_allowed_filters ||= Superset::Dashboard::Datasets::List.new(source_dashboard_id).result
-      end
-
-      def source_dashboard_filters
+      def source_dashboard_filter_dataset_ids
         filters_configuration = JSON.parse(source_dashboard.result['json_metadata'])['native_filter_configuration'] || []
         return Array.new unless filters_configuration && filters_configuration.any?
 
-        filters = filters_configuration.map { |c| c['targets'] }.flatten.compact
+        # pull only the filters dataset ids from the dashboard
+        filters_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact
       end
 
-      def any_unpermitted_filters?
-        source_allowed_filter_ids = source_allowed_filters.map { |r| r["id"] }.compact.uniq
-        source_dashboard_filter_ids = source_dashboard_filters.map { |t| t["datasetId"] }.compact.uniq
-        (source_dashboard_filter_ids - source_allowed_filter_ids).any?
+      # identify any filters dataset that is not part of the dashboard charts datasets
+      # unpermitted meaning we only allow filters to be sourced from the dashboard datasets
+      def unpermitted_filter_dataset_ids
+        source_dashboard_filter_dataset_ids - source_dashboard_dataset_ids
       end
 
       def logger
@@ -250,7 +261,7 @@ module Superset
       def start_log_msg
         logger.info ""
         logger.info ">>>>>>>>>>>>>>>>> Starting DuplicateDashboard Service <<<<<<<<<<<<<<<<<<<<<<"
-        logger.info "Ready Superset Host: #{ENV['SUPERSET_HOST']}"
+        logger.info "Source Dashboard URL: #{source_dashboard.url}"
         logger.info "Duplicating dashboard #{source_dashboard_id} into Target Schema: #{target_schema} in database #{target_database_id}"
       end
 

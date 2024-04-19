@@ -17,8 +17,8 @@ module Superset
         raise "Error: new_dataset_name string is required" unless new_dataset_name.present? && new_dataset_name.is_a?(String)
         raise "Error: new_dataset_name already in use in this schema: #{new_dataset_name}. Suggest you add (COPY) as a suffix to the name" if new_dataset_name_already_in_use?
 
-        logger.info("  Duplicating Source Dataset #{source_dataset.title} in schema #{source_dataset.schema} with id #{source_dataset_id}")
-        
+        logger.info("Duplicating Source Dataset #{source_dataset.title} with id #{source_dataset_id}")
+
         new_dataset_id
       end
 
