@@ -26,7 +26,7 @@ module Superset
       def params
         {
           "css" => "{}",
-          "dashboard_title" => "#{source_dashboard.title} (COPY)",
+          "dashboard_title" => "#{source_dashboard.title}",
           "duplicate_slices" => duplicate_slices,
           "json_metadata" => new_dashboard_json_metadata.to_json,
         }

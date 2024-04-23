@@ -70,7 +70,7 @@ RSpec.describe Superset::Dashboard::Copy do
       specify 'are placed in the json_metadata' do
         expect(subject.params).to eq({
           "css" => "{}",
-          "dashboard_title" => "My Dashboard (COPY)",
+          "dashboard_title" => "My Dashboard",
           "duplicate_slices" => true,
           "json_metadata" => { "key1" => "value1", 
                                "shared_label_colors" => { "Kitchen Crew" => "#1FA8C9" },
@@ -85,7 +85,7 @@ RSpec.describe Superset::Dashboard::Copy do
       specify 'are cleared when option is true' do
         expect(subject.params).to eq({
           "css" => "{}",
-          "dashboard_title" => "My Dashboard (COPY)",
+          "dashboard_title" => "My Dashboard",
           "duplicate_slices" => true,
           "json_metadata" => { "key1" => "value1",
                                "shared_label_colors" => {},
