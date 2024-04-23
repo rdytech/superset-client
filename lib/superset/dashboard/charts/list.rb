@@ -16,16 +16,6 @@ module Superset
           result.map { |c| c[:id] }
         end
 
-        private
-
-        def route
-          "dashboard/#{id}/charts"
-        end
-
-        def list_attributes
-          ['id', 'slice_name', 'dashsource', 'dashboards'].map(&:to_sym)
-        end
-
         def rows
           result.map do |c|
             [
@@ -37,9 +27,19 @@ module Superset
           end
         end
 
-        # when displaying a list of datasets, show dashboard title as well
+        private
+
+        def route
+          "dashboard/#{id}/charts"
+        end
+
+        def list_attributes
+          ['id', 'slice_name', 'datasource', 'dashboards'].map(&:to_sym)
+        end
+
+        # when displaying a list of datasets, show dashboard id and title as well
         def title
-          @title ||= Superset::Dashboard::Get.new(id).title
+          @title ||= [id, Superset::Dashboard::Get.new(id).title].join(' ')
         end
       end
     end

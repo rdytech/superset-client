@@ -35,7 +35,7 @@ module Superset
 
         def datasets_details
           result.map do |details|
-            details.slice('id', 'datasource_name', 'schema').merge('database' => details['database'].slice('id', 'name', 'backend'))
+            details.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => details['database'].slice('id', 'name', 'backend')).with_indifferent_access
           end
         end
 
@@ -64,7 +64,7 @@ module Superset
 
         # when displaying a list of datasets, show dashboard title as well
         def title
-          @title ||= Superset::Dashboard::Get.new(id).title
+          @title ||= [id, Superset::Dashboard::Get.new(id).title].join(' ')
         end
       end
     end

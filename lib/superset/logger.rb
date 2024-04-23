@@ -2,11 +2,13 @@ module Superset
   class Logger
     
     def info(msg)
-      logger.info(msg)
+      # puts msg   # allow logs to console
+      logger.info msg
     end
 
     def error(msg)
-      logger.error(msg)
+      # puts msg   # allow logs to console
+      logger.error msg
     end
 
     def logger

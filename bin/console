@@ -2,12 +2,14 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
+require 'dotenv/load'
 require "json"
 require "faraday"
 require 'faraday/multipart'
 require "happi"
 require "terminal-table"
 require "yaml"
+require "enumerate_it"
 require "superset"
 
 Dir["./lib/**/*.rb"].each { |f| require f }
@@ -15,6 +17,5 @@ Dir["./lib/**/*.rb"].each { |f| require f }
 # with your gem easier. You can also use a different console, if you like.
 
 require "pry"
-load ".env" if File.exist?(".env")
 
 Pry.start(__FILE__)

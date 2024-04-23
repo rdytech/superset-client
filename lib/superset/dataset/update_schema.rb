@@ -16,11 +16,14 @@ module Superset
 
         response
 
-        if result['schema'] == target_schema
+        msg = if result['schema'] == target_schema
           "Successfully updated dataset schema to #{target_schema} on Database: #{target_database_id}"
         else
           "Error: Failed to update dataset schema to #{target_schema} on Database: #{target_database_id}"
         end
+
+        logger.info "    #{msg}"
+        msg
 
       end
 
@@ -48,7 +51,12 @@ module Superset
         end
       end
 
-      # private
+      # check if the sql query embedds the schema name, if so it can not be duplicated cleanly
+      def sql_query_includes_hard_coded_schema?
+        source_dataset['sql'].include?("#{source_dataset['schema']}.")
+      end
+
+      private
 
       def source_dataset
         # will raise an error if the dataset does not exist
@@ -59,6 +67,7 @@ module Superset
       end
 
       def validate_proposed_changes
+        logger.info "    Validating Dataset ID: #{source_dataset_id} schema update to #{target_schema} on Database: #{target_database_id}"
         raise "Error: source_dataset_id integer is required"  unless source_dataset_id.present? && source_dataset_id.is_a?(Integer)
         raise "Error: target_database_id integer is required" unless target_database_id.present? && target_database_id.is_a?(Integer)
         raise "Error: target_schema string is required"       unless target_schema.present? && target_schema.is_a?(String)
@@ -68,9 +77,9 @@ module Superset
         # does the target schema exist in the target database?
         raise "Error: Schema #{target_schema} does not exist in database: #{target_database_id}" unless target_database_available_schemas.include?(target_schema)
 
-        # does the sql query hard code the schema?
-        raise "Error: >>WARNING<< SQL query is hard coded with the schema value.  " +
-              "Remove all direct schema calls from the Dataset SQL query before continuing." if source_dataset['sql'].include?("#{source_dataset['schema']}.")
+        # does the sql query hard code the current schema name?
+        raise "Error: >>WARNING<< The Dataset ID #{source_dataset_id} SQL query is hard coded with the schema value and can not be duplicated cleanly.  " +
+              "Remove all direct embedded schema calls from the Dataset SQL query before continuing." if sql_query_includes_hard_coded_schema?
       end
 
       # attrs as per swagger docs for dataset patch

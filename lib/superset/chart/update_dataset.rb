@@ -4,11 +4,12 @@ module Superset
   module Chart
     class UpdateDataset < Superset::Request
 
-      attr_reader :chart_id, :target_dataset_id
+      attr_reader :chart_id, :target_dataset_id, :target_dashboard_id
 
-      def initialize(chart_id: , target_dataset_id: )
+      def initialize(chart_id: , target_dataset_id: , target_dashboard_id: nil)
         @chart_id = chart_id
         @target_dataset_id = target_dataset_id
+        @target_dashboard_id = target_dashboard_id
       end
 
       def perform
@@ -60,8 +61,9 @@ module Superset
       end
 
       def updated_chart_params
-        chart_params = chart.params # init with source chart params
+        chart_params = chart.params # init with current chart params
         chart_params['datasource'] = chart_params['datasource'].sub(source_dataset_id.to_s, target_dataset_id.to_s) # update to point to the new dataset
+        chart_params['dashboards'] = [target_dashboard_id] if target_dashboard_id.present?                          # update to point to the new dashboard
         chart_params
       end
 
@@ -70,7 +72,8 @@ module Superset
           chart_query_context = chart.query_context                               # init with source chart query context
           chart_query_context['datasource']['id'] = target_dataset_id             # update to point to the new dataset
           chart_query_context['form_data']['datasource'] = chart_query_context['form_data']['datasource']
-            .sub(source_dataset_id.to_s, target_dataset_id.to_s) # update to point to the new dataset
+            .sub(source_dataset_id.to_s, target_dataset_id.to_s)                  # update to point to the new dataset
+            chart_query_context['form_data']['dashboards'] = [target_dashboard_id] if target_dashboard_id.present? # update to point to the new dashboard
           chart_query_context
         end
       end

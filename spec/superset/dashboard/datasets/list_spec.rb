@@ -9,13 +9,15 @@ RSpec.describe Superset::Dashboard::Datasets::List do
         'id' => 101,
         'datasource_name' => 'Acme Forecasts',
         'database' => { 'id' => 1, 'name' => 'DB1', 'backend' => 'postgres' },
-        'schema' => 'acme'
+        'schema' => 'acme',
+        'sql' => 'select * from acme.forecasts'
       }.with_indifferent_access,
       {
         'id' => 102,
         'datasource_name' => 'video_game_sales',
         'database' => { 'id' => 2, 'name' => 'examples', 'backend' => 'postgres' },
-        'schema' => 'public'
+        'schema' => 'public',
+        'sql' => 'select * from acme_new.forecasts'
       }.with_indifferent_access
     ]
   end
@@ -58,8 +60,8 @@ RSpec.describe Superset::Dashboard::Datasets::List do
   describe '#datasets_details' do
     it 'returns a list of datasets' do
       expect(subject.datasets_details).to eq([
-        {"id"=>101, "datasource_name"=>"Acme Forecasts", "schema"=>"acme", "database"=>{"id"=>1, "name"=>"DB1", "backend"=>"postgres"}},
-        {"id"=>102, "datasource_name"=>"video_game_sales", "schema"=>"public", "database"=>{"id"=>2, "name"=>"examples", "backend"=>"postgres"}}
+        {"id"=>101, "datasource_name"=>"Acme Forecasts", "schema"=>"acme", "database"=>{"id"=>1, "name"=>"DB1", "backend"=>"postgres"}, "sql"=>"select * from acme.forecasts"},
+        {"id"=>102, "datasource_name"=>"video_game_sales", "schema"=>"public", "database"=>{"id"=>2, "name"=>"examples", "backend"=>"postgres"}, "sql"=>"select * from acme_new.forecasts"}
       ])
     end
   end
