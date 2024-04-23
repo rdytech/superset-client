@@ -1,5 +1,11 @@
 ## Change Log
 
+## 0.1.3 - 2024-04-23
+
+* duplicate dashboard should also create embedded setting by @jbat in https://github.com/rdytech/superset-client/pull/14
+* Validate and duplicate filters to new dashboard by @vidishaweddy-readytech in https://github.com/rdytech/superset-client/pull/17
+* duplicate cross filters by @jbat in https://github.com/rdytech/superset-client/pull/18
+
 ## 0.1.2 - 2024-03-22
 
 * adds export endpoint
