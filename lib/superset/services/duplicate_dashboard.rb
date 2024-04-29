@@ -53,7 +53,11 @@ module Superset
         raise e
       end
 
-      #private
+      def new_dashboard_json_metadata_configuration
+        @new_dashboard_json_metadata_configuration ||= new_dashboard.json_metadata
+      end
+
+      private
 
       def add_tags_to_new_dashboard
         return unless tags.present?
@@ -164,10 +168,6 @@ module Superset
         raise "Dashboard::Copy error: #{e.message}"
       end
 
-      def new_dashboard_json_metadata_configuration
-        @new_dashboard_json_metadata_configuration ||= new_dashboard.json_metadata
-      end
-
       # retrieve the datasets that will be duplicated
       def source_dashboard_datasets
         @source_dashboard_datasets ||= Superset::Dashboard::Datasets::List.new(source_dashboard_id).datasets_details
@@ -190,17 +190,12 @@ module Superset
         raise ValidationError, "The source dashboard datasets are required to point to one schema only. Actual schema list is #{source_dashboard_schemas.join(',')}" if source_dashboard_has_more_than_one_schema?
         raise ValidationError, "One or more source dashboard filters point to a different dataset than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s}" if unpermitted_filter_dataset_ids.any?
 
-        #raise ValidationError, "One or more source dashboard filters point to a different dataset than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s} " if unpermitted_filter_dataset_ids.any?
-
-
         # new dataset validations
         raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
         validate_source_dashboard_datasets_sql_does_not_hard_code_schema
 
         # embedded allowed_domain validations
         raise  InvalidParameterError, 'allowed_domains array is required' if allowed_domains.nil? || allowed_domains.class != Array
-
-
       end
 
       def validate_source_dashboard_datasets_sql_does_not_hard_code_schema
