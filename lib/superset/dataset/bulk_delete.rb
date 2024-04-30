@@ -1,6 +1,10 @@
 # frozen_string_literal: true
-# TODO: the gui delete has a confirmation step, this does not.  Potentially add a confirm_delete parameter to the constructor
-# that would ensure that no charts point to a dataset before deleting
+
+# TODO: the gui delete has a confirmation step, this API call does not.
+# Potentially we could add a confirm_delete parameter to the constructor that would ensure that all datasets either
+#   1 belong to only an expected charts or filters before deleting
+#   2 or do not belong to any charts or filters
+#  ( not sure if this needed at this point )
 
 module Superset
   module Dataset

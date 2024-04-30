@@ -12,7 +12,7 @@ module Superset
       end
 
       def perform
-        raise "Error: dashboard_id integer is required" unless dashboard_id.present? && dashboard_id.is_a?(Integer)
+        raise InvalidParameterError, "dashboard_id integer is required" unless dashboard_id.present? && dashboard_id.is_a?(Integer)
 
         confirm_zero_charts_on_dashboard if confirm_zero_charts
 

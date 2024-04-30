@@ -14,7 +14,7 @@ RSpec.describe Superset::Dashboard::Delete do
       let(:dashboard_id) { nil }
 
       it 'raises an error' do
-        expect { subject.perform }.to raise_error(RuntimeError, "Error: dashboard_id integer is required")
+        expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "dashboard_id integer is required")
       end
     end
 
@@ -22,7 +22,7 @@ RSpec.describe Superset::Dashboard::Delete do
       let(:dashboard_id) { 'string' }
 
       it 'raises an error' do
-        expect { subject.perform }.to raise_error(RuntimeError, "Error: dashboard_id integer is required")
+        expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "dashboard_id integer is required")
       end
     end
 

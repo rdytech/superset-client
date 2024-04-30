@@ -1,6 +1,10 @@
 # frozen_string_literal: true
-# TODO: the gui delete has a confirmation step, this does not.  Potentially add a confirm_delete parameter to the constructor
-# that would ensure that no charts belong to a dashboard before deleting
+
+# TODO: the gui delete has a confirmation step, this API call does not.
+# Potentially we could add a confirm_delete parameter to the constructor that would ensure that all dashboards either
+#   1 have an expected set of charts or filters before deleting
+#   2 or do not have any charts or filters linked to them
+#  ( not sure if this needed at this point )
 
 module Superset
   module Dashboard

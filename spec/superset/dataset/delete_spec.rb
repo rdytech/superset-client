@@ -14,7 +14,7 @@ RSpec.describe Superset::Dataset::Delete do
       let(:dataset_id) { nil }
 
       it 'raises an error' do
-        expect { subject.perform }.to raise_error(RuntimeError, "Error: dataset_id integer is required")
+        expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "dataset_id integer is required")
       end
     end
 
@@ -22,7 +22,7 @@ RSpec.describe Superset::Dataset::Delete do
       let(:dataset_id) { 'string' }
 
       it 'raises an error' do
-        expect { subject.perform }.to raise_error(RuntimeError, "Error: dataset_id integer is required")
+        expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "dataset_id integer is required")
       end
     end
 
