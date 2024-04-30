@@ -24,7 +24,7 @@ module Superset
         @response ||= client.delete(route)
       end
 
-#      private
+      private
 
       def confirm_zero_charts_on_dashboard
         raise "Error: Dashboard includes #{dashboard_charts.count} charts. Please delete all charts before deleting the dashboard or override and set confirm_zero_charts: false" if dashboard_charts.count.positive?

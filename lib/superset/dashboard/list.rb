@@ -55,6 +55,10 @@ module Superset
         end
       end
 
+      def ids
+        result.map { |d| d[:id] }
+      end
+
       private
 
       def route
