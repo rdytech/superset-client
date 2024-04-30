@@ -91,7 +91,7 @@ module Superset
       def validate_constructor_args
         raise InvalidParameterError, "title_contains must be a String type" unless title_contains.is_a?(String)
         raise InvalidParameterError, "tags_equal must be an Array type" unless tags_equal.is_a?(Array)
-        raise InvalidParameterError, "tags_equal array must contin string only values" unless tags_equal.all? { |item| item.is_a?(String) }
+        raise InvalidParameterError, "tags_equal array must contain string only values" unless tags_equal.all? { |item| item.is_a?(String) }
         raise InvalidParameterError, "ids_not_in must be an Array type" unless ids_not_in.is_a?(Array)
       end
     end

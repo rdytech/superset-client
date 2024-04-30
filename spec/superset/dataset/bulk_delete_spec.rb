@@ -20,7 +20,7 @@ RSpec.describe Superset::Dataset::BulkDelete do
       let(:dataset_ids) { [1, 'string'] }
 
       it 'raises an error' do
-        expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "dataset_ids array must contin Integer only values")
+        expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "dataset_ids array must contain Integer only values")
       end
     end
 
