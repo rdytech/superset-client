@@ -15,7 +15,7 @@ module Superset
         def response
           @response ||= client.get(route)
         rescue Happi::Error::NotFound => e
-          puts "Dashboard #{id} has no Embedded settings. (skipping)"  # some dashboards don't have embedded settings, fine to ignore.
+          logger.info("Dashboard #{id} has no Embedded settings. (skipping)") # some dashboards don't have embedded settings, fine to ignore.
           @response = { result: [] }.with_indifferent_access
           @response
         end

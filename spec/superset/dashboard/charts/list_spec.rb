@@ -36,8 +36,8 @@ RSpec.describe Superset::Dashboard::Charts::List do
     specify do
       expect(subject.rows).to match_array(
         [
-          [248, "Chart 1", "114__table", [28]],
-          [249, "Chart 2", "114__table", [28]]
+          [248, "Chart 1", "114__table"],
+          [249, "Chart 2", "114__table"]
         ]
       )
     end

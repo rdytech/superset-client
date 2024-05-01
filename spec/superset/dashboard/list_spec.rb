@@ -57,4 +57,59 @@ RSpec.describe Superset::Dashboard::List do
       )
     end
   end
+
+  describe '#query_params' do
+    context 'for pagination' do
+      context 'with defaults' do
+        specify do
+          expect(subject.query_params).to eq("page:0,page_size:100")
+        end
+      end
+
+      context 'with specifiec page' do
+        subject { described_class.new(page_num: 5) }
+
+        specify do
+          expect(subject.query_params).to eq("page:5,page_size:100")
+        end
+      end
+    end
+
+    context 'with title_contains filters' do
+      subject { described_class.new(title_contains: 'acme') }
+
+      specify do
+        expect(subject.query_params).to eq("filters:!((col:dashboard_title,opr:ct,value:'acme')),page:0,page_size:100")
+      end
+    end
+
+    context 'with multiple filter set' do
+      subject { described_class.new(title_contains: 'birth', tags_equal: ['template']) }
+
+      specify do
+        expect(subject.query_params).to eq(
+          "filters:!(" \
+          "(col:dashboard_title,opr:ct,value:'birth')," \
+          "(col:tags,opr:dashboard_tags,value:'template')" \
+          "),page:0,page_size:100")
+      end
+    end
+
+    context 'with multiple filter set and multiple tags' do
+      subject { described_class.new(page_num: 3, title_contains: 'birth', tags_equal: ['template', 'client:acme', 'product:turbo-charged-feet']) }
+
+      specify do
+        expect(subject.query_params).to eq(
+          "filters:!(" \
+          "(col:dashboard_title,opr:ct,value:'birth')," \
+          "(col:tags,opr:dashboard_tags,value:'template')," \
+          "(col:tags,opr:dashboard_tags,value:'client:acme')," \
+          "(col:tags,opr:dashboard_tags,value:'product:turbo-charged-feet')" \
+          "),page:3,page_size:100")
+      end
+    end
+
+
+  end
+
 end

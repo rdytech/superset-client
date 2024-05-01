@@ -1,6 +1,7 @@
 module Superset
   module Dashboard
     class Info < Superset::Request
+      alias result response
 
       def filters
         result['filters']

@@ -88,7 +88,7 @@ RSpec.describe Superset::Tag::AddToObject do
         let(:tags) { [1, 2] }
 
         it 'raises an error' do
-          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "tags array must contin string only values")
+          expect { subject.perform }.to raise_error(Superset::Request::InvalidParameterError, "tags array must contain string only values")
         end
       end
     end

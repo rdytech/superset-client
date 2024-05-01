@@ -44,7 +44,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rubyzip", "~> 1.0"
   spec.add_dependency "faraday", "~> 1.0"
   spec.add_dependency "faraday-multipart", "~> 1.0"
-  spec.add_dependency "enumerate_it", "~> 3.2"
+  spec.add_dependency "enumerate_it", "~> 1.7.0"
 
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "rubocop", "~> 1.5"
