@@ -9,25 +9,16 @@ RSpec.describe Superset::Dashboard::Put do
       "positions" => { "key2" => "value2" }
     }.to_json 
   }}
-
-  let(:new_dashboard_id) { 2 }
-  let(:new_dashboard_instance) { instance_double("Superset::Dashboard::Get") }
+  let(:response) { { "result" => { "id" => 2, "last_modified_time" => 1708484547.0 } } }
 
   before do
-    allow(subject).to receive(:response).and_return( { "result" => 
-      {"id"=>new_dashboard_id, "last_modified_time"=>1708484547.0} }
-    )
+    allow(subject).to receive(:response).and_return(response)
   end
 
   describe 'perform' do
     context 'with valid params' do
-      before do
-        allow(Superset::Dashboard::Get).to receive(:new).with(new_dashboard_id).and_return(new_dashboard_instance)
-        allow(new_dashboard_instance).to receive(:perform).and_return(new_dashboard_instance)
-      end
-
-      it 'returns the new dashboard object' do
-        expect(subject.perform).to be new_dashboard_instance
+      it 'returns response' do
+        expect(subject.perform).to eq(response)
       end
     end
 

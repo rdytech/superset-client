@@ -133,7 +133,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
       context 'completes duplicate process' do
         context 'and returns the new dashboard details' do
           specify do
-            expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" }) 
+            expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false})
           end
         end
 
@@ -187,7 +187,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
             expect(Superset::Dashboard::Embedded::Put).to_not receive(:new)
           end
 
-          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" }) }
+          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
         end
 
         context 'are not empty' do
@@ -197,13 +197,13 @@ RSpec.describe Superset::Services::DuplicateDashboard do
             expect(Superset::Dashboard::Embedded::Put).to receive(:new).with(dashboard_id: new_dashboard_id, allowed_domains: allowed_domains).and_return(double(result: { allowed_domains: allowed_domains }))
           end
 
-          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" }) }
+          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
         end
       end
 
       context 'and tags' do
         context 'are empty' do
-          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" }) }
+          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
         end
 
         context 'are not empty' do
@@ -213,10 +213,47 @@ RSpec.describe Superset::Services::DuplicateDashboard do
             expect(Superset::Tag::AddToObject).to receive(:new).with(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard_id, tags: tags).and_return(double(perform: true))
           end
 
-          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2" }) }
+          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
         end
       end
 
+      context 'and publish attr is' do
+        context 'excluded from params' do
+          before do
+            expect(Superset::Dashboard::Put).to_not receive(:new).with(
+              target_dashboard_id: new_dashboard_id,
+              params: { published: false })
+          end
+
+          specify 'defaults to false' do
+            expect(subject.perform).to eq( {
+              new_dashboard_id: 2,
+              new_dashboard_url: "http://superset-host.com/superset/dashboard/2",
+              published: false
+            })
+          end
+        end
+
+        context 'included in params as true' do
+          subject { described_class.new(
+              source_dashboard_id: source_dashboard_id,
+              target_schema:       target_schema,
+              target_database_id:  target_database_id,
+              publish:           true ) }
+
+          before do
+            expect(Superset::Dashboard::Put).to receive(:new).with(
+              target_dashboard_id: new_dashboard_id,
+              params: { published: true }).and_return(double(perform: true))
+          end
+
+          specify { expect(subject.perform).to eq( {
+            new_dashboard_id: 2,
+            new_dashboard_url: "http://superset-host.com/superset/dashboard/2",
+            published: true
+            }) }
+        end
+      end
     end
 
     context 'with invalid params' do

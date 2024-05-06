@@ -6,6 +6,7 @@
 #   2 or do not have any charts or filters linked to them
 #  ( not sure if this needed at this point )
 
+# NOTE: deletes the Dashboard Only. Use Dashboard::BulkDeleteCascade to delete all related objects
 module Superset
   module Dashboard
     class BulkDelete < Superset::Request
