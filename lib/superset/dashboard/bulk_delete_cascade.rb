@@ -17,7 +17,6 @@ module Superset
       def perform
         raise InvalidParameterError, "dashboard_ids array of integers expected" unless dashboard_ids.is_a?(Array)
         raise InvalidParameterError, "dashboard_ids array must contain Integer only values" unless dashboard_ids.all? { |item| item.is_a?(Integer) }
-        # TODO check if dashboard_ids are valid
 
         dashboard_ids.sort.each do |dashboard_id|
           logger.info("Dashboard Id: #{dashboard_id.to_s} Attempting CASCADE delete of dashboard, charts, datasets")
