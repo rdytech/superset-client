@@ -2,6 +2,7 @@
 
 # WARNING: DESTRUCTIVE OPERATION .. use with caution
 # This class is used to delete multiple dashboards and all related charts and datasets.
+# There are NO CHECKS currently to confirm if a dataset is used on other dashboards.
 
 module Superset
   module Dashboard
@@ -11,7 +12,7 @@ module Superset
       attr_reader :dashboard_ids
 
       def initialize(dashboard_ids: [])
-        @dashboard_ids = dashboard_ids # delete sequentially
+        @dashboard_ids = dashboard_ids
       end
 
       def perform
