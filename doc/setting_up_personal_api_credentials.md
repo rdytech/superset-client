@@ -14,6 +14,9 @@ ENV['SUPERSET_API_USERNAME']="your-username"
 ENV['SUPERSET_API_PASSWORD']="your-password"
 ```
 
+If you have multiple superset hosts across various environments you also have the option
+to create individual env files per environment.  More details below.
+
 ## What is my user name?
 
 If your Superset instance is setup to authenicate via SSO then your authenticating agent will most likely have provided a username for you in the form of a UUID value.
@@ -57,6 +60,59 @@ Edit the params to only consist of only the password field and the value of your
 
 And click Execute.
 
-Create your `.env`
-Add your username and password to the `.env` file.
+Within your `.env` now add your username and password.
+
+# Accessing API across Multiple Environments
+
+Given some local development requirements where you have to access multiple superset hosts across various environments with different credentials you can setup the env creds as follows.
+
+Just set the overall superset environment in `.env`
+
+```
+# .env file holding one setting for the overall superset environment
+SUPERSET_ENVIRONMENT='staging'
+```
+
+Then create a new file called `.env-staging` that holds your superset staging host and credentials.
+
+```
+# specific settings for the superset staging host
+SUPERSET_HOST="https://your-staging-superset-host.com"
+SUPERSET_API_USERNAME="staging-user-here"
+SUPERSET_API_PASSWORD="set-password-here"
+```
+
+Do the same for production env.  
+Create a new file called `.env-production` that holds your superset production host and credentials.
+
+```
+# specific settings for the superset production host
+SUPERSET_HOST="https://your-production-superset-host.com"
+SUPERSET_API_USERNAME="production-user-here"
+SUPERSET_API_PASSWORD="set-password-here"
+```
+
+The command `bin/console` will then load your env file depending on the value in ENV['SUPERSET_ENVIRONMENT'] from the primary `.env`.
+
+When you need to switch envs, exit the console, edit the .env to your desired value, eg `production`, then open a console again.
+
+Bonus is the Pry prompt will now also include the `SUPERSET_ENVIRONMENT` value.
+
+```
+bin/console
+ENV configuration loaded from from .env-staging
+[1] (ENV:STAGING)> Superset::Dashboard::List.new(title_contains: 'video').list
+
+Happi: GET https://your-staging-superset-host.com/api/v1/dashboard/?q=(filters:!((col:dashboard_title,opr:ct,value:'video')),page:0,page_size:100), {}
++----+------------------+-----------+------------------------------------------------------------------+
+|                                      Superset::Dashboard::List                                       |
++----+------------------+-----------+------------------------------------------------------------------+
+| Id | Dashboard title  | Status    | Url                                                              |
++----+------------------+-----------+------------------------------------------------------------------+
+| 6  | Video Game Sales | published | https://staging.ready-superset.jobready.io/superset/dashboard/6/ |
++----+------------------+-----------+------------------------------------------------------------------+
+```
+
+
+
 

@@ -13,7 +13,7 @@
 superset-*.gem
 
 # ignore local .env variables
-.env
+.env*
 
 # ignore local log file
 log/superset-client.log
