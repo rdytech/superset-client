@@ -17,7 +17,6 @@ module Superset
         raise "Error: params hash is required" unless params.present? && params.is_a?(Hash)
 
         response
-        Superset::Dashboard::Get.new(id).perform
       end
 
       def response

@@ -7,14 +7,15 @@ module Superset
   module Services
     class DuplicateDashboard < Superset::Request
 
-      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :allowed_domains, :tags
+      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :allowed_domains, :tags, :publish
 
-      def initialize(source_dashboard_id:, target_schema:, target_database_id: , allowed_domains: [], tags: [])
+      def initialize(source_dashboard_id:, target_schema:, target_database_id: , allowed_domains: [], tags: [], publish: false)
         @source_dashboard_id = source_dashboard_id
         @target_schema = target_schema
         @target_database_id = target_database_id
         @allowed_domains = allowed_domains
         @tags = tags
+        @publish = publish
       end
 
       def perform
@@ -43,10 +44,12 @@ module Superset
 
         add_tags_to_new_dashboard
 
+        publish_dashboard if publish
+
         end_log_message
 
         # return the new dashboard id and url
-        { new_dashboard_id: new_dashboard.id, new_dashboard_url: new_dashboard.url }
+        { new_dashboard_id: new_dashboard.id, new_dashboard_url: new_dashboard.url, published: publish }
 
       rescue => e
         logger.error("#{e.message}")
@@ -151,6 +154,10 @@ module Superset
       def update_source_dashboard_json_metadata
         logger.info "  Updated new Dashboard json_metadata charts with new dataset ids"
         Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => @new_dashboard_json_metadata_configuration.to_json }).perform
+      end
+
+      def publish_dashboard
+        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { published: publish } ).perform
       end
 
       def new_dashboard
