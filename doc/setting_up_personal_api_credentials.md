@@ -109,7 +109,7 @@ Happi: GET https://your-staging-superset-host.com/api/v1/dashboard/?q=(filters:!
 +----+------------------+-----------+------------------------------------------------------------------+
 | Id | Dashboard title  | Status    | Url                                                              |
 +----+------------------+-----------+------------------------------------------------------------------+
-| 6  | Video Game Sales | published | https://staging.ready-superset.jobready.io/superset/dashboard/6/ |
+| 6  | Video Game Sales | published | https://your-staging-superset-host.com/superset/dashboard/6/ |
 +----+------------------+-----------+------------------------------------------------------------------+
 ```
 
