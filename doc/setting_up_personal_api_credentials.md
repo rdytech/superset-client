@@ -9,9 +9,9 @@ Create your own .env file with
 
 Adjust .env as required.
 ```
-ENV['SUPERSET_HOST'] = "https://your-superset-host.com"
-ENV['SUPERSET_API_USERNAME']="your-username"
-ENV['SUPERSET_API_PASSWORD']="your-password"
+SUPERSET_HOST="https://your-superset-host.com"
+SUPERSET_API_USERNAME="your-username"
+SUPERSET_API_PASSWORD="your-password"
 ```
 
 If you have multiple superset hosts across various environments you also have the option
