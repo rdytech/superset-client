@@ -18,4 +18,35 @@ Dir["./lib/**/*.rb"].each { |f| require f }
 
 require "pry"
 
+# if accessing multiple supeset host environments regularly you can optionally
+# setup multiple env files, see ./doc/setting_up_personal_api_credentials.md for more info
+if ENV['SUPERSET_ENVIRONMENT']
+  env_file = ".env-#{ENV['SUPERSET_ENVIRONMENT']}"
+  if File.exist?(env_file)
+    Dotenv.overload(env_file)
+    puts "ENV configuration loaded from from #{env_file}"
+  else
+    puts "Environment file #{env_file} not found"
+    exit
+  end
+end
+
+
+# Add the SUPERSET_ENVIRONMENT to the PRY prompt if it exists
+if ENV['SUPERSET_ENVIRONMENT']
+  Pry.config.prompt = Pry::Prompt.new('custom', 'Custom Pry prompt with suffix', [proc do |target_self, nest_level, pry|
+    "[#{pry.input_ring.size}] (#{":#{nest_level}" unless nest_level.zero?}ENV:#{ENV['SUPERSET_ENVIRONMENT'].upcase})> "
+  end,
+  proc do |target_self, nest_level, pry|
+    "[#{pry.input_ring.size}] (#{":#{nest_level}" unless nest_level.zero?}ENV:#{ENV['SUPERSET_ENVIRONMENT'].upcase})* "
+  end])
+end
+
+unless ENV['SUPERSET_HOST'] && ENV['SUPERSET_API_USERNAME'] && ENV['SUPERSET_API_PASSWORD']
+  puts "Missing environment variables.  Check your .env file"
+  puts "Please set each value for SUPERSET_HOST, SUPERSET_API_USERNAME, and SUPERSET_API_PASSWORD values"
+  puts "Refer to ./doc/setting_up_personal_api_credentials.md for more info"
+  exit
+end
+
 Pry.start(__FILE__)

@@ -108,8 +108,5 @@ RSpec.describe Superset::Dashboard::List do
           "),page:3,page_size:100")
       end
     end
-
-
   end
-
 end

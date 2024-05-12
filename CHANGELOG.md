@@ -1,5 +1,18 @@
 ## Change Log
 
+## 0.1.5 - 2024-05-10
+
+* add multi config for multi env creds https://github.com/rdytech/superset-client/pull/22
+* add endpoint for sqllab/execute https://github.com/rdytech/superset-client/pull/22
+* add endpoint for database/list https://github.com/rdytech/superset-client/pull/22
+* add delete cascade endpoint by @jbat in https://github.com/rdytech/superset-client/pull/21
+
+## 0.1.4 - 2024-05-01
+
+* Filter dashboards by array of tags by @jbat in https://github.com/rdytech/superset-client/pull/20
+* adds endpoints for Delete of dashboards, charts, datasets @jbat in https://github.com/rdytech/superset-client/pull/20
+* adds endpoints for BulkDelete of dashboards, charts, datasets @jbat in https://github.com/rdytech/superset-client/pull/20
+
 ## 0.1.3 - 2024-04-23
 
 * duplicate dashboard should also create embedded setting by @jbat in https://github.com/rdytech/superset-client/pull/14
