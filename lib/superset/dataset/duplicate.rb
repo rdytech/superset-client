@@ -40,7 +40,6 @@ module Superset
       end
 
       # The API demands that the new_dataset_name be uniq within the schema it points to.
-      # TODO: ... needs to scope this call by database as well
       def new_dataset_name_already_in_use?
         Dataset::List.new(title_equals: new_dataset_name, schema_equals: source_dataset.schema).result.any?
       end
