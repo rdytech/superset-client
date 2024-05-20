@@ -3,12 +3,13 @@ module Superset
     class Execute < Superset::Request
       class InvalidParameterError < StandardError; end
 
-      attr_reader :database_id, :query, :schema
+      attr_reader :database_id, :query, :schema, :query_limit
 
-      def initialize(database_id: , query: , schema: 'public')
+      def initialize(database_id: , query: , schema: 'public', query_limit: 1000)
         @database_id = database_id
         @query = query
         @schema = schema
+        @query_limit = query_limit
       end
 
       def perform
@@ -36,7 +37,7 @@ module Superset
           database_id: database_id,
           sql:         query,
           schema:      schema,
-          queryLimit:  1000,
+          queryLimit:  query_limit,
           runAsync: false,
         }
       end

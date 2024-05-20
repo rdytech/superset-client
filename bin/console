@@ -49,4 +49,10 @@ unless ENV['SUPERSET_HOST'] && ENV['SUPERSET_API_USERNAME'] && ENV['SUPERSET_API
   exit
 end
 
+puts "\n  >>> Welcome to the Superset Ruby API Client <<< \n\n"
+puts "Your accessible Superset Database connections are: Superset::Database::List.call"
+
+Superset::Database::List.call
+
 Pry.start(__FILE__)
+

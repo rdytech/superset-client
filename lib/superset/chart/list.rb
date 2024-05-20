@@ -39,7 +39,7 @@ module Superset
         # TODO filtering across all classes needs a refactor to support multiple options in a more flexible way
         filter_set = []
         filter_set << "(col:slice_name,opr:ct,value:'#{name_contains}')" if name_contains.present?
-        filter_set << "(col:dashboards,opr:rel_m_m,value:#{dashboard_id_eq})" if dashboard_id_eq.present?
+        filter_set << "(col:dashboards,opr:rel_m_m,value:#{dashboard_id_eq})" if dashboard_id_eq.present? # rel many to many
         filter_set << "(col:datasource_id,opr:eq,value:#{dataset_id_eq})" if dataset_id_eq.present?
 
         unless filter_set.empty?
