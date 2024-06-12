@@ -1,11 +1,14 @@
 # API Credentials
 
-Superset API Credentials are essentially the username and password of the Superset host users account.
+Superset API Credentials are essentially the username, password and host of the Superset host users account.
 
-If you know these already, plug them and your host value into the `.env` and it should all just work.  A sample env.sample is provided as a template. 
+If you know these already, plug them and your host value into the `.env` and it should all just work.  A sample env.sample is provided as a template.
 
-Create your own .env file with  
-`cp env.sample .env`
+Create your own .env file with
+
+```
+cp env.sample .env
+```
 
 Adjust .env as required.
 ```
@@ -17,6 +20,8 @@ SUPERSET_API_PASSWORD="your-password"
 If you have multiple superset hosts across various environments you also have the option
 to create individual env files per environment.  More details below.
 
+Starting a ruby console with `bin/console` will auto load the env vars.
+
 ## What is my user name?
 
 If your Superset instance is setup to authenicate via SSO then your authenticating agent will most likely have provided a username for you in the form of a UUID value.
@@ -25,7 +30,9 @@ This is easily retrieved on you User Profile page in Superset.
 
 Optionally use jinja template macro in sql lab.
 
-`select ' {{ current_username() }}' as user_id;`
+```
+select '{{ current_username() }}' as current_username;
+```
 
 ## Creating / Updating your password via Swagger interface
 
@@ -38,7 +45,9 @@ Firstly you will need your superset user id, which is the superset users table P
 It appears this user id value is not exposed on the Users profile page in Superset. Depending on your level of access within your Superset instance you could:
 - access the Users List page, find your user, and mouse over the edit button to reveal the Url and user id param value.  
 - got to sql lab and use a jinja template predefined macro to retrieve your users id.
-`select ' {{ current_user_id() }}' as user_id;`
+```
+select '{{ current_user_id() }}' as current_user_id;
+```
 - ask your superset admin to tell you what your personal superset user id is.
 
 Once you have your user id value, open the Swagger API page on you superset host.  
