@@ -7,7 +7,7 @@ module Superset
 
       attr_reader :source_dataset_id, :new_dataset_name
 
-      def initialize(source_dataset_id: :source_dataset_id, new_dataset_name: :new_dataset_name)
+      def initialize(source_dataset_id: , new_dataset_name: )
         @source_dataset_id = source_dataset_id
         @new_dataset_name = new_dataset_name
       end

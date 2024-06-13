@@ -4,7 +4,7 @@ module Superset
 
       attr_reader :source_dataset_id, :target_database_id, :target_schema, :remove_copy_suffix
 
-      def initialize(source_dataset_id: :source_dataset_id, target_database_id: :target_database_id, target_schema: :target_schema, remove_copy_suffix: false)
+      def initialize(source_dataset_id: , target_database_id: , target_schema: , remove_copy_suffix: false)
         @source_dataset_id = source_dataset_id
         @target_database_id = target_database_id
         @target_schema = target_schema
