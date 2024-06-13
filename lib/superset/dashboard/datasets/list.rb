@@ -1,5 +1,7 @@
 # WARNING: Does not take into account datasets with queries that have embedded schema references.
-# ie " select * from schema1.table join schema2.table" for a dataset query will not only return the config schema setting not the sql schema reference.
+# ie " select * from schema1.table join schema2.table" for a dataset query will ONLY return the datasets config schema setting not the sql query schema references which refers to 2 distinct schemas.
+#
+# WARNING: Does not return Filter Datasets for the dashboard
 
 module Superset
   module Dashboard

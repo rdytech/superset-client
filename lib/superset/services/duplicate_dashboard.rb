@@ -1,6 +1,8 @@
-# Assumptions
+# Data Sovereignty validations are enforced, ie confirming
+# - all charts datasets on the source dashboard are pointing to the same database schema
+# - all filter datasets on the source dashboard are pointing to the same database schema as the charts
+
 # - The source dashboard is in the same Superset instance as the target database and target schema
-# - All charts datasets on the source dashboard are pointing to the same database schema
 
 
 module Superset
@@ -225,6 +227,7 @@ module Superset
         source_dashboard_schemas.count > 1
       end
 
+      # Data Sovereignty rules expect only 1 value here, and raise a validation error if there is > 1
       def source_dashboard_schemas
         source_dashboard_datasets.map { |dataset| dataset[:schema] }.uniq
       end
@@ -259,10 +262,20 @@ module Superset
         filters_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact
       end
 
-      # identify any filters dataset that is not part of the dashboard charts datasets
-      # unpermitted meaning we only allow filters to be sourced from the dashboard datasets
+      # Primary Assumption is that all charts datasets on the source dashboard are pointing to the same database schema
+      # An unpermitted filter will have a dataset that is pulling data from a datasource that is
+      # different to the dashboard charts database schema
       def unpermitted_filter_dataset_ids
-        source_dashboard_filter_dataset_ids - source_dashboard_dataset_ids
+        @unpermitted_filter_dataset_ids ||= begin
+          filter_datasets_not_used_in_charts = source_dashboard_filter_dataset_ids - source_dashboard_dataset_ids
+
+          # retrieve any filter_datasets_not_used_in_charts that do not match the source_dashboard_schema
+          filter_datasets_not_used_in_charts.map do |filter_dataset|
+            filter_dataset_schema = Superset::Dataset::Get.new(filter_dataset).schema
+            # return any filter datasets not used in charts that are from a different schema
+            {  filter_dataset_id: filter_dataset, filter_schema: filter_dataset_schema  } if [filter_dataset_schema] != source_dashboard_schemas
+          end.compact
+        end
       end
 
       def logger
