@@ -197,7 +197,7 @@ module Superset
         # schema validations
         raise ValidationError, "Schema #{target_schema} does not exist in target database: #{target_database_id}" unless target_database_available_schemas.include?(target_schema)
         raise ValidationError, "The source dashboard datasets are required to point to one schema only. Actual schema list is #{source_dashboard_schemas.join(',')}" if source_dashboard_has_more_than_one_schema?
-        raise ValidationError, "One or more source dashboard filters point to a different dataset than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s}" if unpermitted_filter_dataset_ids.any?
+        raise ValidationError, "One or more source dashboard filters point to a different schema than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s}" if unpermitted_filter_dataset_ids.any?
 
         # new dataset validations
         raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
