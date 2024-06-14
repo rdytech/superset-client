@@ -48,7 +48,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
   let(:existing_target_datasets_list) {[]}
 
   # initial json metadata settings will be copied to the new dashboard and requires updating
-  let(:json_metadata_initial_settings) do 
+  let(:json_metadata_initial_settings) do
     {
       "chart_configuration"=>
         { "#{source_chart_1}"=>{"id"=>source_chart_1, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[source_chart_2]}},
@@ -70,7 +70,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
   end
 
   # expected json metadata settings after the new dashboard is created and json is updated
-  let(:json_metadata_updated_settings) do 
+  let(:json_metadata_updated_settings) do
     {
       "chart_configuration"=>
         { "#{new_chart_1}"=>{"id"=>new_chart_1, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[new_chart_2]}},
@@ -141,7 +141,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
           context 'with stardard json metadata ids' do
             specify do
               expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_initial_settings)
-              subject.perform 
+              subject.perform
               expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_updated_settings)
             end
           end
@@ -149,7 +149,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
           context 'with non stardard json metadata ids to confirm gsub' do
             let(:source_chart_1) { 11 }
             let(:source_chart_2) { 1111 }
-            let(:json_metadata_initial_settings) do 
+            let(:json_metadata_initial_settings) do
               {
                 "chart_configuration"=>
                   { "#{source_chart_1}"=>{"id"=>source_chart_1, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[source_chart_2]}} ,
@@ -161,7 +161,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
 
             let(:new_chart_1) { 222 }
             let(:new_chart_2) { 22222 }
-            let!(:json_metadata_updated_settings) do 
+            let!(:json_metadata_updated_settings) do
               {
                 "chart_configuration"=>
                   { "#{new_chart_1}"=>{"id"=>new_chart_1, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[new_chart_2]}} ,
@@ -173,12 +173,11 @@ RSpec.describe Superset::Services::DuplicateDashboard do
 
             specify do
               expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_initial_settings)
-              subject.perform 
+              subject.perform
               expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_updated_settings)
             end
           end
         end
-        
       end
 
       context 'and embedded domains' do
@@ -289,12 +288,41 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         end
       end
 
-      context 'filters set is outside source schema' do
+      context 'one filters dataset schema not matching the source dashboards schema' do
         let(:target_schema) { 'schema_two' }
-        let(:source_dashboard_filter_dataset_ids) { [101, 202] }
+        let(:invalid_filter_dataset_id) { 404 }
+        let(:invalid_filter_dataset_schema) { 'schema_four' }
+        let(:source_dashboard_filter_dataset_ids) { [101, invalid_filter_dataset_id] }
 
         specify do
-          expect { subject.perform }.to raise_error(Superset::Request::ValidationError, "One or more source dashboard filters point to a different dataset than the dashboard charts. Identified Unpermittied Filter Dataset Ids are [202]")
+          # additional filter checks for validations on unpermitted_filter_dataset_ids
+          expect(Superset::Dataset::Get).to receive(:new).with(invalid_filter_dataset_id).and_return(double(schema: invalid_filter_dataset_schema))
+
+          expect { subject.perform }.to raise_error(Superset::Request::ValidationError,
+            "One or more source dashboard filters point to a different schema than the dashboard charts. " \
+            "Identified Unpermittied Filter Dataset Ids are " \
+            "[{:filter_dataset_id=>#{invalid_filter_dataset_id}, :filter_schema=>\"#{invalid_filter_dataset_schema}\"}]")
+        end
+      end
+
+      context 'more than one filters dataset schema not matching the source dashboards schema' do
+        let(:target_schema) { 'schema_two' }
+        let(:invalid_filter_dataset_id) { 404 }
+        let(:invalid_filter_dataset_schema) { 'schema_four' }
+        let(:invalid_filter_dataset_id_2) { 505 }
+        let(:invalid_filter_dataset_schema_2) { 'schema_five' }
+        let(:source_dashboard_filter_dataset_ids) { [101, invalid_filter_dataset_id, invalid_filter_dataset_id_2] }
+
+        specify do
+          # additional filter checks for validations on unpermitted_filter_dataset_ids
+          expect(Superset::Dataset::Get).to receive(:new).with(invalid_filter_dataset_id).and_return(double(schema: invalid_filter_dataset_schema))
+          expect(Superset::Dataset::Get).to receive(:new).with(invalid_filter_dataset_id_2).and_return(double(schema: invalid_filter_dataset_schema_2))
+
+          expect { subject.perform }.to raise_error(Superset::Request::ValidationError,
+            "One or more source dashboard filters point to a different schema than the dashboard charts. " \
+            "Identified Unpermittied Filter Dataset Ids are " \
+            "[{:filter_dataset_id=>#{invalid_filter_dataset_id}, :filter_schema=>\"#{invalid_filter_dataset_schema}\"}, " \
+            "{:filter_dataset_id=>#{invalid_filter_dataset_id_2}, :filter_schema=>\"#{invalid_filter_dataset_schema_2}\"}]")
         end
       end
 
@@ -311,7 +339,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
       context 'target schema already has matching dataset names' do
         let(:existing_target_datasets_list) {[ 'Dataset 1 (COPY)', 'Dataset 2 (COPY)' ]}
         specify do
-          expect { subject.perform }.to raise_error(Superset::Request::ValidationError, 
+          expect { subject.perform }.to raise_error(Superset::Request::ValidationError,
             "DATASET NAME CONFLICT: The Target Schema schema_two already has existing datasets named: Dataset 1 (COPY),Dataset 2 (COPY)")
         end
       end
