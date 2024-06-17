@@ -3,7 +3,7 @@ module Superset
     alias result response
 
     attr_reader :route
-    
+
     def initialize(route:)
       @route = route
     end

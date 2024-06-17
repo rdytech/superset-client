@@ -46,7 +46,7 @@ module Superset
 
       def logger
         @logger ||= Superset::Logger.new
-      end 
+      end
     end
   end
 end

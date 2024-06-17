@@ -49,6 +49,23 @@ unless ENV['SUPERSET_HOST'] && ENV['SUPERSET_API_USERNAME'] && ENV['SUPERSET_API
   exit
 end
 
+def list_classes(namespace)
+  namespace.constants.each_with_object([]) do |constant, classes|
+    const_value = namespace.const_get(constant)
+    if const_value.is_a?(Class)
+      classes << const_value
+    elsif const_value.is_a?(Module)
+      classes.concat(list_classes(const_value))
+    end
+  end
+end
+
+# general help to list all superset classes
+def superset_class_list
+  puts " ---- Listing Superset Classes ----- "
+  list_classes(Superset)
+end
+
 puts "\n  >>> Welcome to the Superset Ruby API Client <<< \n\n"
 puts "Your accessible Superset Database connections are: Superset::Database::List.call"
 
