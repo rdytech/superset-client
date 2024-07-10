@@ -35,6 +35,10 @@ module Superset
           end
         end
 
+        def dataset_names
+          result.map {|d| d[:datasource_name] }.uniq
+        end
+
         def datasets_details
           result.map do |details|
             details.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => details['database'].slice('id', 'name', 'backend')).with_indifferent_access
