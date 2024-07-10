@@ -10,6 +10,10 @@ module Superset
 
       def perform
         validate_dashboard_id
+        response
+      end
+
+      def response
         dataset_details = fetch_dataset_details(dashboard_id)
         dataset_details.each do |dataset|
           begin
@@ -18,7 +22,6 @@ module Superset
             Rollbar.error(e.message)
           end 
         end
-        return "Dashboard warmed up" 
       end
 
       def validate_dashboard_id
