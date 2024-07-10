@@ -1,27 +1,25 @@
 module Superset
   module Dataset
     class WarmUpCache < Superset::Request
-      attr_reader :db_name
 
-      def initialize(db_name:)
-        @db_name = db_name
+      attr_reader :dashboard_id
+      
+      def initialize(dashboard_id:)
+        @dashboard_id = dashboard_id
       end
 
       def perform
-        dashboard_ids = fetch_dashboard_ids
-        dashboard_ids.each do |dashboard_id|
-          dataset_names = fetch_dataset_names(dashboard_id)
-          dataset_names.each do |dataset_name|
-            begin
-              client.put(route, params(dataset_name, dashboard_id))
-            rescue => e
-              Rollbar.error(e.message)
-            end 
-          end
-        end    
+        dataset_details = fetch_dataset_details(dashboard_id)
+        dataset_details.each do |dataset|
+          begin
+            client.put(route, params(dashboard_id, dataset["datasource_name"], dataset["name"]))
+          rescue => e
+            Rollbar.error(e.message)
+          end 
+        end  
       end
 
-      def params(dataset_name, dashboard_id)
+      def params(dashboard_id, dataset_name, db_name)
         {
           "dashboard_id" => dashboard_id,
           "table_name" => dataset_name,
@@ -29,12 +27,8 @@ module Superset
         }
       end
 
-      def fetch_dashboard_ids
-        Superset::Dashboard::List.new(tags_equal: ['embedded', 'product:jobready']).ids
-      end
-
-      def fetch_dataset_names(dashboard_id)
-        Superset::Dashboard::Datasets::List.new(dashboard_id).dataset_names
+      def fetch_dataset_details(dashboard_id)
+        Superset::Dashboard::Datasets::List.new(dashboard_id).datasets_details.map { |dataset| dataset['database'].slice('name').merge(dataset.slice('datasource_name'))}
       end
 
       private
