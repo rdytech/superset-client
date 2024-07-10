@@ -9,6 +9,7 @@ module Superset
       end
 
       def perform
+        validate_dashboard_id
         dataset_details = fetch_dataset_details(dashboard_id)
         dataset_details.each do |dataset|
           begin
@@ -16,7 +17,12 @@ module Superset
           rescue => e
             Rollbar.error(e.message)
           end 
-        end  
+        end
+        return "Dashboard warmed up" 
+      end
+
+      def validate_dashboard_id
+        raise InvalidParameterError, "dashboard_id must be present and must be an integer" unless dashboard_id.present? && dashboard_id.is_a?(Integer)
       end
 
       def params(dashboard_id, dataset_name, db_name)
