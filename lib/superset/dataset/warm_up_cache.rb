@@ -20,7 +20,7 @@ module Superset
             logger.info("Hitting #{route} for warming up the cache for the dashboard #{dashboard_id.to_s} and for the dataset #{dataset["datasource_name"]}")
             api_response(dataset["datasource_name"], dataset["name"])
           rescue => e
-            Rollbar.error("Warm up cache failed for the dashboard #{dashboard_id.to_s} and for the dataset #{dataset["datasource_name"]} - #{e.message}")
+            Rollbar.error("Warm up cache failed for the dashboard #{dashboard_id.to_s} and for the dataset #{dataset["datasource_name"]} - #{e}")
           end 
         end
       end
