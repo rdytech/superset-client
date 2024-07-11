@@ -25,8 +25,8 @@ module Superset
         end
       end
 
-      def api_response(dataset_name, database_name)
-        client.put(route, params(dashboard_id, dataset_name, database_name))
+      def api_response(dataset_name, db_name)
+        client.put(route, params(dashboard_id, dataset_name, db_name))
       end
 
       def params(dashboard_id, dataset_name, db_name)

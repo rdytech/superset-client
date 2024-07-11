@@ -38,8 +38,8 @@ RSpec.describe Superset::Dataset::WarmUpCache do
     context 'when dashboard has multiple datasets' do
 			let(:dataset_details) do
 				[
-					{"database"=>"client database 1", "datasource_name"=>"datasource 101"},
-					{"database"=>"client database 2", "datasource_name"=>"datasource 102"},
+					{"name"=>"client database 1", "datasource_name"=>"datasource 101"},
+					{"name"=>"client database 2", "datasource_name"=>"datasource 102"},
 			 	]
 			end
 			let(:api_response) { "Dataset warmed up" }
