@@ -17,15 +17,16 @@ module Superset
         dataset_details = fetch_dataset_details(dashboard_id)
         dataset_details.each do |dataset|
           begin
-            client.put(route, params(dashboard_id, dataset["datasource_name"], dataset["name"]))
+            logger.info("Hitting #{route} for warming up the cache for the dashboard #{dashboard_id.to_s} and for the dataset #{dataset["datasource_name"]}")
+            api_response(dataset["datasource_name"], dataset["name"])
           rescue => e
-            Rollbar.error(e.message)
+            Rollbar.error("Warm up cache failed for the dashboard #{dashboard_id.to_s} and for the dataset #{dataset["datasource_name"]} - #{e.message}")
           end 
         end
       end
 
-      def validate_dashboard_id
-        raise InvalidParameterError, "dashboard_id must be present and must be an integer" unless dashboard_id.present? && dashboard_id.is_a?(Integer)
+      def api_response(dataset_name, database_name)
+        client.put(route, params(dashboard_id, dataset_name, database_name))
       end
 
       def params(dashboard_id, dataset_name, db_name)
@@ -36,14 +37,22 @@ module Superset
         }
       end
 
+      private
+      
+      def validate_dashboard_id
+        raise InvalidParameterError, "dashboard_id must be present and must be an integer" unless dashboard_id.present? && dashboard_id.is_a?(Integer)
+      end
+
       def fetch_dataset_details(dashboard_id)
         Superset::Dashboard::Datasets::List.new(dashboard_id).datasets_details.map { |dataset| dataset['database'].slice('name').merge(dataset.slice('datasource_name'))}
       end
 
-      private
-
       def route
         "dataset/warm_up_cache"
+      end
+
+      def logger
+        @logger ||= Superset::Logger.new
       end
     end
   end
