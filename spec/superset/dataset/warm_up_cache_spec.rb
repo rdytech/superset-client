@@ -3,10 +3,10 @@ require 'spec_helper'
 RSpec.describe Superset::Dataset::WarmUpCache do
   subject { described_class.new(dashboard_id: dashboard_id) }
   let(:dashboard_id) { 1 }
-  let(:response) { nil }
 
   describe '.perform' do
 		context "Dataset count is not considered" do
+			let(:response) { nil }
 			before do
 				allow(subject).to receive(:response).and_return(response)
 			end
@@ -44,7 +44,7 @@ RSpec.describe Superset::Dataset::WarmUpCache do
 			end
 			let(:api_response) { "Dataset warmed up" }
 			before do
-				allow(subject).to receive(:fetch_dataset_details).with(1) { dataset_details } 
+				allow(subject).to receive(:fetch_dataset_details).with(dashboard_id) { dataset_details } 
 				allow(subject).to receive(:api_response).and_return(api_response)
 			end
 			it 'warms up both the dataset' do
