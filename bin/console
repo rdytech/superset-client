@@ -11,6 +11,7 @@ require "terminal-table"
 require "yaml"
 require "enumerate_it"
 require "superset"
+require "rollbar"
 
 Dir["./lib/**/*.rb"].each { |f| require f }
 # You can add fixtures and/or initialization code here to make experimenting

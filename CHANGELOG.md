@@ -1,5 +1,9 @@
 ## Change Log
 
+## 0.1.6 - 2024-07-10
+
+* added a class **WarmUpCache** to hit the 'api/v1/dataset/warm_up_cache' endpoint to warm up the cache of all the datasets for a particular dashaboard being passed to the class - https://github.com/rdytech/superset-client/pull/28
+
 ## 0.1.5 - 2024-05-10
 
 * add multi config for multi env creds https://github.com/rdytech/superset-client/pull/22
