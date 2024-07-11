@@ -47,9 +47,9 @@ RSpec.describe Superset::Dataset::WarmUpCache do
 				allow(subject).to receive(:fetch_dataset_details).with(dashboard_id) { dataset_details } 
 				allow(subject).to receive(:api_response).and_return(api_response)
 			end
-			it 'warms up both the dataset' do
+			it 'warms up all the datasets' do
 				subject.response
-				expect(subject).to have_received(:api_response).twice
+				expect(subject).to have_received(:api_response).exactly(dataset_details.count).times
 			end
     end
   end
