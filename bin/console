@@ -45,7 +45,7 @@ end
 
 unless ENV['SUPERSET_HOST'] && ENV['SUPERSET_API_USERNAME'] && ENV['SUPERSET_API_PASSWORD']
   puts "Missing environment variables.  Check your .env file"
-  puts "Please set each value for SUPERSET_HOST, SUPERSET_API_USERNAME, and SUPERSET_API_PASSWORD values"
+  puts "All env vars are required for SUPERSET_HOST, SUPERSET_API_USERNAME, and SUPERSET_API_PASSWORD values"
   puts "Refer to ./doc/setting_up_personal_api_credentials.md for more info"
   exit
 end
@@ -63,11 +63,13 @@ end
 
 # general help to list all superset classes
 def superset_class_list
-  puts " ---- Listing Superset Classes ----- "
+  puts " ---- Listing Superset ruby client API Classes ----- "
   list_classes(Superset)
 end
+alias :sshelp :superset_class_list
 
 puts "\n  >>> Welcome to the Superset Ruby API Client <<< \n\n"
+puts "\n  >>> list all available classes with 'sshelp' <<< \n\n"
 puts "Your accessible Superset Database connections are: Superset::Database::List.call"
 
 Superset::Database::List.call

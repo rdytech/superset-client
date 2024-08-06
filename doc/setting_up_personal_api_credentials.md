@@ -26,17 +26,19 @@ Starting a ruby console with `bin/console` will auto load the env vars.
 
 If your Superset instance is setup to authenicate via SSO then your authenticating agent will most likely have provided a username for you in the form of a UUID value.
 
-This is easily retrieved on you User Profile page in Superset.
+This is easily retrieved on your user profile page in Superset.
 
-Optionally use jinja template macro in sql lab.
+Optionally use the jinja template macro in sql lab.
 
 ```
 select '{{ current_username() }}' as current_username;
 ```
 
+Then plug your username in to the .env file.
+
 ## Creating / Updating your password via Swagger interface
 
-A common setup is to use SSO to enable user access in Superset.  This would mean your authenticating agent is your SSO provider service ( ie Azure ) and most likely you do not have / need a password configured for your Superset user for GUI access.
+A common setup is to use SSO to enable user access in Superset.  This would mean your authenticating agent is your SSO provider service ( ie Azure etc ) and most likely you do not have / need a password configured for your Superset user for GUI access.
 
 If this is the case, you will need to add your own password via hitting the superset API using the swagger interface.
 
@@ -50,7 +52,7 @@ select '{{ current_user_id() }}' as current_user_id;
 ```
 - ask your superset admin to tell you what your personal superset user id is.
 
-Once you have your user id value, open the Swagger API page on you superset host.  
+Once you have your user id value, open the Swagger API page on your superset host.  
 `https://{your-superset-host}/swagger/v1`
 
 Scroll down to the 'Security Users' area and find the PUT request that will update your users record.
@@ -78,7 +80,7 @@ Given some local development requirements where you have to access multiple supe
 Just set the overall superset environment in `.env`
 
 ```
-# .env file holding one setting for the overall superset environment
+# .env file holding one setting for the superset environment your accessing
 SUPERSET_ENVIRONMENT='staging'
 ```
 
@@ -101,11 +103,22 @@ SUPERSET_API_USERNAME="production-user-here"
 SUPERSET_API_PASSWORD="set-password-here"
 ```
 
-The command `bin/console` will then load your env file depending on the value in ENV['SUPERSET_ENVIRONMENT'] from the primary `.env`.
+And again, for localhost if required to perform api call in you local dev environment.
+Create a new file called `.env-localhost` that holds your superset development host and credentials.
+
+```
+# specific settings for the superset localhost env
+SUPERSET_HOST="http://localhost:8080/"
+SUPERSET_API_USERNAME="dev-user-here"
+SUPERSET_API_PASSWORD="set-password-here"
+```
+
+
+The command `bin/console` will then load your env file depending on the value in ENV['SUPERSET_ENVIRONMENT'] from the primary `.env` file.
 
 When you need to switch envs, exit the console, edit the .env to your desired value, eg `production`, then open a console again.
 
-Bonus is the Pry prompt will now also include the `SUPERSET_ENVIRONMENT` value.
+The ruby prompt will now also include the `SUPERSET_ENVIRONMENT` value.
 
 ```
 bin/console
@@ -122,6 +135,29 @@ Happi: GET https://your-staging-superset-host.com/api/v1/dashboard/?q=(filters:!
 +----+------------------+-----------+------------------------------------------------------------------+
 ```
 
+## Optional Credential setup for Embedded User
+
+Primary usage is for api calls and/or for guest token retrieval when setting up applications to use the superset embedded dashboard workflow.
+
+The Superset API users fall into 2 categories  
+- a user for general api calls to endpoints for Dashboards, Datasets, Charts, Users, Roles etc.  
+  ref `Superset::Credential::ApiUser`  
+  which pulls credentials from  `ENV['SUPERSET_API_USERNAME']` and `ENV['SUPERSET_API_PASSWORD']`
+
+- a user for guest token api call to use when embedding dashboards in a host application.  
+  ref `Superset::Credential::EmbeddedUser`
+  which pulls credentials from  `ENV['SUPERSET_EMBEDDED_USERNAME']` and `ENV['SUPERSET_EMBEDDED_PASSWORD']`
+
+
+### Fetch a Guest Token for Embedded user
+
+Assuming you have setup your Dashboard in Superset to be embedded and that your creds are setup in  
+`ENV['SUPERSET_EMBEDDED_USERNAME']` and `ENV['SUPERSET_EMBEDDED_PASSWORD']`
+
+```
+Superset::GuestToken.new(embedded_dashboard_id: '15').guest_token
+=> "eyJ0eXAiOi............VV4mrMfsvg"
+```
 
 
 
