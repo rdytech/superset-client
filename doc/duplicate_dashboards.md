@@ -1,37 +1,32 @@
-# Duplicating Dashboards to a new database or schema
+# Duplicating Dashboards to a New Database or Schema
 
-The problem!
+## The Problem
 
-Given a multi tenant configuration where clients databases are logically separate dbs and or schemas all configured in Superset,  
-copying or duplicating an existing Superset dashboard to a new database is a fairly laborious operation with many manual steps.
+In a multi-tenant configuration where client databases are logically separate (either separate databases or separate schemas), copying or duplicating an existing Superset dashboard to a new database can be a laborious process with many manual steps.
 
-Usually run in the Superset GUI something like :
-- Create Dashboard (template)
-- Duplicate the template in GUI with Edit->Save As (duplicate charts checked)
-- Duplicate all Datasets from template, Edit each and point to the new target database
+### Typical Steps in Superset GUI
+- Create a dashboard template.
+- Duplicate the template in the GUI using Edit -> Save As (ensuring duplicate charts are checked).
+- Duplicate all datasets from the template, edit each, and point to the new target database.
 - Edit all the new charts created and link them to the new datasets.
-- Setup the embedded settings for new dashboard
-- Add new tags for the new dashboard
+- Set up the embedded settings for the new dashboard.
+- Add new tags for the new dashboard.
 
-Give the need for multiple clients, 10s or 100s, or 1000s, this quickly becomes a laborious and time consuming feat.
+Given the need to perform this for multiple clients (tens, hundreds, or thousands), this becomes a very time-consuming task.
 
-Superset API to the rescue.
+### Superset API to the Rescue
 
-Note .. requires setup of your [superset environment credentials](https://github.com/rdytech/superset-client/blob/develop/doc/setting_up_personal_api_credentials.md)
+**Note**: This requires setting up your [Superset environment credentials](https://github.com/rdytech/superset-client/blob/develop/doc/setting_up_personal_api_credentials.md).
 
 ## The Solution
 
-Essentially we perform the same points above but all via the Superset API.
+We can perform the same steps as above via the Superset API.
 
-The examples video game dashboard was adjusted to have only 1 chart.  
-Output is new new_dashboard_id and url.  Logs provided in `log/superset-client.log`
+In this example, the example video game dashboard has been adjusted to include only one chart for simplicity.  The output includes the new dashboard ID and URL, with logs provided in `log/superset-client.log`.
 
-Given you have a dashboard created, ie `source_dashboard_id`  
-and you know your `target_schema`  
-as well as your `target_database_id`  
-then you could go ahead and run something like this.  
+To attempt this on your local superset setup with the examples databse, you would need to create a second database (ref id 2 below) that is a direct replica of the examples db.
 
-
+Given you have a dashboard created, ref `source_dashboard_id`, and you know your `target_schema` and `target_database_id`, the following call would duplicate the dashboard.
 
 ```ruby
 Superset::Services::DuplicateDashboard.new(
@@ -42,7 +37,7 @@ Superset::Services::DuplicateDashboard.new(
 
 => {:new_dashboard_id=>401, :new_dashboard_url=>"https://your-superset-host/superset/dashboard/401/", :published=>false}
 
-# logfile shows the steps taken
+# Logfile shows the steps taken
 
 # cat log/superset-client.log
 # INFO -- : >>>>>>>>>>>>>>>>> Starting DuplicateDashboard Service <<<<<<<<<<<<<<<<<<<<<<
@@ -58,15 +53,14 @@ Superset::Services::DuplicateDashboard.new(
 # INFO -- :   Updated new Dashboard json_metadata charts with new dataset ids
 # INFO -- : Duplication Successful. New Dashboard URL: https://your-superset-host/superset/dashboard/401/
 # INFO -- : >>>>>>>>>>>>>>>>> Finished DuplicateDashboard Service <<<<<<<<<<<<<<<<<<<<<<
-
 ```
 
-## Other options for embedded workflow and tags
+## Additional Options for Embedded Workflow and Tags
 
-If your using the embedded dashboards you can also provied attributes for 
-- allowed domains for embeded dashboard settings
-- database tags for ease of searching
-- option to publish
+If you are using embedded dashboards, you can also provide attributes for:
+- Allowed domains for embedded dashboard settings.
+- Database tags for ease of searching.
+- Option to publish.
 
 ```ruby
 Superset::Services::DuplicateDashboard.new(
@@ -79,10 +73,10 @@ Superset::Services::DuplicateDashboard.new(
   ).perform
 ```
 
-### What is my Database ID ?
+### Determining Your Database ID
 
-``` ruby
-# list your available databases with
+```ruby
+# List your available databases with
 Superset::Database::List.call
 
 # DEBUG -- : Happi: GET https://your-superset-host/api/v1/database/?q=(page:0,page_size:100), {}
@@ -95,7 +89,7 @@ Superset::Database::List.call
 | 2  | examples_two                       | postgresql | true             |
 +----+------------------------------------+------------+------------------+
 
-# optionally provide a title filter
+# Optionally provide a title filter
 Superset::Database::List.new(title_contains: 'examples_two').list
 
 # DEBUG -- : Happi: GET https://your-superset-host/api/v1/database/?q=(filters:!((col:database_name,opr:ct,value:'examples')),page:0,page_size:100), {}
@@ -106,13 +100,12 @@ Superset::Database::List.new(title_contains: 'examples_two').list
 +----+------------------------------------+------------+------------------+
 | 2  | examples_two                       | postgresql | true             |
 +----+------------------------------------+------------+------------------+
-
 ```
 
-### What Dashboards do I have access to ?
+### Determining Your Dashboards
 
 ```ruby
-# list dashboard with
+# List dashboards with
 Superset::Dashboard::List.call
 # DEBUG -- : Happi: GET https://your-superset-host/api/v1/dashboard/?q=(page:0,page_size:100), {}
 +-----+------------------------------------------------------+-----------+--------------------------------------------------------------------+
@@ -126,7 +119,7 @@ Superset::Dashboard::List.call
 | 9   | Superset Project Slack Dashboard                     | published | https://your-superset-host/superset/dashboard/9/                   |
 +-----+------------------------------------------------------+-----------+--------------------------------------------------------------------+
 
-# or filter by title
+# Or filter by title
 Superset::Dashboard::List.new(title_contains: 'video').list
 # DEBUG -- : Happi: GET https://your-superset-host/api/v1/dashboard/?q=(filters:!((col:dashboard_title,opr:ct,value:'video')),page:0,page_size:100), {}
 +----+------------------+-----------+------------------------------------------------------------------+
@@ -136,14 +129,11 @@ Superset::Dashboard::List.new(title_contains: 'video').list
 +----+------------------+-----------+------------------------------------------------------------------+
 | 6  | Video Game Sales | published | https://your-superset-host/superset/dashboard/6/ |
 +----+------------------+-----------+------------------------------------------------------------------+
-
 ```
 
-### Replicate a Dashboard across all schemas
+### Replicate a Dashboard Across All Schemas
 
-With a bit of ruby ...
-
-Duplicate dashboard across all schemas in acme pools 1,2,3.
+To duplicate a dashboard across all schemas in Acme pools 1, 2, and 3:
 
 ```ruby
 acme_dbs = Superset::Database::List.new(title_contains: 'acme').rows
@@ -151,7 +141,7 @@ acme_dbs = Superset::Database::List.new(title_contains: 'acme').rows
     ["8", "acme-pool2", "postgresql", "true"], 
     ["9", "acme-pool3", "postgresql", "true"]]
 
-ignore_system_tables = ['information_schema', 'shared_extensions']   # postgres system schemas
+ignore_system_tables = ['information_schema', 'shared_extensions']  # PostgreSQL system schemas
 
 db_with_schemas = acme_dbs.map do |db_conn|
   Superset::Database::GetSchemas.new(db_conn[0]).list.map do |schema|
@@ -162,7 +152,7 @@ end.flatten
 =>[{:database_id=>"7", :schema=>"client1", :database_name=>"acme-pool1"},
    {:database_id=>"7", :schema=>"client2", :database_name=>"acme-pool1"},
    {:database_id=>"7", :schema=>"client3", :database_name=>"acme-pool1"},
-   {:database_id=>"8", :schema=>"client4", :database_name=>"acme-pool1"},
+   {:database_id=>"8", :schema=>"client4", :database_name=>"acme-pool2"},
    {:database_id=>"8", :schema=>"client5", :database_name=>"acme-pool2"},
    {:database_id=>"8", :schema=>"client6", :database_name=>"acme-pool2"},
    {:database_id=>"9", :schema=>"client7", :database_name=>"acme-pool3"},
@@ -177,38 +167,22 @@ db_with_schemas.each do |conn|
     target_database_id:  conn[:database_id]
   ).perform
 end
-
 ```
 
-## TODO / ISSUES
+## TODO / Issues
 
 ### Handling Change
 
-Dashboards are an ever evolving animal and they are expected to change.
+Dashboards are ever-evolving, and changes are expected. This raises the question: given a template dashboard and multiple replicas, how do you update the template and propagate changes to each replica?
 
-This raises the question, given I have a template dashboard and I have X number of replicas of that dashboard  
-how do I make a change to the template and get the change updated to each of the replicas?
+Changes can be broadly categorized into two types:
 
-Current direction is to separate these "changes" in to 2 categories.
+1. **Minor changes to a dataset query**: Adjusting the logic of the query without altering the output attributes. This can be handled easily by locating each dashboard's dataset and updating the query via the Superset API.
 
-- Firstly: minor chages to a Dataset query that will not result in breaking a chart.  
-  ie .. adjusting the logic of the query but not the output attributes.
-- Secondly: ... everything else.
-  ie .. editing/adding charts, formating the dashboard, updating the datasets with new attributes for new charts
+2. **Major changes**: Editing or adding charts, formatting the dashboard, updating datasets with new attributes for new charts. There is no clear, easy direction forward for these changes. The current approach is to delete all replica dashboards and recreate them.
 
-For the first case, the Superset API can easily locate each Dashboards Dataset and update the query with the changes.  
-This is a fairly simple procedure.
+### Bringing the Duplicate Dashboard Process into Superset Core
 
-For the second case, currently we can see no easy/clear direction forward.  
-Very happy to have others with more experience in Superset pose suggestions.
+Potential direction is to have the DuplicateDashboard process as part of the core Superset codebase. This Superset Improvement Proposal (SIP) below is a starting point for the discussion.
 
-Putting it simply, the current thinking is to delete all the replica dashboards and recreate them.
-
-### Bringing the Duplicate Dashboard process into Superset core
-
-(WIP) The goal would be to have the DuplicateDashboard process as a part of the core superset codebase.
-
-To that end this Superset Improvement Proposal (SIP) .. is a starting point.
-
-{add SIP request here}
-
+{Add SIP request here}
