@@ -24,9 +24,9 @@ docker-compose run --rm app bundle install
 docker-compose run --rm app bin/console
 ```
 
-## Setup Locally ( no docker ) 
+## Setup Locally ( no docker )
 
-Requires Ruby >= 2.6.0 
+Requires Ruby >= 2.6.0
 
 Bundle install and open a ruby console.
 
@@ -37,15 +37,15 @@ bin/console
 
 ## Including in a Ruby app
 
-Add to your Gemfile `gem 'superset'`  
-And then execute: `bundle install`  
+Add to your Gemfile `gem 'superset'`
+And then execute: `bundle install`
 Or install it yourself as `gem install superset`
 
 ## Run specs
 
 ```
 docker-compose run --rm app rspec
-# or 
+# or
 docker-compose run --rm app bash      # then run 'bundle exec rspec' from the container.
 ```
 
@@ -66,7 +66,7 @@ More examples [listed here](https://github.com/rdytech/superset-client/tree/deve
 
 ## Duplicating Dashboards
 
-The Primary motivation behind this gem was to use the Superset API to duplicate dashboards, charts, datasets across multiple database connections.  
+The Primary motivation behind this gem was to use the Superset API to duplicate dashboards, charts, datasets across multiple database connections.
 
 Targeted use case was for superset embedded functionality implemented in a application resting on multi tenanted database setup.
 
@@ -81,11 +81,6 @@ See examples in [Duplicate Dashboards](https://github.com/rdytech/superset-clien
 - Push to the branch (git push origin my-new-feature)
 - Create new Pull Request
 
-
-
-### Publishing to RubyGems
-
-WIP .. direction is for this gem to be made public
 
 ## License
 
