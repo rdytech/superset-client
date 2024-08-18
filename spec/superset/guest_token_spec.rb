@@ -56,5 +56,24 @@ RSpec.describe Superset::GuestToken do
         )
       end
     end
+
+    context 'with rls clause' do
+      before { allow(subject).to receive(:rls_clause).and_return(rls_clause) }
+      let(:user) { nil }
+      let(:rls_clause) { [{ "clause": "publisher = 'Nintendo'" }] }
+      specify do
+        expect(subject.params).to eq(
+          {
+            "resources": [
+              {
+                "id": ss_dashboard_id,
+                "type": "dashboard" }
+            ],
+            "rls": rls_clause,
+            "user": { }
+          }
+        )
+      end
+    end
   end
 end

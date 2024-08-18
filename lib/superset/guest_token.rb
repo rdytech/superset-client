@@ -2,13 +2,12 @@ module Superset
   class GuestToken
     include Credential::EmbeddedUser
 
-    attr_accessor :embedded_dashboard_id, :current_user, :current_user_sites, :current_user_programmes
+    attr_accessor :embedded_dashboard_id, :current_user, :rls_clause
 
-    def initialize(embedded_dashboard_id: , current_user: nil, current_user_sites: [], current_user_programmes: [])
+    def initialize(embedded_dashboard_id: , current_user: nil, rls_clause: [])
       @embedded_dashboard_id = embedded_dashboard_id
       @current_user = current_user
-      @current_user_sites = current_user_sites
-      @current_user_programmes = current_user_programmes
+      @rls_clause = rls_clause
     end
 
     def guest_token
@@ -22,11 +21,7 @@ module Superset
             "id": embedded_dashboard_id.to_s,
             "type": "dashboard" }
         ],
-        "rls": [
-          { 
-            "clause": rls_filter_clause
-          }
-        ],
+        "rls": rls_clause || [], # Ex: [{ "clause": "publisher = 'Nintendo'" }]
         "user": current_user_params
       }
     end
@@ -70,19 +65,6 @@ module Superset
 
     def authenticator
       @authenticator ||= Superset::Authenticator.new(credentials)
-    end
-
-    def rls_filter_clause
-      "#{site_clause} AND #{programme_clause}"
-    end
-
-    def site_clause
-      return true if current_user_sites.empty?
-      "site_id = ANY(ARRAY[#{current_user_sites}])" 
-    end
-
-    def programme_clause
-      "programme = ANY(string_to_array(replace(trim(('#{current_user_programmes.to_json}'), '[]'), '\"', ''), ','))"
     end
   end
 end
