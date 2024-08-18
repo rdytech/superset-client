@@ -1,8 +1,8 @@
 ## Change Log
-## 0.2.0.rc1 - 2024-08-16
+## 0.2.0.rc1 - 2024-08-19
 
 * Adding RLS filter clause to the 'api/v1/security/guest_token/' API params in guest_token.rb - https://github.com/rdytech/superset-client/pull/31
-* This adds 2 filters site_clause which adds the condition to retrieve only the records that belong to current user's accessible_site_ids and programme_clause which adds the condition to retrieve only the records that belong to current user's programmes
+* Any filter that needs to applied to the dataset's final where condition can be passed here. Ex: [{ "clause": "publisher = 'Nintendo'" }]. Refer this: https://github.com/apache/superset/tree/master/superset-embedded-sdk#creating-a-guest-token
 
 ## 0.1.7 - 2024-08-27
 
