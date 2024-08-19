@@ -11,6 +11,7 @@ module Superset
     end
 
     def guest_token
+      validate_params
       response_body['token']
     end
 
@@ -21,12 +22,16 @@ module Superset
             "id": embedded_dashboard_id.to_s,
             "type": "dashboard" }
         ],
-        "rls": rls_clause || [], # Ex: [{ "clause": "publisher = 'Nintendo'" }]
+        "rls": rls_clause, # Ex: [{ "clause": "publisher = 'Nintendo'" }]
         "user": current_user_params
       }
     end
 
     private
+
+    def validate_params
+      raise Superset::Request::InvalidParameterError, "rls_clause should be an array. But it is #{rls_clause.class}" if rls_clause.nil? || rls_clause.class != Array
+    end
 
     # optional param to be available in Superset for query templating using jinja
     # ss expects username .. which could be used to query as current_user.id
