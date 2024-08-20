@@ -1,8 +1,8 @@
-# Transfering Dashboards across Environments
+# Transferring Dashboards across Environments
 
-Research document relating to Migrating dashboard across Superset Environments.
+In this doc, we will discuss how to transfer dashboards across Superset hosting environments with the goal of heading towards an API call to automate the process.
 
-In this doc, we will discuss how to transfer dashboards across Superset hosting environments.
+## Background
 
 A common practice is to setup infrastructure to deploy multiple Superset environments. For example a simple setup might be:
 - local development env for testing version upgrades and feature exploration
@@ -11,10 +11,9 @@ A common practice is to setup infrastructure to deploy multiple Superset environ
 
 For the above example, the Superset staging env often holds connections to staging databases, and the Superset production staging env will hold connections to the production databases.
 
-In the event where the database schema structure for the local dev, staging and production databases are exactly the same, then dashboards can be transfered across Superset hosting environments.
+In the event where the database schema structure for the local dev, staging and production databases are exactly the same, then dashboards can be transferred across Superset hosting environments.
 
 It requires some manual updating of the exported yaml files before importing into the target environment.  Also required is some understanding of the underlying dashboard export structure and how the a object UUIDs work and relate to each other expecially in the context of databases and datasets.
-
 
 ## Dashboard Export/Import within same Environment
 
@@ -58,6 +57,30 @@ Each of the above yaml files holds UUID values for the primary object and any re
 - dataset yamls have their own UUID as well as a referene to the database UUID
 - chart yamls have their own UUID as well as a reference to their dataset UUID
 
+Example of the database yml file.
+
+```
+cat databases/examples.yaml
+database_name: examples
+sqlalchemy_uri: postgresql+psycopg2://superset:XXXXXXXXXX@superset-host:5432/superset
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: true
+allow_ctas: true
+allow_cvas: true
+allow_dml: true
+allow_file_upload: true
+extra:
+  metadata_params: {}
+  engine_params: {}
+  metadata_cache_timeout: {}
+  schemas_allowed_for_file_upload:
+  - examples
+  allows_virtual_table_explore: true
+uuid: a2dc77af-e654-49bb-b321-40f6b559a1ee
+version: 1.0.0
+```
+
 If we grep the database/examples.yaml we can see the UUID of the database.
 
 ```
@@ -66,7 +89,7 @@ grep -r uuid databases/
 
 ```
 
-Now if we look at the UUID values in the datasets, you will see both the dataset UUID and the referenc to the database UUID.
+Now if we look at the UUID values in the datasets, you will see both the dataset UUID and the reference to the database UUID.
 
 ```
 grep -r uuid datasets
@@ -74,16 +97,22 @@ datasets/examples/cleaned_sales_data.yaml:uuid: 2ebaf597-6bb6-4e1a-b3dd-f2d808bd
 datasets/examples/cleaned_sales_data.yaml:database_uuid: a2dc77af-e654-49bb-b321-40f6b559a1ee
 ```
 
-If we have an export from Staging Env, and an export from the Production Env, and we compared the database UUIDs and dataset UUIDs you would see that the UUIDs are unique to the Environment or Supserset instance and that the database connection string would also be unique to each env.
+If the above zip file was imported as is to the same superset environment, this would mean all UUID's exist in superset and these objects would be found an updated with the imported zip data.
+
+If the above zib file was imported to a different target superset environment, it would fail as there would be no matching database UUID entry in that target superset environment.
 
 # Migrate a dashboard across to a different Superset Environment
 
-Given we have a request to 'transfer' a dashboard across to a different environment, say Staging to Production.
+Give the above knowledge, we can now think about how to migrate boards between superset environments. 
 
-With the condition that the database in Staging and Production are structuraly exactly the same schema.  From above discussion on UUIDs, you can then see that if we want to import a Staging dashboard export into the Production environment we will need to perform the following steps:
+If we have an export from Staging Env, and an export from the Production Env, and we compared the database UUIDs and dataset UUIDs you would see that the UUIDs are unique to the Environment or Supserset instance and that the database connection string would also be unique to each env.
+
+Given we have a request to 'transfer' a dashboard across to a different environment, say Staging to Production, how would we then proceed?
+
+With the condition that the database in Staging and Production are structurally exactly the same schema.  From above discussion on UUIDs, you can then see that if we want to import a Staging dashboard export into the Production environment we will need to perform the following steps:
 
 - 1. export the staging dashboard and unzip
-- 2. note the staging database UUIDs in the `databases/` directiory
+- 2. note the staging database UUIDs in the `databases/` directory
 - 3. get a copy of the production database yaml file ( from a production dashboard export )
 - 4. in the exported dashboard files, replace the staging database yaml with the production yaml
 - 5. in the dataset yaml files, replace all instances of the previous noted staging database uuid with the new production UUID
