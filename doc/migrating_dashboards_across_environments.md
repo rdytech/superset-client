@@ -118,14 +118,72 @@ With the condition that the database in Staging and Production are structurally 
 - 5. in the dataset yaml files, replace all instances of the previous noted staging database uuid with the new production UUID
 - 6. zip the files and import to the production environment
 
-## Assumptions / Directions
-
 The process above assumes that whoever is migrating the dashboard has a copy of the target database yml files so that
 in step 3 and 4 we can then replace the staging database yaml with the production one.
+
+
+## Requirements
+
+For the above process we need to know or have access to the following:
+
+- the source dashboard zip file
+- the target SS environment database yaml file
+- ability to copy then manipulate the source dashboard zip file
+- the ability to import via api to the target SS environment
+
+Currently the Superset Acumania repo holds the copies of the Dashboard backups in extracted yaml file format.
+https://github.com/rdytech/superset-acumania/tree/develop
+
+The ideal process for creating a dashboard is to create the initial template version on the staging (or edge) environment, then backup that dashboard into acumania repo.
+As this template can be considered the source dashboard, it makes logical sense to use that backup to replicate into a different environment.
 
 Potentially we could store all database yml files in the superset-acumania repo, where we currently store the dashboard backups.
 
 Then we could use that list, as part of the script class calls to Export -> manipulate yaml file -> Import to new Env
+
+Further Work:
+- in Superset Client : new class to export the database yaml file
+- in Superset Client : need a process to manipulate an export yaml file config adjusting UUIDs for dashboards and datasets and filters
+- in Superset Client : new class to import a dashboard zip to any env
+- in Superset Acumania : new ticket to backup all envs databases yaml files, AU Staging, AU Prod, EU Prod
+- in Superset Acumania : utilize the dashboard_backups folder as source for point 2 above ()
+
+## Proof of Concept
+
+Some intial coding has been done to prove the direction works.
+Needs another 3pt to finish off and clean up specs.
+
+Note .. jb has been doing this process manully to get the boards migrating across environments.
+
+Example of migrating Modules dashboard to Pool1 Tag client.
+
+
+```ruby
+Superset::Services::ImportDashboardAcrossEnvironments.new(
+  target_database_yaml: '/tmp/ss_databases/1/databases/JobReady-P1.yaml', 
+  source_zip_file: '/tmp/superset_dashboards/b9bfbf11-6b76-4c31-a057-02e26be88ad2/dashboard_429_export_20240821.zip', 
+  target_database_schema: 'bamara').perform
+=> {"message"=>"OK"}
+```
+
+
+## Gotchas !
+
+Migrating a Dashboard ONCE .. to a new target env, database, schema will result in 
+- creating a new Dashboard with the uuid from the import zip
+- creating a new set of Charts with their uuid's from the import zip
+- creating a new set of Datasets with their uuid's form the import zip
+
+
+Migrating the same Dashboard a second time, to the same target env, database, BUT different schema will NOT create a new Dashboard.
+
+It will attempt to update the same Dashboard .. as the UUID for the dashboard has not changed.
+It will also NOT change any of the Datasets to the new schema.  Looks to be a limitation of the import process
+
+This may lead to some confusing results.
+
+
+## References
 
 Some more helpful references relating to cross environment workflows.
 
