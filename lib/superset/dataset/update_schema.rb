@@ -68,9 +68,10 @@ module Superset
 
       def validate_proposed_changes
         logger.info "    Validating Dataset ID: #{source_dataset_id} schema update to #{target_schema} on Database: #{target_database_id}"
-        raise "Error: source_dataset_id integer is required"  unless source_dataset_id.present? && source_dataset_id.is_a?(Integer)
-        raise "Error: target_database_id integer is required" unless target_database_id.present? && target_database_id.is_a?(Integer)
-        raise "Error: target_schema string is required"       unless target_schema.present? && target_schema.is_a?(String)
+        raise "Error: source_dataset_id integer is required"    unless source_dataset_id.present? && source_dataset_id.is_a?(Integer)
+        raise "Error: target_database_id integer is required"   unless target_database_id.present? && target_database_id.is_a?(Integer)
+        raise "Error: target_schema string is required"         unless target_schema.present? && target_schema.is_a?(String)
+        raise "Error: schema must be set on the source dataset" unless source_dataset['schema'].present? # required for validating sql_query_includes_hard_coded_schema
 
         # confirm the dataset exist? ... no need as the load_source_dataset method will raise an error if the dataset does not exist
  
