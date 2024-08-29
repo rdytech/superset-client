@@ -34,49 +34,51 @@ RSpec.describe Superset::GuestToken do
   end
 
   describe '#params' do
-    before do
-      allow(subject).to receive(:current_user).and_return(user)
-    end
-
-    context 'without a current_user' do
-      let(:user) { nil }
-
-      specify do
-        expect(subject.params).to eq(
-          {
-            "resources": [
-              {
-                "id": ss_dashboard_id,
-                "type": "dashboard" }
-            ],
-            "rls": [],
-            "user": { }
-          }
-        )
+    context "with additional params" do
+      before do
+        allow(subject).to receive(:additional_params).and_return(additional_params)
       end
-    end
 
-    context 'with a current_user' do
-      let(:user) { double(id: 101) }
+      context 'without a current_user' do
+        let(:additional_params) { {} }
 
-      specify 'passes user id to superset' do
-        expect(subject.params).to eq(
-          {
-            "resources": [
-              {
-                "id": ss_dashboard_id,
-                "type": "dashboard" }
-            ],
-            "rls": [],
-            "user": { username: "101" }
-          }
-        )
+        specify do
+          expect(subject.params).to eq(
+            {
+              "resources": [
+                {
+                  "id": ss_dashboard_id,
+                  "type": "dashboard" }
+              ],
+              "rls": [],
+              "user": { }
+            }
+          )
+        end
+      end
+
+      context 'with a current_user' do
+        let(:additional_params) { {embedded_app_current_user_id: 1} }
+
+        specify 'passes user id to superset' do
+          expect(subject.params).to eq(
+            {
+              "resources": [
+                {
+                  "id": ss_dashboard_id,
+                  "type": "dashboard" }
+              ],
+              "rls": [],
+              "user": { username: additional_params[:embedded_app_current_user_id].to_s },
+              "embedded_app_current_user_id": additional_params[:embedded_app_current_user_id]
+            }
+          )
+        end
       end
     end
 
     context 'with rls clause' do
       before { allow(subject).to receive(:rls_clause).and_return(rls_clause) }
-      let(:user) { nil }
       let(:rls_clause) { [{ "clause": "publisher = 'Nintendo'" }] }
       specify do
         expect(subject.params).to eq(
@@ -95,7 +97,6 @@ RSpec.describe Superset::GuestToken do
 
     context 'with rls clause as empty array' do
       before { allow(subject).to receive(:rls_clause).and_return(rls_clause) }
-      let(:user) { nil }
       let(:rls_clause) { [] }
       specify do
         expect(subject.params).to eq(
