@@ -2,12 +2,13 @@ module Superset
   class GuestToken
     include Credential::EmbeddedUser
 
-    attr_accessor :embedded_dashboard_id, :current_user, :rls_clause
+    attr_accessor :embedded_dashboard_id, :current_user, :rls_clause, :additional_params
 
-    def initialize(embedded_dashboard_id: , current_user: nil, rls_clause: [])
+    def initialize(embedded_dashboard_id: , current_user: nil, rls_clause: [], **additional_params)
       @embedded_dashboard_id = embedded_dashboard_id
       @current_user = current_user
       @rls_clause = rls_clause
+      @additional_params = additional_params
     end
 
     def guest_token
@@ -24,7 +25,7 @@ module Superset
         ],
         "rls": rls_clause, # Ex: [{ "clause": "publisher = 'Nintendo'" }]
         "user": current_user_params
-      }
+      }.merge(additional_params)
     end
 
     private
