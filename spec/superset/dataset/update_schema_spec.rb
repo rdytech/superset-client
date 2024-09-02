@@ -8,6 +8,7 @@ RSpec.describe Superset::Dataset::UpdateSchema do
               remove_copy_suffix: remove_copy_suffix) }
 
   let(:source_dataset_id) { 226 }
+  let(:source_schema) { 'schema_one' }
   let(:target_database_id) { 6 }
   let(:target_schema) { 'schema_three' }
   let(:remove_copy_suffix) { false }
@@ -59,7 +60,7 @@ RSpec.describe Superset::Dataset::UpdateSchema do
         "normalize_columns"=>false,
         "offset"=>0,
         "owners"=>[],
-        "schema"=>"schema_one",
+        "schema"=>source_schema,
         "sql"=>"select count(*),\nservice\n\nfrom blahblah \ngroup by service",
         "table_name"=>"JR SP Service Counts (COPY)",
         "template_params"=>nil
@@ -115,6 +116,15 @@ RSpec.describe Superset::Dataset::UpdateSchema do
           expect { subject.perform }.to raise_error(RuntimeError, "Error: Schema schema_four does not exist in database: 6")
         end
       end
+
+      context 'source dataset schema is not configured' do
+        let(:source_schema) { '' }
+
+        specify do
+          expect { subject.perform }.to raise_error(RuntimeError, "Error: schema must be set on the source dataset")
+        end
+      end
+
     end
   end
 

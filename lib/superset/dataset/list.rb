@@ -34,7 +34,7 @@ module Superset
       end
 
       def list_attributes
-        ['id', 'table_name', 'schema', 'changed_by_name']
+        ['id', 'table_name', 'database', 'schema', 'changed_by_name']
       end
     end
   end
