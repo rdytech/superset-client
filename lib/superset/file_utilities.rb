@@ -9,10 +9,11 @@ module Superset
           entry_path = File.join(destination, entry.name)
           entries << entry_path
           FileUtils.mkdir_p(File.dirname(entry_path))
-          zip.extract(entry, entry_path)
+
+          zip.extract(entry, entry_path) unless File.exist?(entry_path)
         end
       end
-      puts entries
+
       entries # return array of extracted files
     end
   end
