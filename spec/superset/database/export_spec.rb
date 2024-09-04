@@ -18,7 +18,7 @@ RSpec.describe Superset::Database::Export do
 
     context 'with remove_dataset_yamls set to true' do
       before do
-        allow(subject).to receive(:zip_file_name) { 'spec/fixtures/database_1_export_20240903.zip' }
+        allow(subject).to receive(:exported_zip_path) { 'spec/fixtures/database_1_export_20240903.zip' }
       end
 
       it 'exports the database zip file and copies it to the destination path and removes dataset yamls' do
@@ -37,7 +37,7 @@ RSpec.describe Superset::Database::Export do
       let!(:remove_dataset_yamls) { false }
 
       before do
-        allow(subject).to receive(:zip_file_name) { 'spec/fixtures/database_1_export_20240903_with_datasets.zip' }
+        allow(subject).to receive(:exported_zip_path) { 'spec/fixtures/database_1_export_20240903_with_datasets.zip' }
       end
 
       it 'exports the database zip file and copies it to the destination path' do

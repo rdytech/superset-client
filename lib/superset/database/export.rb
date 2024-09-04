@@ -31,7 +31,10 @@ module Superset
         create_tmp_dir
         save_exported_zip_file
         unzip_files
-        copy_export_files_to_destination_path if destination_path
+        copy_export_files_to_destination_path
+
+        puts "Exported database #{database_id} to #{destination_path_with_db_id}"
+        Dir.glob("#{destination_path_with_db_id}/databases/*")
       end
 
       def response
@@ -57,7 +60,7 @@ module Superset
       end
 
       def unzip_files
-        @extracted_files = unzip_file(zip_file_name, tmp_uniq_database_path)
+        @extracted_files = unzip_file(exported_zip_path, tmp_uniq_database_path)
         remove_dataset_yaml_files if remove_dataset_yamls
       end
 

@@ -1,0 +1,18 @@
+database_name: acme_client
+sqlalchemy_uri: postgresql+psycopg2://superset:XXXXXXXXXX@the-db-host:5432/superset
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: true
+allow_ctas: true
+allow_cvas: true
+allow_dml: true
+allow_csv_upload: true
+extra:
+  metadata_params: {}
+  engine_params: {}
+  metadata_cache_timeout: {}
+  allows_virtual_table_explore: true
+  schemas_allowed_for_csv_upload:
+  - acme_client
+uuid: 2f4e4aaf-0c44-4845-bc83-de4c4d2ae20f
+version: 1.0.0

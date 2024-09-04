@@ -1,0 +1,60 @@
+slice_name: Pivot Table
+description: null
+certified_by: null
+certification_details: null
+viz_type: pivot_table_v2
+params:
+  groupbyColumns:
+  - state
+  compare_lag: '10'
+  compare_suffix: o10Y
+  groupbyRows:
+  - name
+  limit: '25'
+  markup_type: markdown
+  metrics:
+  - aggregate: SUM
+    column:
+      column_name: num
+      type: BIGINT
+    expressionType: SIMPLE
+    label: Births
+    optionName: metric_11
+  series_limit: 50000
+  viz_type: pivot_table_v2
+  rowOrder: value_z_to_a
+  adhoc_filters:
+  - clause: WHERE
+    subject: ds
+    operator: TEMPORAL_RANGE
+    comparator: '100 years ago : now'
+    expressionType: SIMPLE
+  form_data_bak:
+    columns:
+    - state
+    compare_lag: '10'
+    compare_suffix: o10Y
+    granularity_sqla: ds
+    groupby:
+    - name
+    limit: '25'
+    markup_type: markdown
+    metrics:
+    - aggregate: SUM
+      column:
+        column_name: num
+        type: BIGINT
+      expressionType: SIMPLE
+      label: Births
+      optionName: metric_11
+    row_limit: 50000
+    time_range: '100 years ago : now'
+    viz_type: pivot_table
+query_context: '{"datasource":{"id":2,"type":"table"},"force":false,"queries":[{"filters":[{"col":"ds","op":"TEMPORAL_RANGE","val":"100
+  years ago : now"}],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":["state","name"],"metrics":[{"aggregate":"SUM","column":{"column_name":"num","type":"BIGINT"},"expressionType":"SIMPLE","label":"Births","optionName":"metric_11"}],"orderby":[[{"aggregate":"SUM","column":{"column_name":"num","type":"BIGINT"},"expressionType":"SIMPLE","label":"Births","optionName":"metric_11"},false]],"annotation_layers":[],"series_limit":50000,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"adhoc_filters":[{"clause":"WHERE","comparator":"100
+  years ago : now","expressionType":"SIMPLE","operator":"TEMPORAL_RANGE","subject":"ds"}],"compare_lag":"10","compare_suffix":"o10Y","datasource":"2__table","form_data_bak":{"columns":["state"],"compare_lag":"10","compare_suffix":"o10Y","granularity_sqla":"ds","groupby":["name"],"limit":"25","markup_type":"markdown","metrics":[{"aggregate":"SUM","column":{"column_name":"num","type":"BIGINT"},"expressionType":"SIMPLE","label":"Births","optionName":"metric_11"}],"row_limit":50000,"time_range":"100
+  years ago : now","viz_type":"pivot_table"},"groupbyColumns":["state"],"groupbyRows":["name"],"limit":"25","markup_type":"markdown","metrics":[{"aggregate":"SUM","column":{"column_name":"num","type":"BIGINT"},"expressionType":"SIMPLE","label":"Births","optionName":"metric_11"}],"rowOrder":"value_z_to_a","series_limit":50000,"slice_id":53931,"viz_type":"pivot_table_v2","force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 03738801-9e9e-49ed-9dfd-9f6fa0d3599e
+version: 1.0.0
+dataset_uuid: 283f5023-0814-40f6-b12d-96f6a86b984f

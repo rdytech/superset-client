@@ -10,6 +10,7 @@
 #             Initial import will result in creating a new dashboard with the contents of the zip file. 
 #             Subsequent imports will result in updating/over writing the previous imported dashboard with the contents of the zip file.
 
+# the overwrite flag will determine if the dashboard will be updated or created new
 
 # Usage
 # Superset::Dashboard::Import.new(source_zip_file: '/tmp/dashboard.zip', overwrite: true).perform
@@ -27,12 +28,8 @@ module Superset
       end
 
       def perform
-        # TODO
-        # validate source_zip_file, check if it exists 
-        # validate database in zip, confirm a Database exists in the SS target env and that it matches the one in the zip file
-        # validate the zip file .. confirming the datasets are valid, ie all datasets point to the same database uuid in the zip
+        validate_params
 
-        # upload the zip file
         response
       end
 
@@ -44,6 +41,12 @@ module Superset
       end
 
       private
+
+      def validate_params
+        raise ArgumentError, 'source_zip_file is required' if source_zip_file.nil?
+        raise ArgumentError, 'source_zip_file does not exist' unless File.exist?(source_zip_file)
+        raise ArgumentError, 'overwrite must be a boolean' unless [true, false].include?(overwrite)
+      end
 
       def payload
         {

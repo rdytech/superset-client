@@ -4,6 +4,7 @@ module Superset
 
       attr_reader :id
 
+      # also accepts a dashboards uuid
       def initialize(id)
         @id = id
       end
