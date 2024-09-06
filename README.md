@@ -43,11 +43,12 @@ Or install it yourself as `gem install superset`
 
 ## Run specs
 
+Open a bash console inside the app container and run specs.
+
 ```
-docker-compose run --rm app rspec
-# or 
-docker-compose run --rm app bash      # then run 'bundle exec rspec' from the container.
+docker-compose run --rm app bash
 ```
+then run 'bundle exec rspec' from inside the container.
 
 
 ## Usage
@@ -66,7 +67,7 @@ More examples [listed here](https://github.com/rdytech/superset-client/tree/deve
 
 ## Duplicating Dashboards
 
-The Primary motivation behind this gem was to use the Superset API to duplicate dashboards, charts, datasets across multiple database connections.  
+The Primary motivation behind this gem was to use the Superset API to duplicate dashboards, charts, datasets across multiple database connections.
 
 Targeted use case was for superset embedded functionality implemented in a application resting on multi tenanted database setup.
 

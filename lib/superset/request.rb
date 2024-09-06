@@ -43,8 +43,12 @@ module Superset
       raise NotImplementedError.new("You must implement route.")
     end
 
-    def client
-      @client ||= Superset::Client.new
+    def client(use_json: true)
+      @client ||= begin
+        c = Superset::Client.new
+        c.config.use_json = use_json
+        c
+      end
     end
 
     def pagination
