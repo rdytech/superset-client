@@ -7,7 +7,7 @@ must already exist in the target superset environment.
 
 Currently requires there be only 1 Database yaml file in the zip file. ( ie only 1 database connection per dashboard )
 
-Requirements: 
+Requirements:
  - dashboard_export_zip_file
  - target_database_yaml
  - target_database_schema
@@ -22,7 +22,6 @@ Superset::Services::ImportDashboardToEnv.new(
  dashboard_export_zip_file: '/tmp/dashboard.zip',
  target_database_yaml: '/tmp/database.yaml',
  target_database_schema: 'insert_schema_here',
- 
 ).perform
 
 =end
@@ -33,7 +32,7 @@ require 'yaml'
 module Superset
   module Services
     class ImportDashboardToEnv < Superset::Request
-      include FileUtilities      
+      include FileUtilities
 
       TMP_PATH = '/tmp/superset_dashboard_imports'.freeze
 
@@ -43,22 +42,21 @@ module Superset
         @dashboard_export_zip_file        = dashboard_export_zip_file
         @target_database_yaml   = target_database_yaml
         @target_database_schema = target_database_schema
-        
       end
 
       def perform
         # validate dashboard_export_zip_file, check if it exists
         # validate target_database_yaml, check if it exists
         # validate only 1 database yaml file in the zip file
-        # validate the zip file .. confirming the datasets are valid, ie all datasets point to the same database uuid in the zip 
+        # validate the zip file .. confirming the datasets are valid, ie all datasets point to the same database uuid in the zip
         # validate the target_database_schema exists in the target environment on the target database
 
         #start_log_msg
         prepare_import
 
-#        result = import_new_dashboard_config
-        #end_log_msg(result)
-#        imported_dashboard_details.merge(result: result)
+        result = import_new_dashboard_config
+        end_log_msg(result)
+        imported_dashboard_details.merge(result: result)
       end
 
       def extracted_files
@@ -124,12 +122,10 @@ module Superset
           # read the new_database_yaml_file_path file to get the database uuid
           yaml_content = YAML.load_file(new_database_yaml_file_path)
           yaml_content['uuid']
+        end
       end
-      end
 
-
-
-      def zip_new_dashboard_config        
+      def zip_new_dashboard_config
         Zip::File.open(new_zip_file, Zip::File::CREATE) do |zipfile|
           Dir[File.join(dashboard_export_root_path, '**', '**')].each do |file|
             zipfile.add(file.sub(dashboard_export_root_path + '/', File.basename(dashboard_export_root_path) + '/' ), file) if File.file?(file)
