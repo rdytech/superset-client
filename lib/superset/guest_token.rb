@@ -2,14 +2,16 @@ module Superset
   class GuestToken
     include Credential::EmbeddedUser
 
-    attr_accessor :embedded_dashboard_id, :current_user
+    attr_accessor :embedded_dashboard_id, :rls_clause, :additional_params
 
-    def initialize(embedded_dashboard_id: , current_user: nil)
+    def initialize(embedded_dashboard_id:, rls_clause: [], **additional_params)
       @embedded_dashboard_id = embedded_dashboard_id
-      @current_user = current_user
+      @rls_clause = rls_clause
+      @additional_params = additional_params
     end
 
     def guest_token
+      validate_params
       response_body['token']
     end
 
@@ -20,18 +22,23 @@ module Superset
             "id": embedded_dashboard_id.to_s,
             "type": "dashboard" }
         ],
-        "rls": [],
+        "rls": rls_clause, # Ex: [{ "clause": "publisher = 'Nintendo'" }]
         "user": current_user_params
-      }
+      }.merge(additional_params)
     end
 
     private
 
+    def validate_params
+      raise Superset::Request::InvalidParameterError, "rls_clause should be an array. But it is #{rls_clause.class}" if rls_clause.nil? || rls_clause.class != Array
+    end
+
     # optional param to be available in Superset for query templating using jinja
     # ss expects username .. which could be used to query as current_user.id
     def current_user_params
-      if current_user
-        { "username": current_user.id.to_s }
+      current_user_id = additional_params[:embedded_app_current_user_id]
+      if current_user_id
+        { "username": current_user_id.to_s }
       else
         { }
       end
