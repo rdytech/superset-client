@@ -1,4 +1,11 @@
 ## Change Log
+
+## 0.2.1 - 2024-09-10
+
+* add Superset::Database::Export class for exporting database configurations
+* add Superset::Dashboard::Import class for importing a dashboard config
+* add Superset::Services::ImportDashboardToEnv for importing/transfering dashboards across environments
+
 ## 0.2.0 - 2024-08-19
 
 * Adding RLS filter clause to the 'api/v1/security/guest_token/' API params in guest_token.rb - https://github.com/rdytech/superset-client/pull/31
