@@ -29,17 +29,6 @@ module Superset
         result['name']
       end
 
-      private
-
-      def route
-        "dataset/#{id}"
-      end
-
-      def display_headers
-        %w[title schema database_name, database_id]
-      end
-  
-
       def database_name
         result['database']['database_name']
       end
@@ -50,6 +39,16 @@ module Superset
 
       def sql
         ['sql']
+      end
+
+      private
+
+      def route
+        "dataset/#{id}"
+      end
+
+      def display_headers
+        %w[title schema database_name, database_id]
       end
     end
   end

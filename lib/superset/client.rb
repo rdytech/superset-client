@@ -44,7 +44,13 @@ module Superset
       @connection ||= Faraday.new(superset_host) do |f|
         f.authorization :Bearer, access_token
         f.use FaradayMiddleware::ParseJson, content_type: 'application/json'
-        f.request :json
+
+        if self.config.use_json
+          f.request :json
+        else
+          f.request :multipart
+          f.request :url_encoded
+        end
 
         f.adapter :net_http
       end

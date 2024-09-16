@@ -206,9 +206,6 @@ Putting it simply, the current thinking is to delete all the replica dashboards 
 
 ### Bringing the Duplicate Dashboard process into Superset core
 
-(WIP) The goal would be to have the DuplicateDashboard process as a part of the core superset codebase.
+An ideal direction would be to have the DuplicateDashboard process as a part of the core superset codebase.
 
-To that end this Superset Improvement Proposal (SIP) .. is a starting point.
-
-{add SIP request here}
-
+A Superset discussion thread has been started in  [Duplicating Dashboards into a new database or schema](https://github.com/apache/superset/discussions/29899)
