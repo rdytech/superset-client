@@ -51,7 +51,11 @@ module Superset
       private
 
       def params
-        { "q": "!(#{database_id})" }   # pulled off chrome dev tools doing a GUI export.  Swagger interface not helpfull with this endpoint.
+        # The Swagger API interface indicates this endpoint should take an array of integers
+        # however this does not work within the Swagger interface or when testing the API 
+        # Investigating the Superset GUI with Dev Tools shows that the format below is used
+
+        { "q": "!(#{database_id})" }
       end
 
       def save_exported_zip_file
