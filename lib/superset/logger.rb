@@ -1,6 +1,6 @@
 module Superset
   class Logger
-    
+
     def info(msg)
       # puts msg   # allow logs to console
       logger.info msg
