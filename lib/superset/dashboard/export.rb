@@ -13,7 +13,7 @@ module Superset
     class Export < Request
       include FileUtilities
 
-      TMP_SUPERSET_DASHBOARD_PATH = '/tmp/superset_dashboards'
+      TMP_SUPERSET_DASHBOARD_PATH = '/tmp/superset_dashboard_exports'
 
       attr_reader :dashboard_id, :destination_path
 

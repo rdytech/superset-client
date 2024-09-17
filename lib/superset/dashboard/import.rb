@@ -11,9 +11,10 @@
 #             Subsequent imports will result in updating/over writing the previous imported dashboard with the contents of the zip file.
 
 # the overwrite flag will determine if the dashboard will be updated or created new
+# overwrite: false .. will result in an error if a dashboard with the same UUID already exists
 
 # Usage
-# Superset::Dashboard::Import.new(source_zip_file: '/tmp/dashboard.zip', overwrite: true).perform
+# Superset::Dashboard::Import.new(source_zip_file: '/tmp/dashboard.zip').perform
 #
 
 module Superset
@@ -22,7 +23,7 @@ module Superset
 
       attr_reader :source_zip_file, :overwrite
 
-      def initialize(source_zip_file: , overwrite: false)
+      def initialize(source_zip_file: , overwrite: true)
         @source_zip_file = source_zip_file
         @overwrite = overwrite
       end
