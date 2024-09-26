@@ -1,0 +1,299 @@
+table_name: JR P4 Tenants - Feature Flags
+main_dttm_col: null
+description: null
+default_endpoint: null
+offset: 0
+cache_timeout: null
+schema: null
+sql: 'SELECT ''abilitywa'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM abilitywa.elcapitan_tenant_configurations
+
+  JOIN abilitywa.elcapitan_feature_groups ON abilitywa.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = abilitywa.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''asuriasea'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM asuriasea.elcapitan_tenant_configurations
+
+  JOIN asuriasea.elcapitan_feature_groups ON asuriasea.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = asuriasea.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''bizlink'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM bizlink.elcapitan_tenant_configurations
+
+  JOIN bizlink.elcapitan_feature_groups ON bizlink.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = bizlink.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''centacare_employment'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM centacare_employment.elcapitan_tenant_configurations
+
+  JOIN centacare_employment.elcapitan_feature_groups ON centacare_employment.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = centacare_employment.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''cvgt'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM cvgt.elcapitan_tenant_configurations
+
+  JOIN cvgt.elcapitan_feature_groups ON cvgt.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = cvgt.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''designerlife'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM designerlife.elcapitan_tenant_configurations
+
+  JOIN designerlife.elcapitan_feature_groups ON designerlife.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = designerlife.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''familyservices'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM familyservices.elcapitan_tenant_configurations
+
+  JOIN familyservices.elcapitan_feature_groups ON familyservices.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = familyservices.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''forrest'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM forrest.elcapitan_tenant_configurations
+
+  JOIN forrest.elcapitan_feature_groups ON forrest.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = forrest.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''help_enterprises'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM help_enterprises.elcapitan_tenant_configurations
+
+  JOIN help_enterprises.elcapitan_feature_groups ON help_enterprises.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = help_enterprises.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''hvtc'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM hvtc.elcapitan_tenant_configurations
+
+  JOIN hvtc.elcapitan_feature_groups ON hvtc.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = hvtc.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''intojobs'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM intojobs.elcapitan_tenant_configurations
+
+  JOIN intojobs.elcapitan_feature_groups ON intojobs.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = intojobs.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''intowork_ttw'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM intowork_ttw.elcapitan_tenant_configurations
+
+  JOIN intowork_ttw.elcapitan_feature_groups ON intowork_ttw.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = intowork_ttw.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''mylestones'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM mylestones.elcapitan_tenant_configurations
+
+  JOIN mylestones.elcapitan_feature_groups ON mylestones.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = mylestones.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''octec'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM octec.elcapitan_tenant_configurations
+
+  JOIN octec.elcapitan_feature_groups ON octec.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = octec.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''peopleplus'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM peopleplus.elcapitan_tenant_configurations
+
+  JOIN peopleplus.elcapitan_feature_groups ON peopleplus.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = peopleplus.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''rsb'' AS client, elcapitan_feature_groups.name AS feature_group_name, elcapitan_tenant_configurations.name,
+  elcapitan_tenant_configurations.value
+
+  FROM rsb.elcapitan_tenant_configurations
+
+  JOIN rsb.elcapitan_feature_groups ON rsb.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = rsb.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''wesjobs'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM wesjobs.elcapitan_tenant_configurations
+
+  JOIN wesjobs.elcapitan_feature_groups ON wesjobs.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = wesjobs.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''workways'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM workways.elcapitan_tenant_configurations
+
+  JOIN workways.elcapitan_feature_groups ON workways.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = workways.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''yilabara'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM yilabara.elcapitan_tenant_configurations
+
+  JOIN yilabara.elcapitan_feature_groups ON yilabara.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = yilabara.elcapitan_feature_groups.id'
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+uuid: 7caebfb2-4f36-4249-9d55-979fc477309b
+metrics:
+- metric_name: count
+  verbose_name: COUNT(*)
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra: null
+  warning_text: null
+columns:
+- column_name: feature_group_name
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: value
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: name
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: client
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+version: 1.0.0
+database_uuid: 151c2dda-55fb-469f-96cf-234cba2241e4

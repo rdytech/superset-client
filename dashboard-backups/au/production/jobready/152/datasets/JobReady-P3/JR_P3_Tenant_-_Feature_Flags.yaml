@@ -1,0 +1,275 @@
+table_name: JR P3 Tenant - Feature Flags
+main_dttm_col: null
+description: null
+default_endpoint: null
+offset: 0
+cache_timeout: null
+schema: null
+sql: 'SELECT ''best'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM best.elcapitan_tenant_configurations
+
+  JOIN best.elcapitan_feature_groups ON best.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = best.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''globalskills'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM globalskills.elcapitan_tenant_configurations
+
+  JOIN globalskills.elcapitan_feature_groups ON globalskills.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = globalskills.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''jca'' AS client, elcapitan_feature_groups.name AS feature_group_name, elcapitan_tenant_configurations.name,
+  elcapitan_tenant_configurations.value
+
+  FROM jca.elcapitan_tenant_configurations
+
+  JOIN jca.elcapitan_feature_groups ON jca.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = jca.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''jljf'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM jljf.elcapitan_tenant_configurations
+
+  JOIN jljf.elcapitan_feature_groups ON jljf.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = jljf.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''jobs_statewide'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM jobs_statewide.elcapitan_tenant_configurations
+
+  JOIN jobs_statewide.elcapitan_feature_groups ON jobs_statewide.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = jobs_statewide.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''maiwel'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM maiwel.elcapitan_tenant_configurations
+
+  JOIN maiwel.elcapitan_feature_groups ON maiwel.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = maiwel.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''maxima'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM maxima.elcapitan_tenant_configurations
+
+  JOIN maxima.elcapitan_feature_groups ON maxima.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = maxima.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''multiplesolutions'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM multiplesolutions.elcapitan_tenant_configurations
+
+  JOIN multiplesolutions.elcapitan_feature_groups ON multiplesolutions.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = multiplesolutions.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''nirrumbuk'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM nirrumbuk.elcapitan_tenant_configurations
+
+  JOIN nirrumbuk.elcapitan_feature_groups ON nirrumbuk.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = nirrumbuk.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''onq'' AS client, elcapitan_feature_groups.name AS feature_group_name, elcapitan_tenant_configurations.name,
+  elcapitan_tenant_configurations.value
+
+  FROM onq.elcapitan_tenant_configurations
+
+  JOIN onq.elcapitan_feature_groups ON onq.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = onq.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''qite'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM qite.elcapitan_tenant_configurations
+
+  JOIN qite.elcapitan_feature_groups ON qite.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = qite.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''realfutures'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM realfutures.elcapitan_tenant_configurations
+
+  JOIN realfutures.elcapitan_feature_groups ON realfutures.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = realfutures.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''sarinarusso'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM sarinarusso.elcapitan_tenant_configurations
+
+  JOIN sarinarusso.elcapitan_feature_groups ON sarinarusso.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = sarinarusso.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''tag'' AS client, elcapitan_feature_groups.name AS feature_group_name, elcapitan_tenant_configurations.name,
+  elcapitan_tenant_configurations.value
+
+  FROM tag.elcapitan_tenant_configurations
+
+  JOIN tag.elcapitan_feature_groups ON tag.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = tag.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''thebridge'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM thebridge.elcapitan_tenant_configurations
+
+  JOIN thebridge.elcapitan_feature_groups ON thebridge.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = thebridge.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''workforceplus'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM workforceplus.elcapitan_tenant_configurations
+
+  JOIN workforceplus.elcapitan_feature_groups ON workforceplus.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = workforceplus.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''yourtown'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM yourtown.elcapitan_tenant_configurations
+
+  JOIN yourtown.elcapitan_feature_groups ON yourtown.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = yourtown.elcapitan_feature_groups.id'
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+uuid: f09707bb-785c-459e-9bc2-b4817bb59015
+metrics:
+- metric_name: count
+  verbose_name: COUNT(*)
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra: null
+  warning_text: null
+columns:
+- column_name: feature_group_name
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: value
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: name
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: client
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+version: 1.0.0
+database_uuid: caf1d4c6-b245-4b9c-bbc9-6ac76946424b

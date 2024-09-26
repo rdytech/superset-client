@@ -1,0 +1,52 @@
+slice_name: JR P1 Tenants- Feature Flags
+description: null
+certified_by: null
+certification_details: null
+viz_type: pivot_table_v2
+params:
+  datasource: 622__table
+  viz_type: pivot_table_v2
+  slice_id: 2890
+  groupbyColumns:
+  - name
+  groupbyRows:
+  - client
+  time_grain_sqla: P1D
+  temporal_columns_lookup: {}
+  metrics:
+  - expressionType: SQL
+    sqlExpression: case when MAX(value) = 'true' then 'On' end
+    column: null
+    aggregate: null
+    datasourceWarning: false
+    hasCustomLabel: false
+    label: case when MAX(value) = 'true' then 'On' end
+    optionName: metric_ozqhg592sxp_hjj7aa15zz
+  metricsLayout: COLUMNS
+  adhoc_filters: []
+  row_limit: 1000
+  order_desc: true
+  aggregateFunction: Sum
+  valueFormat: SMART_NUMBER
+  date_format: smart_date
+  rowOrder: key_a_to_z
+  colOrder: key_a_to_z
+  conditional_formatting:
+  - colorScheme: '#ACE1C4'
+    column: MAX(value)
+    operator: '='
+    targetValue: 1
+  extra_form_data: {}
+  dashboards:
+  - 152
+query_context: '{"datasource":{"id":622,"type":"table"},"force":false,"queries":[{"filters":[],"extras":{"time_grain_sqla":"P1D","having":"","where":""},"applied_time_extras":{},"columns":["name","client"],"metrics":[{"expressionType":"SQL","sqlExpression":"case
+  when MAX(value) = ''true'' then ''On'' end","column":null,"aggregate":null,"datasourceWarning":false,"hasCustomLabel":false,"label":"case
+  when MAX(value) = ''true'' then ''On'' end","optionName":"metric_ozqhg592sxp_hjj7aa15zz"}],"orderby":[[{"expressionType":"SQL","sqlExpression":"case
+  when MAX(value) = ''true'' then ''On'' end","column":null,"aggregate":null,"datasourceWarning":false,"hasCustomLabel":false,"label":"case
+  when MAX(value) = ''true'' then ''On'' end","optionName":"metric_ozqhg592sxp_hjj7aa15zz"},false]],"annotation_layers":[],"row_limit":1000,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"622__table","viz_type":"pivot_table_v2","slice_id":2890,"groupbyColumns":["name"],"groupbyRows":["client"],"time_grain_sqla":"P1D","temporal_columns_lookup":{},"metrics":[{"expressionType":"SQL","sqlExpression":"case
+  when MAX(value) = ''true'' then ''On'' end","column":null,"aggregate":null,"datasourceWarning":false,"hasCustomLabel":false,"label":"case
+  when MAX(value) = ''true'' then ''On'' end","optionName":"metric_ozqhg592sxp_hjj7aa15zz"}],"metricsLayout":"COLUMNS","adhoc_filters":[],"row_limit":1000,"order_desc":true,"aggregateFunction":"Sum","valueFormat":"SMART_NUMBER","date_format":"smart_date","rowOrder":"key_a_to_z","colOrder":"key_a_to_z","conditional_formatting":[{"colorScheme":"#ACE1C4","column":"MAX(value)","operator":"=","targetValue":1}],"extra_form_data":{},"dashboards":[152],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 5b36cf42-a54e-4e24-ae58-5fffeb5ad679
+version: 1.0.0
+dataset_uuid: 4b651b1f-4fea-4e67-bfc8-ccb4cc923c5a

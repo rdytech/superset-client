@@ -1,0 +1,229 @@
+table_name: JR P1 - Feature Flags
+main_dttm_col: null
+description: null
+default_endpoint: null
+offset: 0
+cache_timeout: null
+schema: atwork
+sql: 'SELECT ''aaoa'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM aaoa.elcapitan_tenant_configurations
+
+  JOIN aaoa.elcapitan_feature_groups ON aaoa.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = aaoa.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''atwork'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM atwork.elcapitan_tenant_configurations
+
+  JOIN atwork.elcapitan_feature_groups ON atwork.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = atwork.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''bamara'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM bamara.elcapitan_tenant_configurations
+
+  JOIN bamara.elcapitan_feature_groups ON bamara.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = bamara.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''caei'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM caei.elcapitan_tenant_configurations
+
+  JOIN caei.elcapitan_feature_groups ON caei.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = caei.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''castle'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM castle.elcapitan_tenant_configurations
+
+  JOIN castle.elcapitan_feature_groups ON castle.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = castle.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''cbs'' AS client, elcapitan_feature_groups.name AS feature_group_name, elcapitan_tenant_configurations.name,
+  elcapitan_tenant_configurations.value
+
+  FROM cbs.elcapitan_tenant_configurations
+
+  JOIN cbs.elcapitan_feature_groups ON cbs.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = cbs.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''epicassist'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM epicassist.elcapitan_tenant_configurations
+
+  JOIN epicassist.elcapitan_feature_groups ON epicassist.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = epicassist.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''joblinkplus'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM joblinkplus.elcapitan_tenant_configurations
+
+  JOIN joblinkplus.elcapitan_feature_groups ON joblinkplus.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = joblinkplus.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''jobmatch'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM jobmatch.elcapitan_tenant_configurations
+
+  JOIN jobmatch.elcapitan_feature_groups ON jobmatch.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = jobmatch.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''jobready_prod1'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM jobready_prod1.elcapitan_tenant_configurations
+
+  JOIN jobready_prod1.elcapitan_feature_groups ON jobready_prod1.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = jobready_prod1.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''proactivpeople'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM proactivpeople.elcapitan_tenant_configurations
+
+  JOIN proactivpeople.elcapitan_feature_groups ON proactivpeople.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = proactivpeople.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''senswide'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM senswide.elcapitan_tenant_configurations
+
+  JOIN senswide.elcapitan_feature_groups ON senswide.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = senswide.elcapitan_feature_groups.id
+
+
+  UNION ALL
+
+
+  SELECT ''wdea'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM wdea.elcapitan_tenant_configurations
+
+  JOIN wdea.elcapitan_feature_groups ON wdea.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = wdea.elcapitan_feature_groups.id
+
+  '
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+uuid: 4b651b1f-4fea-4e67-bfc8-ccb4cc923c5a
+metrics:
+- metric_name: count
+  verbose_name: COUNT(*)
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra: null
+  warning_text: null
+columns:
+- column_name: feature_group_name
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: value
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: name
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: client
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+version: 1.0.0
+database_uuid: e00d3a4a-42a5-4739-af0e-2bab069640f6

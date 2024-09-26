@@ -1,0 +1,14 @@
+database_name: JobReady-P1
+sqlalchemy_uri: postgresql+psycopg2://productionapp01:XXXXXXXXXX@dbc-p.live.jobready.io:15434/neptune_productionapp01_dlm_sensitive?sslmode=require
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: false
+allow_ctas: false
+allow_cvas: false
+allow_dml: false
+allow_file_upload: false
+extra:
+  allows_virtual_table_explore: true
+  cost_estimate_enabled: true
+uuid: e00d3a4a-42a5-4739-af0e-2bab069640f6
+version: 1.0.0

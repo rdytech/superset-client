@@ -1,0 +1,221 @@
+dashboard_title: Modules Roll Out Report
+description: null
+css: ''
+slug: null
+certified_by: null
+certification_details: null
+published: true
+uuid: c865eaea-c848-49a3-9435-25b5df7e8eda
+position:
+  CHART-6-9nUHN8Ui:
+    children: []
+    id: CHART-6-9nUHN8Ui
+    meta:
+      chartId: 2899
+      height: 50
+      sliceName: JR P2 Tenants Feature Flags
+      uuid: 4203acc2-92b6-4e11-941c-c2043b1e7ca0
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-7qIDO0XN3c
+    type: CHART
+  CHART-Ub9LiHu6D4:
+    children: []
+    id: CHART-Ub9LiHu6D4
+    meta:
+      chartId: 2890
+      height: 50
+      sliceName: JR P1- Feature Flags
+      uuid: 5b36cf42-a54e-4e24-ae58-5fffeb5ad679
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-j_8oV6p6u_
+    type: CHART
+  CHART-explore-2900-1:
+    children: []
+    id: CHART-explore-2900-1
+    meta:
+      chartId: 2900
+      height: 50
+      sliceName: JR P3 Tenant - Feature Flags
+      uuid: c3b47f95-82e9-42f6-a6f4-cfff785a9ab3
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-vJz9jzFG0b
+    type: CHART
+  CHART-explore-2903-1:
+    children: []
+    id: CHART-explore-2903-1
+    meta:
+      chartId: 2903
+      height: 50
+      sliceName: JR P5 Tenants - Feature Flags
+      uuid: 2016f6b4-b340-4457-bea3-0b65a9940d7c
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-F92EeGlgX8
+    type: CHART
+  CHART-yWy-6yge5K:
+    children: []
+    id: CHART-yWy-6yge5K
+    meta:
+      chartId: 2902
+      height: 50
+      sliceName: JR P4 Tenants - Feature Flags
+      uuid: 9a5c45d1-4c2d-4f52-88f2-8e24cc8a568d
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-EkObTWxbGc
+    type: CHART
+  DASHBOARD_VERSION_KEY: v2
+  GRID_ID:
+    children:
+    - ROW-j_8oV6p6u_
+    - ROW-7qIDO0XN3c
+    - ROW-vJz9jzFG0b
+    - ROW-EkObTWxbGc
+    - ROW-F92EeGlgX8
+    id: GRID_ID
+    parents:
+    - ROOT_ID
+    type: GRID
+  HEADER_ID:
+    id: HEADER_ID
+    meta:
+      text: Modules Roll Out Report
+    type: HEADER
+  ROOT_ID:
+    children:
+    - GRID_ID
+    id: ROOT_ID
+    type: ROOT
+  ROW-7qIDO0XN3c:
+    children:
+    - CHART-6-9nUHN8Ui
+    id: ROW-7qIDO0XN3c
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: ROW
+  ROW-EkObTWxbGc:
+    children:
+    - CHART-yWy-6yge5K
+    id: ROW-EkObTWxbGc
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: ROW
+  ROW-F92EeGlgX8:
+    children:
+    - CHART-explore-2903-1
+    id: ROW-F92EeGlgX8
+    meta:
+      '0': ROOT_ID
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: ROW
+  ROW-j_8oV6p6u_:
+    children:
+    - CHART-Ub9LiHu6D4
+    id: ROW-j_8oV6p6u_
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: ROW
+  ROW-vJz9jzFG0b:
+    children:
+    - CHART-explore-2900-1
+    id: ROW-vJz9jzFG0b
+    meta:
+      '0': ROOT_ID
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: ROW
+metadata:
+  chart_configuration:
+    '2890':
+      id: 2890
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 2899
+        - 2900
+        - 2902
+        - 2903
+    '2899':
+      id: 2899
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 2890
+        - 2900
+        - 2902
+        - 2903
+    '2900':
+      id: 2900
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 2890
+        - 2899
+        - 2902
+        - 2903
+    '2902':
+      id: 2902
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 2890
+        - 2899
+        - 2900
+        - 2903
+    '2903':
+      id: 2903
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 2890
+        - 2899
+        - 2900
+        - 2902
+  global_chart_configuration:
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    chartsInScope:
+    - 2890
+    - 2899
+    - 2900
+    - 2902
+    - 2903
+  color_scheme: ''
+  refresh_frequency: 0
+  expanded_slices: {}
+  label_colors: {}
+  timed_refresh_immune_slices: []
+  cross_filters_enabled: true
+  default_filters: '{}'
+  shared_label_colors: {}
+  color_scheme_domain: []
+version: 1.0.0

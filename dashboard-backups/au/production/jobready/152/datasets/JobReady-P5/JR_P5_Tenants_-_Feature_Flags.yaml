@@ -1,0 +1,85 @@
+table_name: JR P5 Tenants - Feature Flags
+main_dttm_col: null
+description: null
+default_endpoint: null
+offset: 0
+cache_timeout: null
+schema: null
+sql: 'SELECT ''maxsolutions'' AS client, elcapitan_feature_groups.name AS feature_group_name,
+  elcapitan_tenant_configurations.name, elcapitan_tenant_configurations.value
+
+  FROM maxsolutions.elcapitan_tenant_configurations
+
+  JOIN maxsolutions.elcapitan_feature_groups ON maxsolutions.elcapitan_tenant_configurations.elcapitan_feature_group_id
+  = maxsolutions.elcapitan_feature_groups.id
+
+  '
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+uuid: 15516e15-f669-4bce-bfbb-f544b30aa475
+metrics:
+- metric_name: count
+  verbose_name: COUNT(*)
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra: null
+  warning_text: null
+columns:
+- column_name: feature_group_name
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: value
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: name
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+- column_name: client
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: null
+version: 1.0.0
+database_uuid: ba82e50a-d559-47c6-be59-46d0c9ea68d4
