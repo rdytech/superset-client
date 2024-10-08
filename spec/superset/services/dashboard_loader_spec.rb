@@ -8,8 +8,8 @@ RSpec.describe Superset::Services::DashboardLoader do
     before { loader.perform }
 
     it 'populates dashboard_config with each objects filename and content' do
-      expect(loader.dashboard_config.keys).to contain_exactly(:dashboards, :datasets, :databases, :charts, :metadata)
-      loader.dashboard_config.keys.each do |object|
+      expect(loader.dashboard_config.keys).to contain_exactly(:dashboards, :datasets, :databases, :charts, :metadata, :tmp_uniq_dashboard_path)
+      (loader.dashboard_config.keys - [:tmp_uniq_dashboard_path]).each do |object|
         expect(loader.dashboard_config[object]).to all(include(:filename, :content))
       end
     end

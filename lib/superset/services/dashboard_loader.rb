@@ -7,6 +7,7 @@ module Superset
   module Services
     class DashboardLoader
       include FileUtilities
+
       TMP_PATH = '/tmp/superset_dashboard_imports'.freeze
 
       attr_reader :dashboard_export_zip
@@ -43,6 +44,7 @@ module Superset
       class DashboardConfig < ::OpenStruct
         def config
             {
+              tmp_uniq_dashboard_path: tmp_uniq_dashboard_path,
               dashboards: load_yamls_for('dashboards'),
               databases:  load_yamls_for('databases'),
               datasets:   load_yamls_for('datasets'),
@@ -59,8 +61,7 @@ module Superset
         end
 
         def load_yaml_and_symbolize_keys(path)
-          yaml = YAML.load_file(path)
-          yaml.deep_symbolize_keys
+          YAML.load_file(path).deep_symbolize_keys
         end
       end
     end
