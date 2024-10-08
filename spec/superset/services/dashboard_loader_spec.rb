@@ -53,7 +53,6 @@ RSpec.describe Superset::Services::DashboardLoader do
 
     it 'loads the charts yaml' do
       charts = loader.dashboard_config[:charts]
-binding.pry
       expect(charts.size).to eq(5)
       expect(charts.map {|c| File.basename(c[:filename]) }).to match_array([
         "Boy_Name_Cloud_53920.yaml",
