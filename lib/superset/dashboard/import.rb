@@ -20,7 +20,6 @@
 module Superset
   module Dashboard
     class Import < Request
-
       attr_reader :source_zip_file, :overwrite
 
       def initialize(source_zip_file: , overwrite: true)
@@ -30,7 +29,6 @@ module Superset
 
       def perform
         validate_params
-
         response
       end
 
@@ -46,7 +44,9 @@ module Superset
       def validate_params
         raise ArgumentError, 'source_zip_file is required' if source_zip_file.nil?
         raise ArgumentError, 'source_zip_file does not exist' unless File.exist?(source_zip_file)
+        raise ArgumentError, 'source_zip_file is not a zip file' unless File.extname(source_zip_file) == '.zip'
         raise ArgumentError, 'overwrite must be a boolean' unless [true, false].include?(overwrite)
+        raise ArgumentError, "zip target database does not exist: #{zip_database_config_not_found_in_superset}" if zip_database_config_not_found_in_superset.present?
       end
 
       def payload
@@ -58,6 +58,26 @@ module Superset
 
       def route
         "dashboard/import/"
+      end
+
+      def zip_database_config_not_found_in_superset
+        zip_databases_details.select {|s| !superset_database_uuids_found.include?(s[:uuid]) }
+      end
+
+      def superset_database_uuids_found
+        @superset_database_uuids_found ||= begin
+          zip_databases_details.map {|i| i[:uuid]}.map do |uuid|
+            uuid if Superset::Database::List.new(uuid_equals: uuid).result.count == 1
+          end.compact
+        end
+      end
+
+      def zip_databases_details
+        zip_dashboard_config[:databases].map{|d| {uuid: d[:content][:uuid], name: d[:content][:database_name]} }
+      end
+
+      def zip_dashboard_config
+        @zip_dashboard_config ||= Superset::Services::DashboardLoader.new(dashboard_export_zip: source_zip_file).perform
       end
     end
   end

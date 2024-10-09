@@ -5,7 +5,6 @@ module Superset
     class InvalidParameterError < StandardError; end
     class ValidationError < StandardError; end
 
-
     PAGE_SIZE = 100
 
     attr_accessor :page_num

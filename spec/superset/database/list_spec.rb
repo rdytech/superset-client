@@ -2,28 +2,30 @@ require 'spec_helper'
 
 RSpec.describe Superset::Database::List do
   subject { described_class.new }
-  let(:result) do
-    [
-      {
-        id: 1,
-        database_name: 'Test 1',
-        backend: 'postgres',
-        expose_in_sqllab: 'true'
-      },
-      {
-        id: 2,
-        database_name: 'Test 2',
-        backend: 'mysql',
-        expose_in_sqllab: 'false'
-      }
-    ]
-  end
-
-  before do
-    allow(subject).to receive(:result).and_return(result)
+  let(:response) do
+    { 'result' =>
+      [
+        {
+          id: 1,
+          database_name: 'Test 1',
+          backend: 'postgres',
+          expose_in_sqllab: 'true'
+        },
+        {
+          id: 2,
+          database_name: 'Test 2',
+          backend: 'mysql',
+          expose_in_sqllab: 'false'
+        }
+      ]
+    }
   end
 
   describe '#rows' do
+    before do
+      allow(subject).to receive(:response).and_return(response)
+    end
+
     specify do
       expect(subject.rows).to match_array(
         [
@@ -56,6 +58,34 @@ RSpec.describe Superset::Database::List do
 
       specify do
         expect(subject.query_params).to eq("filters:!((col:database_name,opr:ct,value:'acme')),page:0,page_size:100")
+      end
+    end
+
+    context 'with uuid_equals filters' do
+      subject { described_class.new(uuid_equals: '123') }
+
+      specify do
+        expect(subject.query_params).to eq("filters:!((col:uuid,opr:eq,value:'123')),page:0,page_size:100")
+      end
+    end
+  end
+
+  describe '#response' do
+    context 'with invalid parameters' do
+      context 'when title_contains is not a string' do
+        subject { described_class.new(title_contains: ['test']) }
+
+        specify do
+          expect { subject.response }.to raise_error(Superset::Request::InvalidParameterError, 'title_contains must be a String type')
+        end
+      end
+
+      context 'when uuid_equals is not a string' do
+        subject { described_class.new(uuid_equals: 1) }
+
+        specify do
+          expect { subject.response }.to raise_error(Superset::Request::InvalidParameterError, 'uuid_equals must be a String type')
+        end
       end
     end
   end

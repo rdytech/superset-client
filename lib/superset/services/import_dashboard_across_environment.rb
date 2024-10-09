@@ -86,7 +86,6 @@ module Superset
       def create_new_dashboard_zip
         Zip::File.open(new_zip_file, Zip::File::CREATE) do |zipfile|
           Dir[File.join(dashboard_export_root_path, '**', '**')].each do |file|
-#            puts "File Sub:" + file.sub(dashboard_export_root_path + '/', File.basename(dashboard_export_root_path) + '/' ).to_s
             zipfile.add(file.sub(dashboard_export_root_path + '/', File.basename(dashboard_export_root_path) + '/' ), file) if File.file?(file)
           end
         end
