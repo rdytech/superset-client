@@ -2,6 +2,33 @@
 
 In this document, we will discuss how to transfer dashboards across Superset hosting environments with the goal of heading towards an API call to automate the process.
 
+Current process is limited to dashboards with all datasets based on a single database connection.
+
+## Short Version
+
+Assuming you want to transfer a dashboard from Env1 to Env2.
+
+You will need the following:
+- a Env1 Dashboard Export Zip file
+- a Env2 Database config export yaml
+- a Env2 schema to point your datasets to
+
+Assuming your API env for ruby is setup for your target superset environment.
+( ie using API creds for Env2 for this example )
+
+```ruby
+
+new_import_zip = Superset::Services::ImportDashboardAcrossEnvironments.new(
+  dashboard_export_zip:      'path_to/dashboard_101_export_20241010.zip',
+  target_database_yaml_file: 'path_to/env2_db_config.yaml', 
+  target_database_schema:    'acme', 
+  ).perform
+
+# now import the adjusted zip to the target superset env
+Superset::Dashboard::Import.new(source_zip_file: new_import_file).perform
+
+```
+
 ## Background
 
 A common practice is to set up infrastructure to deploy multiple Superset environments. For example, a simple setup might be:
