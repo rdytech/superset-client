@@ -14,6 +14,11 @@ RSpec.describe Superset::Dashboard::Import do
 
       describe '#response' do
         context 'with valid parameters' do
+          before do
+            allow(Superset::Database::List).to receive(:new).
+              with(uuid_equals: "a2dc77af-e654-49bb-b321-40f6b559a1ee").
+              and_return(double(result: ['some data']))
+          end
 
           specify 'returns response' do
             expect(subject.perform).to eq(response)
@@ -43,6 +48,26 @@ RSpec.describe Superset::Dashboard::Import do
 
             specify 'raises error' do
               expect { subject.perform }.to raise_error(ArgumentError, 'overwrite must be a boolean')
+            end
+          end
+
+          context 'when source_zip_file is not a zip extension' do
+            let(:source_zip_file) { 'spec/fixtures/database-prod-examples.yaml' }
+
+            specify 'raises error' do
+              expect { subject.perform }.to raise_error(ArgumentError, 'source_zip_file is not a zip file')
+            end
+          end
+
+          context 'when zip_database_config_not_found_in_superset is not present' do
+            before do
+              allow(Superset::Database::List).to receive(:new).
+                with(uuid_equals: "a2dc77af-e654-49bb-b321-40f6b559a1ee").
+                and_return(double(result: []))
+            end
+
+            specify 'raises error' do
+              expect { subject.perform }.to raise_error(ArgumentError, "zip target database does not exist: [{:uuid=>\"a2dc77af-e654-49bb-b321-40f6b559a1ee\", :name=>\"examples\"}]")
             end
           end
         end

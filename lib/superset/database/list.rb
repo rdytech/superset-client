@@ -4,10 +4,11 @@
 module Superset
   module Database
     class List < Superset::Request
-      attr_reader :title_contains
+      attr_reader :title_contains, :uuid_equals
 
-      def initialize(page_num: 0, title_contains: '')
+      def initialize(page_num: 0, title_contains: '', uuid_equals: '')
         @title_contains = title_contains
+        @uuid_equals = uuid_equals
         super(page_num: page_num)
       end
 
@@ -34,6 +35,7 @@ module Superset
         # TODO filtering across all list classes can be refactored to support multiple options in a more flexible way
         filter_set = []
         filter_set << "(col:database_name,opr:ct,value:'#{title_contains}')" if title_contains.present?
+        filter_set << "(col:uuid,opr:eq,value:'#{uuid_equals}')" if uuid_equals.present?
         unless filter_set.empty?
           "filters:!(" + filter_set.join(',') + "),"
         end
@@ -45,6 +47,7 @@ module Superset
 
       def validate_constructor_args
         raise InvalidParameterError, "title_contains must be a String type" unless title_contains.is_a?(String)
+        raise InvalidParameterError, "uuid_equals must be a String type" unless uuid_equals.is_a?(String)
       end
     end
   end
