@@ -67,7 +67,7 @@ module Superset
       def superset_database_uuids_found
         @superset_database_uuids_found ||= begin
           zip_databases_details.map {|i| i[:uuid]}.map do |uuid|
-            uuid if Superset::Database::List.new(uuid_equals: uuid).result.count == 1
+            uuid if Superset::Database::List.new(uuid_equals: uuid).result.present?
           end.compact
         end
       end
