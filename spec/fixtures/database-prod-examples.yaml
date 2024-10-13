@@ -1,0 +1,17 @@
+database_name: prod-examples
+sqlalchemy_uri: postgresql+psycopg2://superset:XXXXXXXXXX@the-prod-db-host:5432/superset
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: true
+allow_ctas: true
+allow_cvas: true
+allow_dml: true
+allow_csv_upload: true
+extra:
+  metadata_params: {}
+  engine_params: {}
+  metadata_cache_timeout: {}
+  allows_virtual_table_explore: true
+  schemas_allowed_for_csv_upload: null
+uuid: cc21999b-649f-451f-816a-85b5977b9582
+version: 1.0.0

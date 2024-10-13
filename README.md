@@ -66,12 +66,17 @@ More examples [listed here](https://github.com/rdytech/superset-client/tree/deve
 
 ## Duplicating Dashboards
 
-The Primary motivation behind this gem was to use the Superset API to duplicate dashboards, charts, datasets across multiple database connections.  
+One Primary motivation behind this gem was to use the Superset API to duplicate dashboards, charts, datasets across multiple database connections.
 
 Targeted use case was for superset embedded functionality implemented in a application resting on multi tenanted database setup.
 
 See examples in [Duplicate Dashboards](https://github.com/rdytech/superset-client/tree/develop/doc/duplicate_dashboards.md)
 
+## Moving / Transferring Dashboards across Environments
+
+With a few configuration changes to an import file, the process can be codified to transfer a dashboard between environments.
+
+See example in [Transferring Dashboards across Environments](https://github.com/rdytech/superset-client/tree/develop/doc/migrating_dashboards_across_environments.md)
 
 ## Contributing
 

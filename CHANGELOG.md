@@ -1,5 +1,9 @@
 ## Change Log
 
+## 0.2.2 - 2024-10-10
+
+* add ImportDashboardAcrossEnvironments class for transfering between superset environments
+
 ## 0.2.1 - 2024-09-17
 
 * add Superset::Database::Export class for exporting database configurations
