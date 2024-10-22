@@ -1,5 +1,3 @@
-
-
 module Superset
   class BasePutRequest < Superset::Request
     attr_reader :object_id, :params
