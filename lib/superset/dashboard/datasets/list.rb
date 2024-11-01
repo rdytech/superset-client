@@ -88,6 +88,16 @@ module Superset
           end
         end
 
+        private
+
+        def route
+          "dashboard/#{id}/datasets"
+        end
+
+        def list_attributes
+          ['id', 'datasource_name', 'database_id', 'database_name', 'database_backend', 'schema'].map(&:to_sym)
+        end
+
         # when displaying a list of datasets, show dashboard title as well
         def title
           @title ||= [id, dashboard.title].join(' ')
