@@ -2,6 +2,12 @@
 # providing count of charts, datasets, and databases used in each dashboard
 # as well as optional data sovereignty information
 
+# Data Sovereignty in this context requires that all datasets used in a dashboard are from one database schema only.
+# Primarily used to identify potential issues with embedded dashboards where data sovereignty is a concern.
+
+# Usage:
+# Superset::Services::DashboardReport.new(dashboard_ids: [1,2,3]).perform
+
 module Superset
   module Services
     class DashboardReport
@@ -36,27 +42,29 @@ module Superset
 
       # possible data sovereignty issues
       def data_sovereignty_issues
-        @report.map do |dashboard|
-          reasons = []
-          chart_dataset_ids = dashboard[:datasets][:chart_datasets].map{|d| d[:id]}
+        @data_sovereignty_issues ||= begin
+          @report.map do |dashboard|
+            reasons = []
+            chart_dataset_ids = dashboard[:datasets][:chart_datasets].map{|d| d[:id]}
 
-          # invalid if any filters datasets are not part of the chart datasets
-          unknown_datasets = dashboard[:filters][:filter_dataset_ids] - chart_dataset_ids
-          if unknown_datasets.any?
-            reasons << "WARNING: One or more filter datasets is not included in chart datasets for " \
-                        "filter dataset ids: #{unknown_datasets.join(', ')}."
-            reasons << "DETAILS: #{unknown_dataset_details(unknown_datasets)}"
-          end
+            # invalid if any filters datasets are not part of the chart datasets
+            unknown_datasets = dashboard[:filters][:filter_dataset_ids] - chart_dataset_ids
+            if unknown_datasets.any?
+              reasons << "WARNING: One or more filter datasets is not included in chart datasets for " \
+                          "filter dataset ids: #{unknown_datasets.join(', ')}."
+              reasons << "DETAILS: #{unknown_dataset_details(unknown_datasets)}"
+            end
 
-          # invalid if any filters datasets are not part of the chart datasets
-          chart_dataset_schemas = dashboard[:datasets][:chart_datasets].map{|d| d[:schema]}.uniq
-          if chart_dataset_schemas.count > 1
-            reasons << "ERROR: Multiple distinct chart dataset schemas found. Expected 1. Found #{chart_dataset_schemas.count}. " \
-                        "schema names: #{chart_dataset_schemas.join(', ') }"
-          end
+            # invalid if any filters datasets are not part of the chart datasets
+            chart_dataset_schemas = dashboard[:datasets][:chart_datasets].map{|d| d[:schema]}.uniq
+            if chart_dataset_schemas.count > 1
+              reasons << "ERROR: Multiple distinct chart dataset schemas found. Expected 1. Found #{chart_dataset_schemas.count}. " \
+                          "schema names: #{chart_dataset_schemas.join(', ') }"
+            end
 
-          { reasons: reasons, dashboard: dashboard } if reasons.any?
-        end.compact
+            { reasons: reasons, dashboard: dashboard } if reasons.any?
+          end.compact
+        end
       end
 
       def unknown_dataset_details(unknown_datasets)
@@ -66,8 +74,6 @@ module Superset
           { id: d.id, name: d.title }
         rescue Happi::Error::NotFound => e
           { id: dataset_id, name: '>>>> ERROR: DATASET DOES NOT EXIST <<<<' }
-        rescue => e
-          { id: dataset_id, name: '>>>> ERROR: #{e} <<<<' }
         end
       end
 
