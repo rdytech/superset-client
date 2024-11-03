@@ -87,6 +87,10 @@ module Superset
         ids_not_in.map {|id| "(col:id,opr:neq,value:'#{id}')"}.join(',')
       end
 
+      def order_by
+        ",order_column:changed_on,order_direction:desc"
+      end
+
       def list_attributes
         [:id, :dashboard_title, :status, :url]
       end

@@ -36,11 +36,6 @@ module Superset
       [filters, pagination, order_by].join
     end
 
-    def order_by
-      # by default, we will order by changed_on as per the GUI
-      ",order_column:changed_on,order_direction:desc"
-    end
-
     private
 
     def route
@@ -57,6 +52,13 @@ module Superset
 
     def pagination
       "page:#{page_num},page_size:#{PAGE_SIZE}"
+    end
+
+    def order_by
+      # order options are to not be consistant across all objects
+      # eg changed_on is NOT available on all objects .. requires customization in each ::List class
+      #
+      # Example only: ",order_column:changed_on,order_direction:desc"
     end
 
     def filters

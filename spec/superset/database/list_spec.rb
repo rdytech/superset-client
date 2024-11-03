@@ -20,7 +20,7 @@ RSpec.describe Superset::Database::List do
       ]
     }
   end
-  let(:default_query_params) { "page:0,page_size:100,order_column:changed_on,order_direction:desc" }
+  let(:default_query_params) { "page:0,page_size:100" }
 
   describe '#rows' do
     before do

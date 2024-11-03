@@ -74,12 +74,10 @@ RSpec.describe Superset::Chart::List do
       "viz_type"=>"dist_bar"
     }]
   end
-  let(:default_query_params) { "page:0,page_size:100,order_column:changed_on,order_direction:desc" }
+  let(:default_query_params) { "page:0,page_size:100" }
 
   before do
     allow(subject).to receive(:result).and_return(result)
-    #allow(subject).to receive(:superset_host).and_return(superset_host)
-    #allow(subject).to receive(:response).and_return( { 'count': 2 } )
   end
 
   describe '#rows' do
