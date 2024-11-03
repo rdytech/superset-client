@@ -33,7 +33,12 @@ module Superset
     end
 
     def query_params
-      [filters, pagination].join
+      [filters, pagination, order_by].join
+    end
+
+    def order_by
+      # by default, we will order by changed_on as per the GUI
+      ",order_column:changed_on,order_direction:desc"
     end
 
     private

@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# Add tags to an object
+# for object type options see ObjectType.to_a
+#
+# Usage:
+# Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard.id, tags: tags).perform
+
 module Superset
   module Tag
     class AddToObject < Superset::Request
