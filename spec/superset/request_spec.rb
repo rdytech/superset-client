@@ -41,7 +41,7 @@ RSpec.describe Superset::Request, type: :service do
 
   describe '#query_params' do
     it 'returns the default query params' do
-      expect(subject.send(:query_params)).to eq("page:0,page_size:100,order_column:changed_on,order_direction:desc")
+      expect(subject.send(:query_params)).to eq("page:0,page_size:100")
     end
   end
 end

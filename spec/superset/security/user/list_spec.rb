@@ -35,7 +35,7 @@ RSpec.describe Superset::Security::User::List do
     }]
   end
 
-  let(:default_query_params) { "page:0,page_size:100,order_column:changed_on,order_direction:desc" }
+  let(:default_query_params) { "page:0,page_size:100" }
 
   before do
     allow(subject).to receive(:result).and_return(result)
