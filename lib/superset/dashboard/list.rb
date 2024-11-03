@@ -7,7 +7,7 @@ module Superset
     class List < Superset::Request
       attr_reader :title_contains, :title_equals, :tags_equal, :ids_not_in
 
-      def initialize(page_num: 0, title_contains: '', title_equals: '', tags_equal: [], ids_not_in: [])
+      def initialize(page_num: 0, title_contains: '', title_equals: '', tags_equal: [], ids_not_in: [], **extra_args)
         @title_contains = title_contains
         @title_equals = title_equals
         @tags_equal = tags_equal

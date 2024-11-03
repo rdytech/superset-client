@@ -43,6 +43,8 @@ RSpec.describe Superset::Dataset::List do
   ]
   end
 
+  let(:default_query_params) { "page:0,page_size:100,order_column:changed_on,order_direction:desc" }
+
   before do
     allow(subject).to receive(:result).and_return(result)
     allow(subject).to receive(:superset_host).and_return(superset_host)
@@ -50,8 +52,6 @@ RSpec.describe Superset::Dataset::List do
   end
 
   describe '#rows' do
-    #before { stub_const("Superset::Request::PAGE_SIZE", "3") }
-
     specify do
       expect(subject.rows).to eq(
         [
@@ -64,14 +64,14 @@ RSpec.describe Superset::Dataset::List do
 
   describe '#query_params' do
     specify 'with defaults' do
-      expect(subject.query_params).to eq("page:0,page_size:100")
+      expect(subject.query_params).to eq("#{default_query_params}")
     end
 
     context 'with title_contains filters' do
       subject { described_class.new(title_contains: 'birth') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:table_name,opr:ct,value:'birth')),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:table_name,opr:ct,value:'birth')),#{default_query_params}")
       end
     end
 
@@ -79,7 +79,7 @@ RSpec.describe Superset::Dataset::List do
       subject { described_class.new(title_equals: 'birth_days') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:table_name,opr:eq,value:'birth_days')),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:table_name,opr:eq,value:'birth_days')),#{default_query_params}")
       end
     end
 
@@ -88,7 +88,7 @@ RSpec.describe Superset::Dataset::List do
       subject { described_class.new(title_equals: 'birth_days', schema_equals: 'schema_one') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:table_name,opr:eq,value:'birth_days'),(col:schema,opr:eq,value:'schema_one')),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:table_name,opr:eq,value:'birth_days'),(col:schema,opr:eq,value:'schema_one')),#{default_query_params}")
       end
     end
 
