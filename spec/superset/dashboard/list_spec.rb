@@ -19,6 +19,7 @@ RSpec.describe Superset::Dashboard::List do
       }
     ]
   end
+  let(:default_query_params) { "page:0,page_size:100,order_column:changed_on,order_direction:desc" }
 
   before do
     allow(subject).to receive(:result).and_return(result)
@@ -62,7 +63,7 @@ RSpec.describe Superset::Dashboard::List do
     context 'for pagination' do
       context 'with defaults' do
         specify do
-          expect(subject.query_params).to eq("page:0,page_size:100")
+          expect(subject.query_params).to eq(default_query_params)
         end
       end
 
@@ -70,7 +71,7 @@ RSpec.describe Superset::Dashboard::List do
         subject { described_class.new(page_num: 5) }
 
         specify do
-          expect(subject.query_params).to eq("page:5,page_size:100")
+          expect(subject.query_params).to eq(default_query_params.gsub('page:0', 'page:5'))
         end
       end
     end
@@ -79,7 +80,7 @@ RSpec.describe Superset::Dashboard::List do
       subject { described_class.new(title_contains: 'acme') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:dashboard_title,opr:ct,value:'acme')),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:dashboard_title,opr:ct,value:'acme')),#{default_query_params}")
       end
     end
 
@@ -91,7 +92,7 @@ RSpec.describe Superset::Dashboard::List do
           "filters:!(" \
           "(col:dashboard_title,opr:ct,value:'birth')," \
           "(col:tags,opr:dashboard_tags,value:'template')" \
-          "),page:0,page_size:100")
+          "),#{default_query_params}")
       end
     end
 
@@ -106,7 +107,7 @@ RSpec.describe Superset::Dashboard::List do
           "(col:tags,opr:dashboard_tags,value:'template')," \
           "(col:tags,opr:dashboard_tags,value:'client:acme')," \
           "(col:tags,opr:dashboard_tags,value:'product:turbo-charged-feet')" \
-          "),page:3,page_size:100")
+          "),#{default_query_params.gsub('page:0', 'page:3')}")
       end
     end
   end
