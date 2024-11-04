@@ -47,7 +47,7 @@ module Superset
             reasons = []
             chart_dataset_ids = dashboard[:datasets][:chart_datasets].map{|d| d[:id]}
 
-            # invalid if any filters datasets are not part of the chart datasets
+            # add WARNING msg if any filters datasets are not part of the chart datasets
             unknown_datasets = dashboard[:filters][:filter_dataset_ids] - chart_dataset_ids
             if unknown_datasets.any?
               reasons << "WARNING: One or more filter datasets is not included in chart datasets for " \
@@ -55,7 +55,7 @@ module Superset
               reasons << "DETAILS: #{unknown_dataset_details(unknown_datasets)}"
             end
 
-            # invalid if any filters datasets are not part of the chart datasets
+            # add ERROR msg if multiple chart dataset schemas are found
             chart_dataset_schemas = dashboard[:datasets][:chart_datasets].map{|d| d[:schema]}.uniq
             if chart_dataset_schemas.count > 1
               reasons << "ERROR: Multiple distinct chart dataset schemas found. Expected 1. Found #{chart_dataset_schemas.count}. " \
