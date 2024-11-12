@@ -23,10 +23,26 @@ module Superset
       end
 
       def perform
+        puts "Starting export for dashboard ID: #{@dashboard_id}"
         create_tmp_dir
+        puts "Temporary directory created at: #{tmp_uniq_dashboard_path}"
+
         save_exported_zip_file
+        puts "Exported zip file saved at: #{zip_file_name}"
+
         unzip_files
-        copy_export_files_to_destination_path if destination_path
+        puts "Files unzipped to: #{tmp_uniq_dashboard_path}"
+
+        copy_export_files_to_destination_path
+        puts "Files copied to destination: #{destination_path_with_dash_id}"
+
+        cleanup_outdated_files
+        puts "Cleanup of outdated files completed."
+
+        Dir.glob("#{destination_path_with_dash_id}/**/*")
+      rescue => e
+        puts "Export failed: #{e.message}"
+        raise
       end
 
       def response
@@ -37,6 +53,10 @@ module Superset
         )
       end
 
+      def zip_file_name
+        @zip_file_name ||= "#{tmp_uniq_dashboard_path}/dashboard_#{dashboard_id}_export_#{datestamp}.zip"
+      end
+
       private
 
       def params
@@ -45,27 +65,66 @@ module Superset
 
       def save_exported_zip_file
         File.open(zip_file_name, 'wb') { |fp| fp.write(response.body) }
+        puts "Saved zip file: #{zip_file_name}"
       end
 
       def unzip_files
         @extracted_files = unzip_file(zip_file_name, tmp_uniq_dashboard_path)
+        puts "Unzipped files: #{@extracted_files.inspect}"
       end
 
       def download_folder
         File.dirname(extracted_files[0])
       end
 
-      def copy_export_files_to_destination_path
-        path_with_dash_id = File.join(destination_path, dashboard_id.to_s)
-        FileUtils.mkdir_p(path_with_dash_id) unless File.directory?(path_with_dash_id)
+      def destination_path_with_dash_id
+        @destination_path_with_dash_id ||= File.join(destination_path, dashboard_id.to_s)
+      end
 
-        Dir.glob("#{download_folder}/*").each do |item|
-          FileUtils.cp_r(item, path_with_dash_id)
+      def copy_export_files_to_destination_path
+        FileUtils.mkdir_p(destination_path_with_dash_id) unless File.directory?(destination_path_with_dash_id)
+        puts "Ensured destination directory: #{destination_path_with_dash_id}"
+
+        Dir.glob("#{download_folder}/**/*").each do |item|
+          next if File.directory?(item) # Skip directories
+
+          relative_item_path = Pathname.new(item).relative_path_from(Pathname.new(download_folder)).to_s
+          destination_item = File.join(destination_path_with_dash_id, relative_item_path)
+
+          FileUtils.mkdir_p(File.dirname(destination_item)) unless File.directory?(File.dirname(destination_item))
+          puts "Copying #{item} to #{destination_item}"
+          FileUtils.cp(item, destination_item) # Using cp instead of cp_r
         end
       end
 
-      def zip_file_name
-        @zip_file_name ||= "#{tmp_uniq_dashboard_path}/dashboard_#{dashboard_id}_export_#{datestamp}.zip"
+      def cleanup_outdated_files
+        destination = Pathname.new(destination_path_with_dash_id)
+        puts "Cleaning up outdated files in #{destination}"
+
+        # Gather a list of relative paths from the download_folder, including only files
+        latest_files = Dir.glob("#{download_folder}/**/*").select { |f| File.file?(f) }.map do |file|
+          Pathname.new(file).relative_path_from(Pathname.new(download_folder)).to_s.downcase
+        end
+        puts "Latest files: #{latest_files.inspect}"
+
+        # Convert latest_files to a Set for efficient lookup
+        latest_files_set = latest_files.to_set
+
+        # Iterate over existing files in the destination path and delete any that are not in the latest export
+        Dir.glob("#{destination}/**/*").each do |existing_file|
+          existing_path = Pathname.new(existing_file)
+          next if existing_path.directory? # Skip directories
+
+          relative_path = existing_path.relative_path_from(destination).to_s.downcase
+          puts "Checking file: #{relative_path}"
+
+          unless latest_files_set.include?(relative_path)
+            puts "Removing file: #{existing_file} as it's not in the latest export."
+            FileUtils.rm_f(existing_file)
+          else
+            puts "Retaining file: #{existing_file} as it's part of the latest export."
+          end
+        end
       end
 
       def create_tmp_dir
@@ -73,7 +132,7 @@ module Superset
       end
 
       # uniq random tmp folder name for each export
-      # this will allow us to do a wildcard glop on the folder to get the files 
+      # this will allow us to do a wildcard glop on the folder to get the files
       def tmp_uniq_dashboard_path
         @tmp_uniq_dashboard_path ||= File.join(TMP_SUPERSET_DASHBOARD_PATH, uuid)
       end
@@ -92,6 +151,22 @@ module Superset
 
       def datestamp
         @datestamp ||= Time.now.strftime('%Y%m%d')
+      end
+
+      def unzip_file(zip_path, destination)
+        extracted_files = []
+        Zip::File.open(zip_path) do |zip_file|
+          zip_file.each do |entry|
+            entry_path = File.join(destination, entry.name)
+            FileUtils.mkdir_p(File.dirname(entry_path))
+            zip_file.extract(entry, entry_path) unless File.exist?(entry_path)
+            extracted_files << entry_path
+          end
+        end
+        extracted_files
+      rescue => e
+        puts "Failed to unzip file: #{e.message}"
+        raise
       end
     end
   end
