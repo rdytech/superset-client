@@ -33,17 +33,24 @@ module Superset
         unzip_files
         puts "Files unzipped to: #{tmp_uniq_dashboard_path}"
 
+        clean_destination_directory
+        puts "Destination directory cleaned: #{destination_path_with_dash_id}"
+
         copy_export_files_to_destination_path if destination_path
         puts "Files copied to destination: #{destination_path_with_dash_id}"
 
-        cleanup_outdated_files
-        puts "Cleanup of outdated files completed."
+        puts "Export process completed successfully."
 
-        Dir.glob("#{destination_path_with_dash_id}/**/*")
-      rescue => e
+        # Return the list of copied files
+        Dir.glob("#{destination_path_with_dash_id}/**/*").select { |f| File.file?(f) }
+      rescue StandardError => e
         puts "Export failed: #{e.message}"
         raise
+      ensure
+        cleanup_temp_dir
       end
+
+      private
 
       def response
         @response ||= client.call(
@@ -81,49 +88,33 @@ module Superset
         @destination_path_with_dash_id ||= File.join(destination_path, dashboard_id.to_s)
       end
 
-      def copy_export_files_to_destination_path
-        FileUtils.mkdir_p(destination_path_with_dash_id) unless File.directory?(destination_path_with_dash_id)
-        puts "Ensured destination directory: #{destination_path_with_dash_id}"
+      def clean_destination_directory
+        if Dir.exist?(destination_path_with_dash_id)
+          FileUtils.rm_rf(Dir.glob("#{destination_path_with_dash_id}/*"))
+          puts "Deleted all existing files in #{destination_path_with_dash_id}."
+        else
+          FileUtils.mkdir_p(destination_path_with_dash_id)
+          puts "Created new destination directory: #{destination_path_with_dash_id}"
+        end
+      end
 
+      def copy_export_files_to_destination_path
         Dir.glob("#{download_folder}/**/*").each do |item|
           next if File.directory?(item) # Skip directories
 
           relative_item_path = Pathname.new(item).relative_path_from(Pathname.new(download_folder)).to_s
           destination_item = File.join(destination_path_with_dash_id, relative_item_path)
 
-          FileUtils.mkdir_p(File.dirname(destination_item)) unless File.directory?(File.dirname(destination_item))
+          FileUtils.mkdir_p(File.dirname(destination_item)) unless Dir.exist?(File.dirname(destination_item))
           puts "Copying #{item} to #{destination_item}"
-          FileUtils.cp(item, destination_item) # Using cp instead of cp_r
+          FileUtils.cp(item, destination_item)
         end
       end
 
-      def cleanup_outdated_files
-        destination = Pathname.new(destination_path_with_dash_id)
-        puts "Cleaning up outdated files in #{destination}"
-
-        # Gather a list of relative paths from the download_folder, including only files
-        latest_files = Dir.glob("#{download_folder}/**/*").select { |f| File.file?(f) }.map do |file|
-          Pathname.new(file).relative_path_from(Pathname.new(download_folder)).to_s.downcase
-        end
-        puts "Latest files: #{latest_files.inspect}"
-
-        # Convert latest_files to a Set for efficient lookup
-        latest_files_set = latest_files.to_set
-
-        # Iterate over existing files in the destination path and delete any that are not in the latest export
-        Dir.glob("#{destination}/**/*").each do |existing_file|
-          existing_path = Pathname.new(existing_file)
-          next if existing_path.directory? # Skip directories
-
-          relative_path = existing_path.relative_path_from(destination).to_s.downcase
-          puts "Checking file: #{relative_path}"
-
-          unless latest_files_set.include?(relative_path)
-            puts "Removing file: #{existing_file} as it's not in the latest export."
-            FileUtils.rm_f(existing_file)
-          else
-            puts "Retaining file: #{existing_file} as it's part of the latest export."
-          end
+      def cleanup_temp_dir
+        if Dir.exist?(tmp_uniq_dashboard_path)
+          FileUtils.rm_rf(tmp_uniq_dashboard_path)
+          puts "Temporary directory cleaned up: #{tmp_uniq_dashboard_path}"
         end
       end
 
