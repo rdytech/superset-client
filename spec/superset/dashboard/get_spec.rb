@@ -12,7 +12,7 @@ RSpec.describe Superset::Dashboard::Get do
       'published' => true,
       'changed_on_delta_humanized' => '1 day ago',
       'charts' => dashboard_charts,
-      'json_metadata' => { 'key1' => 'value1' }.to_json,
+      'json_metadata' => { 'native_filter_configuration' => [] }.to_json,
       'position_json' => { 'key2' => 'value2' }.to_json,
       'url' => '',
 
@@ -40,6 +40,12 @@ RSpec.describe Superset::Dashboard::Get do
   describe '#json_metadata' do
     it 'returns the parsed json_metadata' do
       expect(subject.json_metadata).to eq(JSON.parse(dashboard_result['json_metadata']))
+    end
+  end
+
+  describe '#filter_configuration' do
+    it 'returns the filter_configuration' do
+      expect(subject.filter_configuration).to eq(JSON.parse(dashboard_result['json_metadata'])['native_filter_configuration'])
     end
   end
 
