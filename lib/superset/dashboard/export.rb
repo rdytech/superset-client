@@ -33,7 +33,7 @@ module Superset
         unzip_files
         puts "Files unzipped to: #{tmp_uniq_dashboard_path}"
 
-        copy_export_files_to_destination_path
+        copy_export_files_to_destination_path if destination_path
         puts "Files copied to destination: #{destination_path_with_dash_id}"
 
         cleanup_outdated_files
