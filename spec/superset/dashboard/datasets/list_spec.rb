@@ -108,8 +108,14 @@ RSpec.describe Superset::Dashboard::Datasets::List do
   end
 
   describe '#table' do
+    before do
+      allow(subject).to receive(:datasets_details).and_return(([
+        {"id"=>101, "datasource_name"=>"Acme Forecasts", "schema"=>"acme", "database"=>{"id"=>1, "name"=>"DB1", "backend"=>"postgres"}, "sql"=>"select * from acme.forecasts"},
+        {"id"=>102, "datasource_name"=>"video_game_sales", "schema"=>"public", "database"=>{"id"=>2, "name"=>"examples", "backend"=>"postgres"}, "sql"=>"select * from acme_new.forecasts"}
+      ]+ filter_dataset_json).map(&:with_indifferent_access))
+    end
+    let(:filter_dataset_json) { [] }
     it 'prints a table with the dashboard title and charts' do
-
       expect(subject.table.to_s).to eq(
         "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
         "|                                      1: Test Dashboard                                      |\n" \
@@ -120,6 +126,52 @@ RSpec.describe Superset::Dashboard::Datasets::List do
         "| 102 | video_game_sales | 2        | examples      | postgres         | public |             |\n" \
         "+-----+------------------+----------+---------------+------------------+--------+-------------+"
       )
+    end
+
+    context 'prints a table with the dashboard title with chart and filter datasets' do
+      let(:include_filter_datasets) { true }
+      let(:filter_dataset_json) {
+      [
+        {
+          "id"=>103, 
+          "datasource_name"=>"Filter 1", 
+          "schema"=>"acme", 
+          "database"=>{
+            "id"=>1, 
+            "name"=>"DB1", 
+            "backend"=>"postgres"
+          }, 
+          "sql"=>"select * from acme.forecasts",
+          "filter_only" => true
+        },
+        {
+          "id"=>104, 
+          "datasource_name"=>"Filter 2", 
+          "schema"=>"public",
+          "database"=>{
+            "id"=>2, 
+            "name"=>"examples", 
+            "backend"=>"postgres"
+          }, 
+          "sql"=>"select * from acme_new.forecasts",
+          "filter_only" => true
+        }
+      ]
+      }
+      specify do
+        expect(subject.table.to_s).to eq(
+          "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
+          "|                                      1: Test Dashboard                                      |\n" \
+          "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
+          "| Id  | Datasource name  | Database | Database name | Database backend | Schema | Filter only |\n" \
+          "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
+          "| 101 | Acme Forecasts   | 1        | DB1           | postgres         | acme   |             |\n" \
+          "| 102 | video_game_sales | 2        | examples      | postgres         | public |             |\n" \
+          "| 103 | Filter 1         | 1        | DB1           | postgres         | acme   | true        |\n" \
+          "| 104 | Filter 2         | 2        | examples      | postgres         | public | true        |\n" \
+          "+-----+------------------+----------+---------------+------------------+--------+-------------+"
+        )
+      end
     end
   end
 end
