@@ -37,8 +37,8 @@ module Superset
 
       def list_datasets
         puts "\n ====== DASHBOARD DATASETS ====== "
-        Superset::Dashboard::Datasets::List.new(first_dashboard_id).list
-        Superset::Dashboard::Datasets::List.new(second_dashboard_id).list
+        Superset::Dashboard::Datasets::List.new(dashboard_id: first_dashboard_id).list
+        Superset::Dashboard::Datasets::List.new(dashboard_id: second_dashboard_id).list
       end
 
       def list_charts

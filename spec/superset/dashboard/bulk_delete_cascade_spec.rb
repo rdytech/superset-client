@@ -23,7 +23,7 @@ RSpec.describe Superset::Dashboard::BulkDeleteCascade do
       let(:dashboard_ids) { [1] }
 
       before do
-        allow(Superset::Dashboard::Datasets::List).to receive(:new).with(1).and_return(double(datasets_details: [{ id: 11 }, { id: 12 }]))
+        allow(Superset::Dashboard::Datasets::List).to receive(:new).with(dashboard_id: 1).and_return(double(datasets_details: [{ id: 11 }, { id: 12 }]))
         allow(Superset::Dataset::BulkDelete).to receive(:new).with(dataset_ids: [11,12]).and_return(double(perform: true))
 
         allow(Superset::Dashboard::Charts::List).to receive(:new).with(1).and_return(double(chart_ids: [21, 22]))

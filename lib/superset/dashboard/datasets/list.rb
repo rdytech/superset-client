@@ -62,7 +62,7 @@ module Superset
               'name' => filter_dataset['database']['database_name'],
               'backend' => filter_dataset['database']['backend']
             }
-            filter_dataset.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => database_info).with_indifferent_access
+            filter_dataset.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => database_info, 'filter_only': true).with_indifferent_access
           end
         end
 
@@ -71,18 +71,19 @@ module Superset
         end
 
         def list_attributes
-          ['id', 'datasource_name', 'database_id', 'database_name', 'database_backend', 'schema'].map(&:to_sym)
+          ['id', 'datasource_name', 'database_id', 'database_name', 'database_backend', 'schema', 'filter_only'].map(&:to_sym)
         end
 
         def rows
-          result.map do |d|
+          datasets_details.map do |d|
             [
               d[:id],
               d[:datasource_name],
               d[:database][:id],
               d[:database][:name],
               d[:database][:backend],
-              d[:schema]
+              d[:schema],
+              d[:filter_only]
             ]
           end
         end
@@ -93,7 +94,7 @@ module Superset
         end
 
         def dashboard
-          @dashboard = Superset::Dashboard::Get.new(id)
+          @dashboard ||= Superset::Dashboard::Get.new(id)
         end
       end
     end

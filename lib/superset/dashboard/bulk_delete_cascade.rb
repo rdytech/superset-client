@@ -31,7 +31,7 @@ module Superset
       private
 
       def delete_datasets(dashboard_id)
-        datasets_to_delete = Superset::Dashboard::Datasets::List.new(dashboard_id).datasets_details.map{|d| d[:id] }
+        datasets_to_delete = Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id).datasets_details.map{|d| d[:id] }
         Superset::Dataset::BulkDelete.new(dataset_ids: datasets_to_delete).perform if datasets_to_delete.any?
       end
 
