@@ -7,14 +7,14 @@ module Superset
   module Dashboard
     module Datasets
       class List < Superset::Request
-        attr_reader :id, :include_filter_datasets # dashboard id
+        attr_reader :id, :include_filter_datasets # id - dashboard id
 
         def self.call(id)
           self.new(id).list
         end
 
-        def initialize(id, include_filter_datasets = false)
-          @id = id
+        def initialize(dashboard_id:, include_filter_datasets: false)
+          @id = dashboard_id
           @include_filter_datasets = include_filter_datasets
         end
 
@@ -50,7 +50,7 @@ module Superset
         private
 
         def filter_dataset_ids
-          @filter_dataset_ids ||= Dashboard::Filters::List.new(id).perform
+          @filter_dataset_ids ||= dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact
         end
 
         def filter_datasets(filter_dataset_ids_not_used_in_charts)
@@ -88,7 +88,11 @@ module Superset
 
         # when displaying a list of datasets, show dashboard title as well
         def title
-          @title ||= [id, Superset::Dashboard::Get.new(id).title].join(' ')
+          @title ||= [id, dashboard.title].join(' ')
+        end
+
+        def dashboard
+          @dashboard = Superset::Dashboard::Get.new(id)
         end
       end
     end

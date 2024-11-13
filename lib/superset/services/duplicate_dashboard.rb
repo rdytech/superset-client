@@ -183,7 +183,7 @@ module Superset
 
       # retrieve the datasets that will be duplicated
       def source_dashboard_datasets
-        @source_dashboard_datasets ||= Superset::Dashboard::Datasets::List.new(source_dashboard_id, true).datasets_details
+        @source_dashboard_datasets ||= Superset::Dashboard::Datasets::List.new(dashboard_id: source_dashboard_id, include_filter_datasets: true).datasets_details
       rescue => e
         raise "Unable to retrieve datasets for source dashboard #{source_dashboard_id}: #{e.message}"
       end
