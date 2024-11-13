@@ -50,7 +50,7 @@ module Superset
         private
 
         def filter_dataset_ids
-          @filter_dataset_ids ||= Superset::Dashboard::Filters::List.new(id).perform
+          @filter_dataset_ids ||= Dashboard::Filters::List.new(id).perform
         end
 
         def filter_datasets(filter_dataset_ids_not_used_in_charts)

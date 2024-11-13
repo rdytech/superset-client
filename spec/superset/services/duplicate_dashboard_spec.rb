@@ -107,16 +107,18 @@ RSpec.describe Superset::Services::DuplicateDashboard do
     context 'with valid params' do
       before do
         # duplicating the current datasets
-        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1-schema_two").and_return(double(perform: new_dataset_1))
+        expect(Superset::Dataset::Duplicate).not_to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1-schema_two")
         expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2-schema_two").and_return(double(perform: new_dataset_2))
 
         # updating the new datasets to point to the target schema and target database
-        expect(Superset::Dataset::UpdateSchema).to receive(:new).with(source_dataset_id: new_dataset_1, target_database_id: target_database_id, target_schema: target_schema).and_return(double(perform: new_dataset_1))
+        expect(Superset::Dataset::UpdateSchema).not_to receive(:new).with(source_dataset_id: new_dataset_1, target_database_id: target_database_id, target_schema: target_schema)
         expect(Superset::Dataset::UpdateSchema).to receive(:new).with(source_dataset_id: new_dataset_2, target_database_id: target_database_id, target_schema: target_schema).and_return(double(perform: new_dataset_2))
 
         # getting the list of charts for the source dashboard
         allow(Superset::Dashboard::Charts::List).to receive(:new).with(source_dashboard_id).and_return(double(result: [{ 'slice_name' => "chart 1", "id" => source_chart_1}, { 'slice_name' => "chart 2", "id" => source_chart_2}])) # , chart_ids: [source_chart_1, source_chart_2]
         allow(Superset::Dashboard::Charts::List).to receive(:new).with(new_dashboard_id).and_return(double(result: [{ 'slice_name' => "chart 1", "id" => new_chart_1}, { 'slice_name' => "chart 2", "id" => new_chart_2}]))
+        allow(Superset::Dataset::List).to receive(:new).with(title_equals: "Dataset 1-schema_two", schema_equals: target_schema).and_return(double(result: [{id: 301}]))
+        allow(Superset::Dataset::List).to receive(:new).with(title_equals: "Dataset 2-schema_two", schema_equals: target_schema).and_return(double(result: []))
 
         # getting the current dataset_id for the new charts .. still pointing to the old datasets
         expect(Superset::Chart::Get).to receive(:new).with(new_chart_1).and_return(double(datasource_id: source_dataset_1))

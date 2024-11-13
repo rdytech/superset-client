@@ -94,18 +94,16 @@ module Superset
           # reason: there is a bug(or feature) in the SS API where a dataset name must be uniq when duplicating.  
           # (note however renaming in the GUI to a dup name works fine)
           new_dataset_name = "#{dataset[:datasource_name]}-#{target_schema}"
-          existing_datasets = Dataset::List.new(title_equals: new_dataset_name, schema_equals: source_dataset.schema).result
-          if existing_dataset.any?
+          existing_datasets = Superset::Dataset::List.new(title_equals: new_dataset_name, schema_equals: target_schema).result
+          if existing_datasets.any?
             new_dataset_id = existing_datasets[0]["id"] # assuming that we do not name multiple datasets with same name in a single schema
           else
             new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: new_dataset_name).perform
+            # update the new dataset with the target schema and target database
+            Superset::Dataset::UpdateSchema.new(source_dataset_id: new_dataset_id, target_database_id: target_database_id, target_schema: target_schema).perform
           end
-
           # keep track of the previous dataset and the matching new dataset_id
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
-
-          # update the new dataset with the target schema and target database
-          Superset::Dataset::UpdateSchema.new(source_dataset_id: new_dataset_id, target_database_id: target_database_id, target_schema: target_schema).perform
         end
       end
 
