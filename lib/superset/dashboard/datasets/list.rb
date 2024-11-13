@@ -44,7 +44,17 @@ module Superset
           chart_dataset_ids = chart_datasets.map{|d| d['id'] }
           filter_dataset_ids_not_used_in_charts = filter_dataset_ids - chart_dataset_ids
           return chart_datasets if filter_dataset_ids_not_used_in_charts.empty?
-          filter_datasets = filter_dataset_ids_not_used_in_charts.map do |filter_dataset_id|
+          dashboard_datasets = chart_datasets + filter_datasets(filter_dataset_ids_not_used_in_charts)
+        end
+
+        private
+
+        def filter_dataset_ids
+          @filter_dataset_ids ||= Superset::Dashboard::Filters::List.new(id).perform
+        end
+
+        def filter_datasets(filter_dataset_ids_not_used_in_charts)
+          filter_dataset_ids_not_used_in_charts.map do |filter_dataset_id|
             filter_dataset = Superset::Dataset::Get.new(filter_dataset_id).result
             database_info = {
               'id' => filter_dataset['database']['id'],
@@ -53,13 +63,6 @@ module Superset
             }
             filter_dataset.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => database_info).with_indifferent_access
           end
-          dashboard_datasets = chart_datasets + filter_datasets
-        end
-
-        private
-
-        def filter_dataset_ids
-          @filter_dataset_ids ||= Superset::Dashboard::Filters::List.new(id).perform
         end
 
         def route
