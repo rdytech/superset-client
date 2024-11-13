@@ -111,14 +111,14 @@ RSpec.describe Superset::Dashboard::Datasets::List do
     it 'prints a table with the dashboard title and charts' do
 
       expect(subject.table.to_s).to eq(
-        "+-----+------------------+----------+---------------+------------------+--------+\n" \
-        "|                               1: Test Dashboard                               |\n" \
-        "+-----+------------------+----------+---------------+------------------+--------+\n" \
-        "| Id  | Datasource name  | Database | Database name | Database backend | Schema |\n" \
-        "+-----+------------------+----------+---------------+------------------+--------+\n" \
-        "| 101 | Acme Forecasts   | 1        | DB1           | postgres         | acme   |\n" \
-        "| 102 | video_game_sales | 2        | examples      | postgres         | public |\n" \
-        "+-----+------------------+----------+---------------+------------------+--------+"
+        "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
+        "|                                      1: Test Dashboard                                      |\n" \
+        "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
+        "| Id  | Datasource name  | Database | Database name | Database backend | Schema | Filter only |\n" \
+        "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
+        "| 101 | Acme Forecasts   | 1        | DB1           | postgres         | acme   |             |\n" \
+        "| 102 | video_game_sales | 2        | examples      | postgres         | public |             |\n" \
+        "+-----+------------------+----------+---------------+------------------+--------+-------------+"
       )
     end
   end
