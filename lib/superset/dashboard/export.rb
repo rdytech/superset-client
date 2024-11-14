@@ -23,25 +23,13 @@ module Superset
       end
 
       def perform
-        puts "Starting export for dashboard ID: #{@dashboard_id}"
+        logger.info("Exporting dashboard: #{dashboard_id}")
         create_tmp_dir
-        puts "Temporary directory created at: #{tmp_uniq_dashboard_path}"
-
         save_exported_zip_file
-        puts "Exported zip file saved at: #{zip_file_name}"
-
         unzip_files
-        puts "Files unzipped to: #{tmp_uniq_dashboard_path}"
-
         clean_destination_directory
-        puts "Destination directory cleaned: #{destination_path_with_dash_id}"
-
         copy_export_files_to_destination_path if destination_path
-        puts "Files copied to destination: #{destination_path_with_dash_id}"
 
-        puts "Export process completed successfully."
-
-        # Return the list of copied files
         Dir.glob("#{destination_path_with_dash_id}/**/*").select { |f| File.file?(f) }
       rescue StandardError => e
         puts "Export failed: #{e.message}"
@@ -49,8 +37,6 @@ module Superset
       ensure
         cleanup_temp_dir
       end
-
-      private
 
       def response
         @response ||= client.call(
@@ -71,11 +57,13 @@ module Superset
       end
 
       def save_exported_zip_file
+        logger.info("Saving zip file: #{zip_file_name}")
         File.open(zip_file_name, 'wb') { |fp| fp.write(response.body) }
         puts "Saved zip file: #{zip_file_name}"
       end
 
       def unzip_files
+        logger.info("Unzipping file: #{zip_file_name}")
         @extracted_files = unzip_file(zip_file_name, tmp_uniq_dashboard_path)
         puts "Unzipped files: #{@extracted_files.inspect}"
       end
@@ -89,6 +77,7 @@ module Superset
       end
 
       def clean_destination_directory
+        logger.info("Cleaning destination directory: #{destination_path_with_dash_id}")
         if Dir.exist?(destination_path_with_dash_id)
           FileUtils.rm_rf(Dir.glob("#{destination_path_with_dash_id}/*"))
           puts "Deleted all existing files in #{destination_path_with_dash_id}."
@@ -99,6 +88,7 @@ module Superset
       end
 
       def copy_export_files_to_destination_path
+        logger.info("Copying files to destination: #{destination_path_with_dash_id}")
         path_with_dash_id = File.join(destination_path, dashboard_id.to_s)
         FileUtils.mkdir_p(path_with_dash_id) unless File.directory?(path_with_dash_id)
         FileUtils.cp(zip_file_name, path_with_dash_id)
@@ -116,6 +106,7 @@ module Superset
       end
 
       def create_tmp_dir
+        logger.info("Creating tmp directory: #{tmp_uniq_dashboard_path}")
         FileUtils.mkdir_p(tmp_uniq_dashboard_path) unless File.directory?(tmp_uniq_dashboard_path)
       end
 
@@ -156,6 +147,10 @@ module Superset
         puts "Failed to unzip file: #{e.message}"
         raise
       end
+    end
+
+    def logger
+      @logger ||= Superset::Logger.new
     end
   end
 end
