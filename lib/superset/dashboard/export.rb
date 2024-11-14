@@ -99,15 +99,11 @@ module Superset
       end
 
       def copy_export_files_to_destination_path
-        Dir.glob("#{download_folder}/**/*").each do |item|
-          next if File.directory?(item) # Skip directories
+        path_with_dash_id = File.join(destination_path, dashboard_id.to_s)
+        FileUtils.mkdir_p(path_with_dash_id) unless File.directory?(path_with_dash_id)
 
-          relative_item_path = Pathname.new(item).relative_path_from(Pathname.new(download_folder)).to_s
-          destination_item = File.join(destination_path_with_dash_id, relative_item_path)
-
-          FileUtils.mkdir_p(File.dirname(destination_item)) unless Dir.exist?(File.dirname(destination_item))
-          puts "Copying #{item} to #{destination_item}"
-          FileUtils.cp(item, destination_item)
+        Dir.glob("#{download_folder}/*").each do |item|
+          FileUtils.cp_r(item, path_with_dash_id)
         end
       end
 
