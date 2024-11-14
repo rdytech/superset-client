@@ -51,7 +51,7 @@ module Superset
         private
 
         def filter_dataset_ids
-          @filter_dataset_ids ||= dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact
+          @filter_dataset_ids ||= dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact.uniq
         end
 
         def filter_datasets(filter_dataset_ids_not_used_in_charts)

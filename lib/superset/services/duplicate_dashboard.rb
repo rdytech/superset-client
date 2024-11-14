@@ -259,7 +259,7 @@ module Superset
       end
 
       def source_dashboard_filter_dataset_ids
-        @filter_dataset_ids ||= source_dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact
+        @filter_dataset_ids ||= source_dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact.uniq
       end
 
       # Primary Assumption is that all charts datasets on the source dashboard are pointing to the same database schema
