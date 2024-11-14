@@ -32,7 +32,6 @@ module Superset
 
         Dir.glob("#{destination_path_with_dash_id}/**/*").select { |f| File.file?(f) }
       rescue StandardError => e
-        puts "Export failed: #{e.message}"
         raise
       ensure
         cleanup_temp_dir
@@ -59,13 +58,11 @@ module Superset
       def save_exported_zip_file
         logger.info("Saving zip file: #{zip_file_name}")
         File.open(zip_file_name, 'wb') { |fp| fp.write(response.body) }
-        puts "Saved zip file: #{zip_file_name}"
       end
 
       def unzip_files
         logger.info("Unzipping file: #{zip_file_name}")
         @extracted_files = unzip_file(zip_file_name, tmp_uniq_dashboard_path)
-        puts "Unzipped files: #{@extracted_files.inspect}"
       end
 
       def download_folder
@@ -80,10 +77,8 @@ module Superset
         logger.info("Cleaning destination directory: #{destination_path_with_dash_id}")
         if Dir.exist?(destination_path_with_dash_id)
           FileUtils.rm_rf(Dir.glob("#{destination_path_with_dash_id}/*"))
-          puts "Deleted all existing files in #{destination_path_with_dash_id}."
         else
           FileUtils.mkdir_p(destination_path_with_dash_id)
-          puts "Created new destination directory: #{destination_path_with_dash_id}"
         end
       end
 
@@ -101,7 +96,6 @@ module Superset
       def cleanup_temp_dir
         if Dir.exist?(tmp_uniq_dashboard_path)
           FileUtils.rm_rf(tmp_uniq_dashboard_path)
-          puts "Temporary directory cleaned up: #{tmp_uniq_dashboard_path}"
         end
       end
 
@@ -144,7 +138,6 @@ module Superset
         end
         extracted_files
       rescue => e
-        puts "Failed to unzip file: #{e.message}"
         raise
       end
     end
