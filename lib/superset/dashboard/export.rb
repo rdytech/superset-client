@@ -101,6 +101,7 @@ module Superset
       def copy_export_files_to_destination_path
         path_with_dash_id = File.join(destination_path, dashboard_id.to_s)
         FileUtils.mkdir_p(path_with_dash_id) unless File.directory?(path_with_dash_id)
+        FileUtils.cp(zip_file_name, path_with_dash_id)
 
         Dir.glob("#{download_folder}/*").each do |item|
           FileUtils.cp_r(item, path_with_dash_id)

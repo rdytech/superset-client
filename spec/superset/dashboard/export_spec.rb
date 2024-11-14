@@ -64,7 +64,8 @@ RSpec.describe Superset::Dashboard::Export do
         "./tmp/superset_dashboard_backups/18/datasets",
         "./tmp/superset_dashboard_backups/18/datasets/examples",
         "./tmp/superset_dashboard_backups/18/datasets/examples/video_game_sales.yaml",
-        "./tmp/superset_dashboard_backups/18/metadata.yaml"
+        "./tmp/superset_dashboard_backups/18/metadata.yaml",
+        "./tmp/superset_dashboard_backups/18/dashboard_18_export_20240322.zip" # Include the zip file itself
       ]
 
       actual_files = Dir.glob("#{destination_path}#{dashboard_id}/**/*").sort.map do |path|
