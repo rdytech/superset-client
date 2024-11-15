@@ -10,7 +10,9 @@ Superset::Database::GetSchemas.new(1).list # get schemas for database 1
 
 Superset::Dashboard::List.call
 Superset::Dashboard::List.new(title_contains: 'Sales').list
-Superset::Dashboard::Datasets::List.new(10).list  # get all datasets for dashboard 10
+Superset::Dashboard::Datasets::List.new(dashboard_id: 10).list  # get all datasets for dashboard 10
+
+Superset::Dashboard::Datasets::List.new(dashboard_id: 10, include_filter_datasets: true).list  # get all datasets for dashboard 10 including the ones used only in dashboard filters
 Superset::Dashboard::WarmUpCache.new(dashboard_id: 10).perform
 
 Superset::Dataset::List.call

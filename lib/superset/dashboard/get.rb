@@ -25,6 +25,10 @@ module Superset
       def json_metadata
         JSON.parse(result['json_metadata'])
       end
+      
+      def filter_configuration
+        json_metadata['native_filter_configuration'] || []
+      end
 
       def positions
         JSON.parse(result['position_json'])

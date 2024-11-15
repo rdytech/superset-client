@@ -93,13 +93,18 @@ module Superset
           # duplicate the dataset, renaming to use of suffix as the target_schema
           # reason: there is a bug(or feature) in the SS API where a dataset name must be uniq when duplicating.  
           # (note however renaming in the GUI to a dup name works fine)
-          new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: "#{dataset[:datasource_name]}-#{target_schema}").perform
-
+          new_dataset_name = "#{dataset[:datasource_name]}-#{target_schema}"
+          existing_datasets = Superset::Dataset::List.new(title_equals: new_dataset_name, schema_equals: target_schema).result
+          if existing_datasets.any?
+            logger.info "Dataset #{existing_datasets[0]["table_name"]} already exists. Reusing it"
+            new_dataset_id = existing_datasets[0]["id"] # assuming that we do not name multiple datasets with same name in a single schema
+          else
+            new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: new_dataset_name).perform
+            # update the new dataset with the target schema and target database
+            Superset::Dataset::UpdateSchema.new(source_dataset_id: new_dataset_id, target_database_id: target_database_id, target_schema: target_schema).perform
+          end
           # keep track of the previous dataset and the matching new dataset_id
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
-
-          # update the new dataset with the target schema and target database
-          Superset::Dataset::UpdateSchema.new(source_dataset_id: new_dataset_id, target_database_id: target_database_id, target_schema: target_schema).perform
         end
       end
 
@@ -179,7 +184,7 @@ module Superset
 
       # retrieve the datasets that will be duplicated
       def source_dashboard_datasets
-        @source_dashboard_datasets ||= Superset::Dashboard::Datasets::List.new(source_dashboard_id).datasets_details
+        @source_dashboard_datasets ||= Superset::Dashboard::Datasets::List.new(dashboard_id: source_dashboard_id, include_filter_datasets: true).datasets_details
       rescue => e
         raise "Unable to retrieve datasets for source dashboard #{source_dashboard_id}: #{e.message}"
       end
@@ -199,7 +204,7 @@ module Superset
         raise ValidationError, "The source dashboard datasets are required to point to one schema only. Actual schema list is #{source_dashboard_schemas.join(',')}" if source_dashboard_has_more_than_one_schema?
         raise ValidationError, "One or more source dashboard filters point to a different schema than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s}" if unpermitted_filter_dataset_ids.any?
 
-        # new dataset validations
+        # new dataset validations - Need to be commented for EU dashboard duplication as we are using the existing datasets for the new dashboard
         raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
         validate_source_dashboard_datasets_sql_does_not_hard_code_schema
 
@@ -241,7 +246,7 @@ module Superset
       # here we will need to decide if we want to use the existing dataset or not see NEP-????
       # for now we will exit with an error if we find any existing datasets of the same name
       def target_schema_matching_dataset_names
-        source_dashboard_dataset_names.map do |source_dataset_name|
+        @target_schema_matching_dataset_names ||= source_dashboard_dataset_names.map do |source_dataset_name|
           existing_names = Superset::Dataset::List.new(title_contains: source_dataset_name, schema_equals: target_schema).result.map{|t|t['table_name']}.uniq # contains match to cover with suffix as well
           unless existing_names.flatten.empty?
             logger.error "  HALTING PROCESS: Schema #{target_schema} already has Dataset called #{existing_names}"
@@ -255,11 +260,7 @@ module Superset
       end
 
       def source_dashboard_filter_dataset_ids
-        filters_configuration = JSON.parse(source_dashboard.result['json_metadata'])['native_filter_configuration'] || []
-        return Array.new unless filters_configuration && filters_configuration.any?
-
-        # pull only the filters dataset ids from the dashboard
-        filters_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact
+        @filter_dataset_ids ||= source_dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact.uniq
       end
 
       # Primary Assumption is that all charts datasets on the source dashboard are pointing to the same database schema

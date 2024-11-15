@@ -1,5 +1,13 @@
 ## Change Log
 
+## 0.2.3 - 2024-11-15
+
+* modifies the `Superset::Dashboard::Datasets::List.new(id).dataset_details` and `Superset::Dashboard::Datasets::List.new(id).list` to optionally include filter datasets as well to duplicate those during the dashboard duplication process. It also add a new column "Filter only" in the result which shows if a dataset is used only on filters
+* This also adds an additional check in source dataset duplication that if any dataset already exists with the new name in the target schema we can use the existing dataset itself for the new dashboard also.
+* Exporting a Dashboard will also include the Zip file in the repo backup (destination_path) folder.
+* Exporting a Dashboard and copying the files to the backup folder will also clear out any previous backup files that no longer exist in the current zip export.
+* Adds a put endpoint for chart and datasets which is needed for the bulk update of set of charts/datasets
+
 ## 0.2.2 - 2024-10-10
 
 * add ImportDashboardAcrossEnvironments class for transfering between superset environments

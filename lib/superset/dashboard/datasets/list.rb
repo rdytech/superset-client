@@ -7,14 +7,15 @@ module Superset
   module Dashboard
     module Datasets
       class List < Superset::Request
-        attr_reader :id  # dashboard id
+        attr_reader :id, :include_filter_datasets # id - dashboard id
 
         def self.call(id)
           self.new(id).list
         end
 
-        def initialize(id)
-          @id = id
+        def initialize(dashboard_id:, include_filter_datasets: false)
+          @id = dashboard_id
+          @include_filter_datasets = include_filter_datasets
         end
 
         def perform
@@ -36,37 +37,64 @@ module Superset
         end
 
         def datasets_details
-          result.map do |details|
+          chart_datasets = result.map do |details|
             details.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => details['database'].slice('id', 'name', 'backend')).with_indifferent_access
           end
+          return chart_datasets unless include_filter_datasets
+          chart_dataset_ids = chart_datasets.map{|d| d['id'] }
+          filter_dataset_ids_not_used_in_charts = filter_dataset_ids - chart_dataset_ids
+          return chart_datasets if filter_dataset_ids_not_used_in_charts.empty?
+          # returning chart and filter datasets
+          chart_datasets + filter_datasets(filter_dataset_ids_not_used_in_charts)
         end
 
         private
+
+        def filter_dataset_ids
+          @filter_dataset_ids ||= dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact.uniq
+        end
+
+        def filter_datasets(filter_dataset_ids_not_used_in_charts)
+          filter_dataset_ids_not_used_in_charts.map do |filter_dataset_id|
+            filter_dataset = Superset::Dataset::Get.new(filter_dataset_id).result
+            database_info = {
+              'id' => filter_dataset['database']['id'],
+              'name' => filter_dataset['database']['database_name'],
+              'backend' => filter_dataset['database']['backend']
+            }
+            filter_dataset.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => database_info, 'filter_only': true).with_indifferent_access
+          end
+        end
 
         def route
           "dashboard/#{id}/datasets"
         end
 
         def list_attributes
-          ['id', 'datasource_name', 'database_id', 'database_name', 'database_backend', 'schema'].map(&:to_sym)
+          ['id', 'datasource_name', 'database_id', 'database_name', 'database_backend', 'schema', 'filter_only'].map(&:to_sym)
         end
 
         def rows
-          result.map do |d|
+          datasets_details.map do |d|
             [
               d[:id],
               d[:datasource_name],
               d[:database][:id],
               d[:database][:name],
               d[:database][:backend],
-              d[:schema]
+              d[:schema],
+              d[:filter_only]
             ]
           end
         end
 
         # when displaying a list of datasets, show dashboard title as well
         def title
-          @title ||= [id, Superset::Dashboard::Get.new(id).title].join(' ')
+          @title ||= [id, dashboard.title].join(' ')
+        end
+
+        def dashboard
+          @dashboard ||= Superset::Dashboard::Get.new(id)
         end
       end
     end
