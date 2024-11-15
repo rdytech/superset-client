@@ -23,10 +23,18 @@ module Superset
       end
 
       def perform
+        logger.info("Exporting dashboard: #{dashboard_id}")
         create_tmp_dir
         save_exported_zip_file
         unzip_files
+        clean_destination_directory
         copy_export_files_to_destination_path if destination_path
+
+        Dir.glob("#{destination_path_with_dash_id}/**/*").select { |f| File.file?(f) }
+      rescue StandardError => e
+        raise
+      ensure
+        cleanup_temp_dir
       end
 
       def response
@@ -37,6 +45,10 @@ module Superset
         )
       end
 
+      def zip_file_name
+        @zip_file_name ||= "#{tmp_uniq_dashboard_path}/dashboard_#{dashboard_id}_export_#{datestamp}.zip"
+      end
+
       private
 
       def params
@@ -44,10 +56,12 @@ module Superset
       end
 
       def save_exported_zip_file
+        logger.info("Saving zip file: #{zip_file_name}")
         File.open(zip_file_name, 'wb') { |fp| fp.write(response.body) }
       end
 
       def unzip_files
+        logger.info("Unzipping file: #{zip_file_name}")
         @extracted_files = unzip_file(zip_file_name, tmp_uniq_dashboard_path)
       end
 
@@ -55,25 +69,43 @@ module Superset
         File.dirname(extracted_files[0])
       end
 
+      def destination_path_with_dash_id
+        @destination_path_with_dash_id ||= File.join(destination_path, dashboard_id.to_s)
+      end
+
+      def clean_destination_directory
+        logger.info("Cleaning destination directory: #{destination_path_with_dash_id}")
+        if Dir.exist?(destination_path_with_dash_id)
+          FileUtils.rm_rf(Dir.glob("#{destination_path_with_dash_id}/*"))
+        else
+          FileUtils.mkdir_p(destination_path_with_dash_id)
+        end
+      end
+
       def copy_export_files_to_destination_path
+        logger.info("Copying files to destination: #{destination_path_with_dash_id}")
         path_with_dash_id = File.join(destination_path, dashboard_id.to_s)
         FileUtils.mkdir_p(path_with_dash_id) unless File.directory?(path_with_dash_id)
+        FileUtils.cp(zip_file_name, path_with_dash_id)
 
         Dir.glob("#{download_folder}/*").each do |item|
           FileUtils.cp_r(item, path_with_dash_id)
         end
       end
 
-      def zip_file_name
-        @zip_file_name ||= "#{tmp_uniq_dashboard_path}/dashboard_#{dashboard_id}_export_#{datestamp}.zip"
+      def cleanup_temp_dir
+        if Dir.exist?(tmp_uniq_dashboard_path)
+          FileUtils.rm_rf(tmp_uniq_dashboard_path)
+        end
       end
 
       def create_tmp_dir
+        logger.info("Creating tmp directory: #{tmp_uniq_dashboard_path}")
         FileUtils.mkdir_p(tmp_uniq_dashboard_path) unless File.directory?(tmp_uniq_dashboard_path)
       end
 
       # uniq random tmp folder name for each export
-      # this will allow us to do a wildcard glop on the folder to get the files 
+      # this will allow us to do a wildcard glop on the folder to get the files
       def tmp_uniq_dashboard_path
         @tmp_uniq_dashboard_path ||= File.join(TMP_SUPERSET_DASHBOARD_PATH, uuid)
       end
@@ -93,6 +125,25 @@ module Superset
       def datestamp
         @datestamp ||= Time.now.strftime('%Y%m%d')
       end
+
+      def unzip_file(zip_path, destination)
+        extracted_files = []
+        Zip::File.open(zip_path) do |zip_file|
+          zip_file.each do |entry|
+            entry_path = File.join(destination, entry.name)
+            FileUtils.mkdir_p(File.dirname(entry_path))
+            zip_file.extract(entry, entry_path) unless File.exist?(entry_path)
+            extracted_files << entry_path
+          end
+        end
+        extracted_files
+      rescue => e
+        raise
+      end
+    end
+
+    def logger
+      @logger ||= Superset::Logger.new
     end
   end
 end
