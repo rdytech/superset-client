@@ -96,6 +96,7 @@ module Superset
           new_dataset_name = "#{dataset[:datasource_name]}-#{target_schema}"
           existing_datasets = Superset::Dataset::List.new(title_equals: new_dataset_name, schema_equals: target_schema).result
           if existing_datasets.any?
+            logger.info "Dataset #{existing_datasets[0]["table_name"]} already exists. Reusing it"
             new_dataset_id = existing_datasets[0]["id"] # assuming that we do not name multiple datasets with same name in a single schema
           else
             new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: new_dataset_name).perform
