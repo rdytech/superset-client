@@ -204,8 +204,8 @@ module Superset
         raise ValidationError, "The source dashboard datasets are required to point to one schema only. Actual schema list is #{source_dashboard_schemas.join(',')}" if source_dashboard_has_more_than_one_schema?
         raise ValidationError, "One or more source dashboard filters point to a different schema than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s}" if unpermitted_filter_dataset_ids.any?
 
-        # new dataset validations -  Need to remove this as we are using the existing datasets for the new dashboard
-        # raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
+        # new dataset validations - Need to be commented for EU dashboard duplication as we are using the existing datasets for the new dashboard
+        raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
         validate_source_dashboard_datasets_sql_does_not_hard_code_schema
 
         # embedded allowed_domain validations
@@ -246,7 +246,7 @@ module Superset
       # here we will need to decide if we want to use the existing dataset or not see NEP-????
       # for now we will exit with an error if we find any existing datasets of the same name
       def target_schema_matching_dataset_names
-        source_dashboard_dataset_names.map do |source_dataset_name|
+        @target_schema_matching_dataset_names ||= source_dashboard_dataset_names.map do |source_dataset_name|
           existing_names = Superset::Dataset::List.new(title_contains: source_dataset_name, schema_equals: target_schema).result.map{|t|t['table_name']}.uniq # contains match to cover with suffix as well
           unless existing_names.flatten.empty?
             logger.error "  HALTING PROCESS: Schema #{target_schema} already has Dataset called #{existing_names}"
