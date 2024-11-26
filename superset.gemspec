@@ -39,7 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "json", "~> 2.6"
   spec.add_dependency "terminal-table", "> 1.8"
   spec.add_dependency "rake", "~> 13.0"
-  spec.add_dependency "rollbar", "~> 3.4"
+  spec.add_dependency "rollbar", "> 3.4"
   spec.add_dependency "require_all", "~> 3.0"
   spec.add_dependency "rubyzip", "~> 1.0"
   spec.add_dependency "faraday", "~> 1.0"
