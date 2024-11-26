@@ -19,14 +19,14 @@ Short version is .. copy the `env.sample` to `.env` and add edit values where ap
 Build, bundle and open a ruby console
 
 ```
-docker-compose build
-docker-compose run --rm app bundle install
-docker-compose run --rm app bin/console
+docker compose build
+docker compose run --rm app bundle install
+docker compose run --rm app bin/console
 ```
 
-## Setup Locally ( no docker ) 
+## Setup Locally ( no docker )
 
-Requires Ruby >= 2.6.0 
+Requires Ruby >= 2.6.0
 
 Bundle install and open a ruby console.
 
@@ -37,16 +37,16 @@ bin/console
 
 ## Including in a Ruby app
 
-Add to your Gemfile `gem 'superset'`  
-And then execute: `bundle install`  
+Add to your Gemfile `gem 'superset'`
+And then execute: `bundle install`
 Or install it yourself as `gem install superset`
 
 ## Run specs
 
 ```
-docker-compose run --rm app rspec
-# or 
-docker-compose run --rm app bash      # then run 'bundle exec rspec' from the container.
+docker compose run --rm app rspec
+# or
+docker compose run --rm app bash      # then run 'bundle exec rspec' from the container.
 ```
 
 
