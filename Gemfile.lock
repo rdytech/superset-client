@@ -23,7 +23,7 @@ PATH
       rake (~> 13.0)
       require_all (~> 3.0)
       rollbar (> 3.4)
-      rubyzip (~> 1.0)
+      rubyzip (> 1.0)
       terminal-table (> 1.8)
 
 GEM

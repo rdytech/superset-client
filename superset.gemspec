@@ -41,7 +41,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rake", "~> 13.0"
   spec.add_dependency "rollbar", "> 3.4"
   spec.add_dependency "require_all", "~> 3.0"
-  spec.add_dependency "rubyzip", "~> 1.0"
+  spec.add_dependency "rubyzip", "> 1.0"
   spec.add_dependency "faraday", "~> 1.0"
   spec.add_dependency "faraday-multipart", "~> 1.0"
   spec.add_dependency "enumerate_it", "~> 1.7.0"
