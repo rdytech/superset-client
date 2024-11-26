@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'require_all'
+require 'terminal-table'
 
 require_rel "superset/credential"
 require_relative "superset/authenticator"
