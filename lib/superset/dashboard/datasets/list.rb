@@ -25,7 +25,7 @@ module Superset
 
         def schemas
           @schemas ||= begin
-            all_dashboard_schemas = result.map {|d| d[:schema] }.uniq
+            all_dashboard_schemas = datasets_details.map {|d| d[:schema] }.uniq
 
             # For the current superset setup we will assume a dashboard datasets will point to EXACTLY one schema, their own.
             # if not .. we need to know about it. Potentially we could override this check if others do not consider it a problem.

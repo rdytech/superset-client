@@ -8,8 +8,8 @@ module Superset
           self.new(id).list
         end
 
-        def initialize(id)
-          @id = id
+        def initialize(dashboard_id:)
+          @id = dashboard_id
         end
 
         def response

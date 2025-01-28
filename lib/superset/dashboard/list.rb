@@ -35,7 +35,7 @@ module Superset
       end
 
       def retrieve_schemas(id)
-        { schemas: Datasets::List.new(id).schemas }
+        { schemas: Datasets::List.new(dashboard_id: id, include_filter_datasets: true).schemas }
       rescue StandardError => e
         # within Superset, a bug exists around deleting dashboards failing and the corrupting datasets configs, so handle errored datasets gracefully
         # ref NEP-17532
@@ -43,7 +43,7 @@ module Superset
       end
 
       def retrieve_embedded_details(id)
-        embedded_dashboard = Dashboard::Embedded::Get.new(id)
+        embedded_dashboard = Dashboard::Embedded::Get.new(dashboard_id: id)
         { allowed_embedded_domains: embedded_dashboard.allowed_domains,
           uuid: embedded_dashboard.uuid,}
       end

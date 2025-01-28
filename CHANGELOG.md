@@ -1,5 +1,11 @@
 ## Change Log
 
+## 0.2.4 - 2025-01-29
+* modifies the `Superset::Dashboard::Datasets::List.new(id).schemas` to optionally include filter datasets as well.
+* modifies the `Superset::Dashboard::Embedded::Get.new` to accept dashboard_id as named parameter
+* modifies the `Superset::Dashboard::List.new().retrieve_schemas` to call `Datasets::List.new(dashboard_id: id, include_filter_datasets: true).schemas` with `include_filter_datasets` to validate the filter dataset schemas during dashboard embedding.
+
+
 ## 0.2.3 - 2024-11-15
 
 * modifies the `Superset::Dashboard::Datasets::List.new(id).dataset_details` and `Superset::Dashboard::Datasets::List.new(id).list` to optionally include filter datasets as well to duplicate those during the dashboard duplication process. It also add a new column "Filter only" in the result which shows if a dataset is used only on filters
