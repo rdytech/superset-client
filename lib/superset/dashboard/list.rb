@@ -5,13 +5,14 @@
 module Superset
   module Dashboard
     class List < Superset::Request
-      attr_reader :title_contains, :title_equals, :tags_equal, :ids_not_in
+      attr_reader :title_contains, :title_equals, :tags_equal, :ids_not_in, :include_filter_dataset_schemas
 
-      def initialize(page_num: 0, title_contains: '', title_equals: '', tags_equal: [], ids_not_in: [])
+      def initialize(page_num: 0, title_contains: '', title_equals: '', tags_equal: [], ids_not_in: [], include_filter_dataset_schemas: false)
         @title_contains = title_contains
         @title_equals = title_equals
         @tags_equal = tags_equal
         @ids_not_in = ids_not_in
+        @include_filter_dataset_schemas = include_filter_dataset_schemas
         super(page_num: page_num)
       end
 
@@ -35,7 +36,7 @@ module Superset
       end
 
       def retrieve_schemas(id)
-        { schemas: Datasets::List.new(id).schemas }
+        { schemas: Datasets::List.new(dashboard_id: id, include_filter_datasets: include_filter_dataset_schemas).schemas }
       rescue StandardError => e
         # within Superset, a bug exists around deleting dashboards failing and the corrupting datasets configs, so handle errored datasets gracefully
         # ref NEP-17532
@@ -43,7 +44,7 @@ module Superset
       end
 
       def retrieve_embedded_details(id)
-        embedded_dashboard = Dashboard::Embedded::Get.new(id)
+        embedded_dashboard = Dashboard::Embedded::Get.new(dashboard_id: id)
         { allowed_embedded_domains: embedded_dashboard.allowed_domains,
           uuid: embedded_dashboard.uuid,}
       end

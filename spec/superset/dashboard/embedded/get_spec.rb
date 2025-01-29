@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Superset::Dashboard::Embedded::Get, type: :service do
-  subject { described_class.new(dashboard_id) }
+  subject { described_class.new(dashboard_id: dashboard_id) }
   let(:dashboard_id) { 1 }
 
   describe 'with a dashboard that has embedded settings, ie has a result' do
