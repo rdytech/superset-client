@@ -7,6 +7,15 @@ the gem on RubyGems.
 
 Until then, ReadyTech will continue to host a private Gemfury version as well as RubyGems.
 
+## Publish to RubyGems
+
+As per the RubyGems guide https://guides.rubygems.org/publishing/#publishing-to-rubygemsorg
+
+Requires a RubyGems account.
+
+```
+gem push superset-0.1.0.gem
+```
 
 ## ReadyTech private Gemfury repo
 

@@ -90,7 +90,7 @@ See example in [Transferring Dashboards across Environments](https://github.com/
 
 ### Publishing to RubyGems
 
-WIP .. direction is for this gem to be made public
+Refer to [Publishing Doc](https://github.com/rdytech/superset-client/tree/develop/doc/publishing.md)
 
 ## License
 
