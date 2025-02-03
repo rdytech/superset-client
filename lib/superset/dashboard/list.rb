@@ -12,7 +12,7 @@ module Superset
         @title_equals = title_equals
         @tags_equal = tags_equal
         @ids_not_in = ids_not_in
-        @ids_in_filters = ids_in
+        @ids_in = ids_in
         @include_filter_dataset_schemas = include_filter_dataset_schemas
         super(page_num: page_num)
       end
@@ -87,6 +87,7 @@ module Superset
 
       def ids_not_in_filters
         ids_not_in.map {|id| "(col:id,opr:neq,value:'#{id}')"}.join(',')
+      end
 
       def ids_in_filters
         ids_in.map {|id| "(col:id,opr:eq,value:'#{id}')"}.join(',')
