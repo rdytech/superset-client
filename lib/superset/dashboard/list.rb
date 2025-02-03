@@ -114,6 +114,7 @@ module Superset
 
       def ids_not_in_filters
         ids_not_in.map {|id| "(col:id,opr:neq,value:'#{id}')"}.join(',')
+      end
 
       def list_attributes
         [:id, :dashboard_title, :status, :url]
@@ -130,3 +131,4 @@ module Superset
     end
   end
 end
+
