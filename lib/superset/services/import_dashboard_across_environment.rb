@@ -4,8 +4,10 @@ It will not create any database connections from an imported dashboard zip, ther
 must already exist as a database connection in the target superset environment.
 
 Currently handles only 1 Database yaml file in the zip file. ( ie only 1 common database connection per dashboards datasets )
+Targeted towards Dashboard for an individual Clients Database Data only.
+Most often used in EXTERNAL facing embedded client dashboards.
 
-Required Attributes: 
+Required Attributes:
  - target_database_yaml_file - location of the target database yaml config file
  - target_database_schema - the schema name to be used in the target database
  - dashboard_export_zip - location of the source dashboard export zip file to tranferred to a new superset Env
@@ -78,6 +80,9 @@ module Superset
         dashboard_config[:datasets].each do |dataset|
           dataset[:content][:database_uuid] = dashboard_config[:databases].first[:content][:uuid]
           dataset[:content][:schema]        = target_database_schema
+
+          dataset[:content].delete(:catalog)  # temp fix for catalog config issue. see NEP-19227. Unclear if we need to merge this yet.
+
           stringified_content = deep_transform_keys_to_strings(dataset[:content])
           File.open(dataset[:filename], 'w') { |f| f.write stringified_content.to_yaml }
         end
@@ -103,7 +108,7 @@ module Superset
 
       def dashboard_export_root_path
         # locate the unziped dashboard_export_* directory as named by superset app, eg dashboard_export_20240821T001536
-        @dashboard_export_root_path ||= begin 
+        @dashboard_export_root_path ||= begin
           pattern = File.join(dashboard_config[:tmp_uniq_dashboard_path], 'dashboard_export_*')
           Dir.glob(pattern).first
         end
