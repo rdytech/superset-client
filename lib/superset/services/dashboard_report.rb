@@ -15,33 +15,32 @@ module Superset
       attr_reader :dashboard_ids, :report_on_data_sovereignty_only
 
       def initialize(dashboard_ids: [], report_on_data_sovereignty_only: true)
-        @dashboard_ids = dashboard_ids.presence || all_dashboard_ids
+        @dashboard_ids = dashboard_ids
         @report_on_data_sovereignty_only = report_on_data_sovereignty_only
       end
 
       def perform
-        create_report
+        create_dashboard_report
+        load_data_sovereignty_issues
         
         report_on_data_sovereignty_only ? display_data_sovereignty_report : @report
       end
 
-      def all_dashboard_ids
-        Superset::Dashboard::List.new().rows.map{|d| d['id']}
-      end
+      private
 
       def display_data_sovereignty_report
         # filter by dashboards where 
         # 1. A filter dataset is not part of the dashboard datasets (might be ok for some cases)
-        # 2. There is more than one distinct dataset schema (never ok for embedded dashboards)
+        # 2. There is more than one distinct dataset schema (never ok for embedded dashboards where the expected schema num is only one)
 
         puts "Data Sovereignty Report"
         puts "-----------------------"
-        puts "Invalid Dashboards: #{data_sovereignty_issues.count}"
-        data_sovereignty_issues
+        puts "Possible Invalid Dashboards (CONFIRMATION REQUIRED): #{@data_sovereignty_issues.count}"
+        @data_sovereignty_issues
       end
 
       # possible data sovereignty issues
-      def data_sovereignty_issues
+      def load_data_sovereignty_issues
         @data_sovereignty_issues ||= begin
           @report.map do |dashboard|
             reasons = []
@@ -77,7 +76,7 @@ module Superset
         end
       end
 
-      def create_report
+      def create_dashboard_report
         @report ||= begin
           dashboard_ids.map do |dashboard_id|
             dashboard = dashboard_result(dashboard_id)
@@ -86,7 +85,7 @@ module Superset
               dashboard_id: dashboard_id,
               dashboard_title: dashboard['dashboard_title'],
               dashboard_url: dashboard['url'],
-              dashboard_client_tags: dashboard_client_tags(dashboard),
+              dashboard_tags: dashboard_tags(dashboard),
               filters: filter_details(dashboard),
               charts: chart_count(dashboard),
               datasets: dataset_details(dashboard_id),
@@ -124,8 +123,8 @@ module Superset
         }
       end
 
-      def dashboard_client_tags(dashboard)
-        dashboard['tags'].map { |t| t['name'] if t['name'].include?('client') }.compact.join(',') || 'None'
+      def dashboard_tags(dashboard)
+        dashboard['tags'].map{|t| t['name']}.join('|')
       end
 
       def dashboard_result(dashboard_id)
