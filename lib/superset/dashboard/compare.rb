@@ -65,7 +65,13 @@ module Superset
       def native_filter_configuration(dashboard_result)
         rows = []
         JSON.parse(dashboard_result['json_metadata'])['native_filter_configuration'].each do |filter|
-          filter['targets'].each {|t| rows << [ t['column']['name'], t['datasetId'] ] }
+          filter['targets'].each do |t|
+            if t['column']
+              rows << [ filter['name'], t['column']['name'], t['datasetId'] ]
+            else
+              rows << [ filter['name'], '>NO DATASET LINKED<', t['datasetId'] ] # some filters don't have a dataset linked, ie date filter
+            end
+          end
         end
         rows
       end
@@ -73,7 +79,7 @@ module Superset
       def list_native_filters_for(dashboard_result)
         puts Terminal::Table.new(
           title: [dashboard_result['id'], dashboard_result['dashboard_title']].join(' - '),
-          headings: ['Filter Name', 'Dataset Id'],
+          headings: ['Filter Name', 'Dataset Column', 'Dataset Id'],
           rows: native_filter_configuration(dashboard_result)
         )
       end

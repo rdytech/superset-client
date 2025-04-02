@@ -30,12 +30,12 @@ module Superset
 
       def display_data_sovereignty_report
         # filter by dashboards where 
-        # 1. A filter dataset is not part of the dashboard datasets (might be ok for some cases)
+        # 1. A filter dataset is not part of the dashboard datasets (might be ok for some cases, ie a dummy dataset listing dates only)
         # 2. There is more than one distinct dataset schema (never ok for embedded dashboards where the expected schema num is only one)
 
         puts "Data Sovereignty Report"
         puts "-----------------------"
-        puts "Possible Invalid Dashboards (CONFIRMATION REQUIRED): #{@data_sovereignty_issues.count}"
+        puts "Possible Invalid Dashboards: #{@data_sovereignty_issues.count}"
         @data_sovereignty_issues
       end
 
@@ -54,7 +54,7 @@ module Superset
               reasons << "DETAILS: #{unknown_dataset_details(unknown_datasets)}"
             end
 
-            # add ERROR msg if multiple chart dataset schemas are found
+            # add ERROR msg if multiple chart dataset schemas are found, ie all datasets should be sourced from the same db schema
             chart_dataset_schemas = dashboard[:datasets][:chart_datasets].map{|d| d[:schema]}.uniq
             if chart_dataset_schemas.count > 1
               reasons << "ERROR: Multiple distinct chart dataset schemas found. Expected 1. Found #{chart_dataset_schemas.count}. " \
@@ -80,7 +80,6 @@ module Superset
         @report ||= begin
           dashboard_ids.map do |dashboard_id|
             dashboard = dashboard_result(dashboard_id)
-            # binding.pry
             {
               dashboard_id: dashboard_id,
               dashboard_title: dashboard['dashboard_title'],
@@ -102,7 +101,7 @@ module Superset
       end
 
       def filter_count(dashboard)
-        dashboard['json_metadata']['native_filter_configuration'].count
+        dashboard['json_metadata']['native_filter_configuration']&.count || 0
       end
 
       def filter_datasets(dashboard)
@@ -116,7 +115,7 @@ module Superset
       end
 
       def dataset_details(dashboard_id)
-        datasets = Superset::Dashboard::Datasets::List.new(dashboard_id).rows_hash
+        datasets = Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id).rows_hash
         { 
           dataset_count: datasets.count,
           chart_datasets: datasets
@@ -128,11 +127,11 @@ module Superset
       end
 
       def dashboard_result(dashboard_id)
-        # convert json_metadata within result to a hash
-        board = Superset::Dashboard::Get.new(dashboard_id)
-        board.result['json_metadata'] = JSON.parse(board.result['json_metadata'])
-        board.result['url'] = board.url # add full url to the dashboard result
-        board.result
+       # convert json_metadata within result to a hash
+       board = Superset::Dashboard::Get.new(dashboard_id)
+       board.result['json_metadata'] = JSON.parse(board.result['json_metadata'])
+       board.result['url'] = board.url # add full url to the dashboard result
+       board.result
       end
     end
   end

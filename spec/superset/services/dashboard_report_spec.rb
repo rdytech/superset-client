@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Superset::Services::DashboardReport do
-  let(:dashboard_ids) { [1, 2] }
+  let(:dashboard_ids) { [1] }
   let(:service) { described_class.new(dashboard_ids: dashboard_ids) }
 
     describe '#perform' do
@@ -16,7 +16,7 @@ RSpec.describe Superset::Services::DashboardReport do
               'targets' => [{'datasetId' => 100}]
             }
           ],
-          'chart_configuration' => [{}, {}] # 2 charts
+          'chart_configuration' => [{}, {}]
         }.to_json
       }
     end
@@ -29,15 +29,26 @@ RSpec.describe Superset::Services::DashboardReport do
     end
 
     before do
+#      allow(ENV).to receive(:[]).with('SUPERSET_HOST').and_return('http://example.com/')
       allow_any_instance_of(Superset::Dashboard::Get).to receive(:result).and_return(dashboard_response)
       allow_any_instance_of(Superset::Dashboard::Get).to receive(:url).and_return('http://example.com/dashboard/1')
-      allow_any_instance_of(Superset::Dashboard::Datasets::List).to receive(:rows_hash).and_return(datasets_response)
+      allow(Superset::Dashboard::Datasets::List).to receive(:new).with(dashboard_id: 1).and_return(
+        instance_double(Superset::Dashboard::Datasets::List, rows_hash: datasets_response)
+      )     
+
+      allow(Superset::Dataset::Get).to receive(:new).with(100).and_return(
+        instance_double(Superset::Dataset::Get,
+          result: { 'id' => 100, 'title' => "Dataset 1" },
+          id: 100,
+          title: "Dataset 1"
+        )
+      )
     end
 
     context 'when report_on_data_sovereignty_only is true' do
       it 'returns data sovereignty issues only' do
         result = service.perform
-        binding.pry
+        
         expect(result).to be_an(Array)
         expect(result).to all(include(:reasons, :dashboard))
       end
@@ -89,7 +100,9 @@ RSpec.describe Superset::Services::DashboardReport do
       before do
         allow_any_instance_of(Superset::Dashboard::Get).to receive(:result).and_return(dashboard_response)
         allow_any_instance_of(Superset::Dashboard::Get).to receive(:url).and_return('http://example.com/dashboard/1')
-        allow_any_instance_of(Superset::Dashboard::Datasets::List).to receive(:rows_hash).and_return(datasets_response)
+        allow(Superset::Dashboard::Datasets::List).to receive(:new).with(dashboard_id: anything).and_return(
+          instance_double(Superset::Dashboard::Datasets::List, rows_hash: datasets_response)
+        )
         allow_any_instance_of(Superset::Dataset::Get).to receive(:result)
         allow_any_instance_of(Superset::Dataset::Get).to receive(:id).and_return(999)
         allow_any_instance_of(Superset::Dataset::Get).to receive(:title).and_return('Unknown Dataset')
@@ -121,7 +134,9 @@ RSpec.describe Superset::Services::DashboardReport do
           }
         )
         allow_any_instance_of(Superset::Dashboard::Get).to receive(:url).and_return('http://example.com/dashboard/1')
-        allow_any_instance_of(Superset::Dashboard::Datasets::List).to receive(:rows_hash).and_return(datasets_response)
+        allow(Superset::Dashboard::Datasets::List).to receive(:new).with(dashboard_id: anything).and_return(
+          instance_double(Superset::Dashboard::Datasets::List, rows_hash: datasets_response)
+        )
       end
 
       it 'reports error for multiple schemas' do
