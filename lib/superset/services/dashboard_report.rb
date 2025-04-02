@@ -35,7 +35,7 @@ module Superset
 
         puts "Data Sovereignty Report"
         puts "-----------------------"
-        puts "Possible Invalid Dashboards: #{@data_sovereignty_issues.count}"
+        puts "Possible Invalid Dashboard Datasets: #{@data_sovereignty_issues.count}"
         @data_sovereignty_issues
       end
 
