@@ -115,7 +115,7 @@ module Superset
       end
 
       def dataset_details(dashboard_id)
-        datasets = Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id).rows_hash
+        datasets = Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id, include_filter_datasets: true).rows_hash
         { 
           dataset_count: datasets.count,
           chart_datasets: datasets

@@ -32,7 +32,7 @@ RSpec.describe Superset::Services::DashboardReport do
 #      allow(ENV).to receive(:[]).with('SUPERSET_HOST').and_return('http://example.com/')
       allow_any_instance_of(Superset::Dashboard::Get).to receive(:result).and_return(dashboard_response)
       allow_any_instance_of(Superset::Dashboard::Get).to receive(:url).and_return('http://example.com/dashboard/1')
-      allow(Superset::Dashboard::Datasets::List).to receive(:new).with(dashboard_id: 1).and_return(
+      allow(Superset::Dashboard::Datasets::List).to receive(:new).with(dashboard_id: 1, include_filter_datasets: true).and_return(
         instance_double(Superset::Dashboard::Datasets::List, rows_hash: datasets_response)
       )     
 
@@ -100,7 +100,7 @@ RSpec.describe Superset::Services::DashboardReport do
       before do
         allow_any_instance_of(Superset::Dashboard::Get).to receive(:result).and_return(dashboard_response)
         allow_any_instance_of(Superset::Dashboard::Get).to receive(:url).and_return('http://example.com/dashboard/1')
-        allow(Superset::Dashboard::Datasets::List).to receive(:new).with(dashboard_id: anything).and_return(
+        allow(Superset::Dashboard::Datasets::List).to receive(:new).with(dashboard_id: anything, include_filter_datasets: true).and_return(
           instance_double(Superset::Dashboard::Datasets::List, rows_hash: datasets_response)
         )
         allow_any_instance_of(Superset::Dataset::Get).to receive(:result)
@@ -134,7 +134,7 @@ RSpec.describe Superset::Services::DashboardReport do
           }
         )
         allow_any_instance_of(Superset::Dashboard::Get).to receive(:url).and_return('http://example.com/dashboard/1')
-        allow(Superset::Dashboard::Datasets::List).to receive(:new).with(dashboard_id: anything).and_return(
+        allow(Superset::Dashboard::Datasets::List).to receive(:new).with(dashboard_id: anything, include_filter_datasets: true).and_return(
           instance_double(Superset::Dashboard::Datasets::List, rows_hash: datasets_response)
         )
       end
