@@ -91,7 +91,7 @@ module Superset
       def duplicate_source_dashboard_datasets
         source_dashboard_datasets.each do |dataset|
           # duplicate the dataset, renaming to use of suffix as the target_schema
-          # reason: there is a bug(or feature) in the SS API where a dataset name must be uniq when duplicating.  
+          # reason: there is a bug(or feature) in the SS API where a dataset name must be uniq when duplicating.
           # (note however renaming in the GUI to a dup name works fine)
           new_dataset_name = "#{dataset[:datasource_name]}-#{target_schema}"
           existing_datasets = Superset::Dataset::List.new(title_equals: new_dataset_name, schema_equals: target_schema).result

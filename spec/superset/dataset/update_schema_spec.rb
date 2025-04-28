@@ -2,16 +2,19 @@ require 'spec_helper'
 
 RSpec.describe Superset::Dataset::UpdateSchema do
   subject { described_class.new(
-              source_dataset_id:  source_dataset_id, 
-              target_database_id: target_database_id, 
+              source_dataset_id:  source_dataset_id,
+              target_database_id: target_database_id,
               target_schema:      target_schema,
-              remove_copy_suffix: remove_copy_suffix) }
+              remove_copy_suffix: remove_copy_suffix,
+              catalog: catalog
+  ) }
 
   let(:source_dataset_id) { 226 }
   let(:source_schema) { 'schema_one' }
   let(:target_database_id) { 6 }
   let(:target_schema) { 'schema_three' }
   let(:remove_copy_suffix) { false }
+  let(:catalog) { nil }
 
   let(:source_dataset) do
     {
@@ -87,7 +90,7 @@ RSpec.describe Superset::Dataset::UpdateSchema do
     context 'with invalid params' do
       context 'source_dataset_id is empty' do
         let(:source_dataset_id) { nil }
-        
+
         specify do
           expect { subject.perform }.to raise_error(RuntimeError, "Error: source_dataset_id integer is required")
         end
@@ -95,12 +98,12 @@ RSpec.describe Superset::Dataset::UpdateSchema do
 
       context 'target_database_id is empty' do
         let(:target_database_id) { nil }
-        
+
         specify do
           expect { subject.perform }.to raise_error(RuntimeError, "Error: target_database_id integer is required")
         end
       end
- 
+
       context 'target_schema is empty' do
         let(:target_schema) { nil }
 
@@ -129,9 +132,10 @@ RSpec.describe Superset::Dataset::UpdateSchema do
   end
 
   describe '#params_updated' do
-    context 'with remove_copy_suffix true' do
+    context 'with remove_copy_suffix false' do
       specify 'set the new target schema and target database correctly' do
         expect(subject.params_updated['schema']).to eq(target_schema)
+        expect(subject.params_updated['catalog']).to eq(nil)
         expect(subject.params_updated['database_id']).to eq(target_database_id)
         expect(subject.params_updated['table_name']).to eq('JR SP Service Counts (COPY)') # unchanged if remove_copy_suffix is false
       end
@@ -142,6 +146,14 @@ RSpec.describe Superset::Dataset::UpdateSchema do
 
       specify do
         expect(subject.params_updated['table_name']).to eq('JR SP Service Counts') # removed (COPY) suffix
+      end
+    end
+
+    context 'with catalog set to blah' do
+      let(:catalog) { 'blah' }
+
+      specify do
+        expect(subject.params_updated['catalog']).to eq('blah')
       end
     end
   end
