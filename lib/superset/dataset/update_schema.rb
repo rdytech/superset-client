@@ -38,7 +38,8 @@ module Superset
 
           # primary database and schema changes
           new_params.merge!("database_id": target_database_id)  # add the target database id
-          new_params['catalog'] = catalog
+          # new_params['catalog'] = catalog
+          new_params['catalog'] = '' # next thing to try is an empty string
           new_params['schema'] = target_schema
           new_params['owners'] = new_params['owners'].map {|o| o['id'] } # expects an array of user ids
           new_params['table_name'] = new_params['table_name'].gsub(/ \(COPY\)/, '') if remove_copy_suffix
