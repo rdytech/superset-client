@@ -62,21 +62,6 @@ RSpec.describe Superset::Database::Import do
             expect { subject.perform }.to raise_error(ArgumentError, "source does not exist")
           end
         end
-
-        context "when database_config_not_found_in_superset is not present" do
-          before do
-            allow(Superset::Database::List).to receive(:new)
-              .with(uuid_equals: "a2dc77af-e654-49bb-b321-40f6b559a1ee")
-              .and_return(double(result: []))
-          end
-
-          specify "raises error" do
-            expect do
-              subject.perform
-            end.to raise_error(ArgumentError,
-                               "target database does not exist: [{:uuid=>\"a2dc77af-e654-49bb-b321-40f6b559a1ee\", :name=>\"examples\"}]")
-          end
-        end
       end
     end
 
@@ -145,21 +130,6 @@ RSpec.describe Superset::Database::Import do
 
             specify "raises error" do
               expect { subject.perform }.to raise_error(ArgumentError, "source is not a zip file or directory")
-            end
-          end
-
-          context "when database_config_not_found_in_superset is not present" do
-            before do
-              allow(Superset::Database::List).to receive(:new)
-                .with(uuid_equals: "a2dc77af-e654-49bb-b321-40f6b559a1ee")
-                .and_return(double(result: []))
-            end
-
-            specify "raises error" do
-              expect do
-                subject.perform
-              end.to raise_error(ArgumentError,
-                                 "target database does not exist: [{:uuid=>\"a2dc77af-e654-49bb-b321-40f6b559a1ee\", :name=>\"examples\"}]")
             end
           end
         end

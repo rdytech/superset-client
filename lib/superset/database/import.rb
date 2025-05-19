@@ -51,11 +51,6 @@ module Superset
         raise ArgumentError, "source does not exist" unless File.exist?(source)
         raise ArgumentError, "source is not a zip file or directory" unless zip? || directory?
         raise ArgumentError, "overwrite must be a boolean" unless [true, false].include?(overwrite)
-
-        return unless database_config_not_found_in_superset.present?
-
-        raise ArgumentError,
-              "target database does not exist: #{database_config_not_found_in_superset}"
       end
 
       def payload
@@ -94,20 +89,6 @@ module Superset
         File.join(source, "database_import.zip")
       end
 
-      def database_config_not_found_in_superset
-        databases_details.reject { |s| superset_database_uuids_found.include?(s[:uuid]) }
-      end
-
-      def superset_database_uuids_found
-        @superset_database_uuids_found ||= databases_details.map { |i| i[:uuid] }.map do |uuid|
-          uuid if Superset::Database::List.new(uuid_equals: uuid).result.present?
-        end.compact
-      end
-
-      def databases_details
-        database_config[:databases].map { |d| { uuid: d[:content][:uuid], name: d[:content][:database_name] } }
-      end
-
       def database_config
         @database_config ||= zip? ? zip_database_config : directory_database_config
       end
@@ -118,7 +99,7 @@ module Superset
 
       def directory_database_config
         Superset::Services::Loader::Config.new(
-          export_zip: "", tmp_uniq_database_path: source
+          export_zip: "", tmp_uniq_path: source
         ).config
       end
     end
