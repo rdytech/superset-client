@@ -12,11 +12,13 @@
 # the overwrite flag will determine if the database will be updated or created new
 # overwrite: false .. will result in an error if a database with the same UUID already exists
 
+# passwords can be set by passing in an hash in the form {"databases/MyDatabase.yaml": "my_password", "databases/db2.yaml": "other_pass"}
 # Usage
 # Superset::Database::Import.new(source: '/tmp/database.zip').perform
 # Superset::Database::Import.new(source: '/tmp/database').perform
 #
 
+require "json"
 require "zip"
 require "superset/file_utilities"
 
@@ -25,11 +27,18 @@ module Superset
     class Import < Request
       include FileUtilities
 
-      attr_reader :source, :overwrite
+      attr_reader :source, :overwrite, :passwords, :ssh_tunnel_passwords,
+                :ssh_tunnel_private_key_passwords, :ssh_tunnel_private_keys
 
-      def initialize(source:, overwrite: true)
+      def initialize(source:, overwrite: true, passwords: {},
+                     ssh_tunnel_passwords: {}, ssh_tunnel_private_key_passwords: {},
+                     ssh_tunnel_private_keys: {})
         @source = source
         @overwrite = overwrite
+        @passwords = passwords
+        @ssh_tunnel_passwords = ssh_tunnel_passwords
+        @ssh_tunnel_private_key_passwords = ssh_tunnel_private_key_passwords
+        @ssh_tunnel_private_keys = ssh_tunnel_private_keys
       end
 
       def perform
@@ -57,7 +66,10 @@ module Superset
         {
           formData: Faraday::UploadIO.new(source_zip_file, "application/zip"),
           overwrite: overwrite.to_s,
-          passwords: "{}"
+          passwords: passwords.to_json,
+          ssh_tunnel_passwords: ssh_tunnel_passwords.to_json,
+          ssh_tunnel_private_key_passwords: ssh_tunnel_private_key_passwords.to_json,
+          ssh_tunnel_private_keys: ssh_tunnel_private_keys.to_json
         }
       end
 

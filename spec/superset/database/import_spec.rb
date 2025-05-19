@@ -236,21 +236,52 @@ RSpec.describe Superset::Database::Import do
   end
 
   describe "#payload" do
-    let(:subject) { described_class.new(source: source, overwrite: overwrite) }
+    let(:subject) { 
+      described_class.new(
+        source: source, 
+        overwrite: overwrite,
+        passwords: passwords,
+        ssh_tunnel_passwords: ssh_tunnel_passwords,
+        ssh_tunnel_private_key_passwords: ssh_tunnel_private_key_passwords,
+        ssh_tunnel_private_keys: ssh_tunnel_private_keys
+      ) 
+    }
     let(:source) { "spec/fixtures/database_1_export_20240903.zip" }
     let(:overwrite) { true }
+    let(:passwords) { {"databases/MyDatabase.yaml": "db_password"} }
+    let(:ssh_tunnel_passwords) { {"databases/MyDatabase.yaml": "ssh_password"} }
+    let(:ssh_tunnel_private_key_passwords) { {"databases/MyDatabase.yaml": "key_password"} }
+    let(:ssh_tunnel_private_keys) { {"databases/MyDatabase.yaml": "private_key_content"} }
 
     before do
       allow(subject).to receive(:source_zip_file).and_return(source)
       allow(Faraday::UploadIO).to receive(:new).with(source, "application/zip").and_return("mock_upload_io")
     end
 
-    it "includes formData and overwrite parameters" do
-      expect(subject.send(:payload)).to include(
+    it "includes all required parameters in the payload" do
+      payload = subject.send(:payload)
+      expect(payload).to include(
         formData: "mock_upload_io",
         overwrite: "true",
-        passwords: "{}"
+        passwords: passwords.to_json,
+        ssh_tunnel_passwords: ssh_tunnel_passwords.to_json,
+        ssh_tunnel_private_key_passwords: ssh_tunnel_private_key_passwords.to_json,
+        ssh_tunnel_private_keys: ssh_tunnel_private_keys.to_json
       )
+    end
+    
+    context "with default SSH parameters" do
+      let(:subject) { described_class.new(source: source, overwrite: overwrite) }
+      
+      it "sends empty JSON objects for SSH-related parameters" do
+        payload = subject.send(:payload)
+        expect(payload).to include(
+          passwords: "{}",
+          ssh_tunnel_passwords: "{}",
+          ssh_tunnel_private_key_passwords: "{}",
+          ssh_tunnel_private_keys: "{}"
+        )
+      end
     end
   end
 
