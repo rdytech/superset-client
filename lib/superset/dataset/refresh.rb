@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Description: Same functionality as 'Sync Columns from Source' button in the Superset UI on a dataset.
-# Executes the dataset against the source to confirm query run and sync and cache dataset columns for charting.
+# Description: This endpoint has the same functionality as 'Sync Columns from Source' button in the Superset UI on a dataset.
+# Executes the dataset against the source to confirm the query runs and then sync and cache dataset columns.
 # Usage: Superset::Dataset::Refresh.call(id)
 
 module Superset
