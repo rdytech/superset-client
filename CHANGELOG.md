@@ -1,5 +1,8 @@
 ## Change Log
 
+## 0.2.5 - 2025-05-22
+* add refresh dataset call in `Superset::Dataset::Refresh.call(id)`
+
 ## 0.2.4 - 2025-01-29
 * modifies the `Superset::Dashboard::Datasets::List.new(id).schemas` to optionally include filter datasets as well.
 * modifies the `Superset::Dashboard::Embedded::Get.new` to accept dashboard_id as named parameter

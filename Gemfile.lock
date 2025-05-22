@@ -14,7 +14,7 @@ GIT
 PATH
   remote: .
   specs:
-    superset (0.2.4)
+    superset (0.2.5)
       dotenv (~> 2.7)
       enumerate_it (~> 1.7.0)
       faraday (~> 1.0)

@@ -11,6 +11,7 @@ require "superset/credential/embedded_user"
 require "superset/client"
 require "superset/display"
 require "superset/request"
+require "superset/base_put_request"
 
 Dir["./lib/**/*.rb"].each { |f| require f }
 
