@@ -2,6 +2,8 @@
 
 # Description: This endpoint has the same functionality as 'Sync Columns from Source' button in the Superset UI on a dataset.
 # Executes the dataset against the source to confirm the query runs and then sync and cache dataset columns.
+# NOTICE: only owners of the dataset can refresh it
+#
 # Usage: Superset::Dataset::Refresh.call(id)
 
 module Superset
