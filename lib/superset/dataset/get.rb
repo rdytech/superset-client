@@ -38,7 +38,7 @@ module Superset
       end
 
       def sql
-        ['sql']
+        result['sql']
       end
 
       private

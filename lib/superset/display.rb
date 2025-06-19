@@ -18,6 +18,10 @@ module Superset
       end
     end
 
+    def rows_hash
+      rows.map { |value| list_attributes.zip(value).to_h }
+    end
+
     def title
       self.class.to_s
     end

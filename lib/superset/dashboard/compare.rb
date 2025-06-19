@@ -36,36 +36,42 @@ module Superset
       end
 
       def list_datasets
-        puts "\n ====== DASHBOARD DATASETS ====== "
+        puts "\n >>>>>>>>>>>>>>>>>>>>>>>>> DASHBOARD DATASETS <<<<<<<<<<<<<<<<<<<<<<<<<<<< "
         Superset::Dashboard::Datasets::List.new(dashboard_id: first_dashboard_id).list
+        puts "\n"
         Superset::Dashboard::Datasets::List.new(dashboard_id: second_dashboard_id).list
       end
 
       def list_charts
-        puts "\n ====== DASHBOARD CHARTS ====== "
+        puts "\n >>>>>>>>>>>>>>>>>>>>>>>>> DASHBOARD CHARTS <<<<<<<<<<<<<<<<<<<<<<<<<<<< "
         Superset::Dashboard::Charts::List.new(first_dashboard_id).list
-        puts ''
+        puts "\n"
         Superset::Dashboard::Charts::List.new(second_dashboard_id).list
       end
 
       def list_native_filters
-        puts "\n ====== DASHBOARD NATIVE FILTERS ====== "
+        puts "\n >>>>>>>>>>>>>>>>>>>>>>>>> DASHBOARD NATIVE FILTERS <<<<<<<<<<<<<<<<<<<<<<<<<<<< "
         list_native_filters_for(first_dashboard)
-        puts ''
+        puts "\n"
         list_native_filters_for(second_dashboard)
       end
 
       def list_cross_filters
-        puts "\n ====== DASHBOARD CROSS FILTERS ====== "
+        puts "\n >>>>>>>>>>>>>>>>>>>>>>>>> DASHBOARD CROSS FILTERS <<<<<<<<<<<<<<<<<<<<<<<<<<<< "
         list_cross_filters_for(first_dashboard)
-        puts ''
         list_cross_filters_for(second_dashboard)
       end
 
       def native_filter_configuration(dashboard_result)
         rows = []
         JSON.parse(dashboard_result['json_metadata'])['native_filter_configuration'].each do |filter|
-          filter['targets'].each {|t| rows << [ t['column']['name'], t['datasetId'] ] }
+          filter['targets'].each do |t|
+            if t['column']
+              rows << [ filter['name'], t['column']['name'], t['datasetId'] ]
+            else
+              rows << [ filter['name'], '>NO DATASET LINKED<', t['datasetId'] ] # some filters don't have a dataset linked, ie date filter
+            end
+          end
         end
         rows
       end
@@ -73,7 +79,7 @@ module Superset
       def list_native_filters_for(dashboard_result)
         puts Terminal::Table.new(
           title: [dashboard_result['id'], dashboard_result['dashboard_title']].join(' - '),
-          headings: ['Filter Name', 'Dataset Id'],
+          headings: ['Filter Name', 'Dataset Column', 'Dataset Id'],
           rows: native_filter_configuration(dashboard_result)
         )
       end

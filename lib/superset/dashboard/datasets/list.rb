@@ -9,8 +9,8 @@ module Superset
       class List < Superset::Request
         attr_reader :id, :include_filter_datasets # id - dashboard id
 
-        def self.call(id)
-          self.new(id).list
+        def self.call(dashboard_id: id)
+          self.new(dashboard_id: id).list
         end
 
         def initialize(dashboard_id:, include_filter_datasets: false)
@@ -48,6 +48,28 @@ module Superset
           chart_datasets + filter_datasets(filter_dataset_ids_not_used_in_charts)
         end
 
+        def rows
+          datasets_details.map do |d|
+            [
+              d[:id],
+              d[:datasource_name],
+              d[:database][:id],
+              d[:database][:name],
+              d[:database][:backend],
+              d[:schema],
+              d[:filter_only]
+            ]
+          end
+        end
+
+        def title
+          @title ||= [id, dashboard.title].join(' ')
+        end
+
+        def dashboard
+          @dashboard ||= Superset::Dashboard::Get.new(id)
+        end
+
         private
 
         def filter_dataset_ids
@@ -72,29 +94,6 @@ module Superset
 
         def list_attributes
           ['id', 'datasource_name', 'database_id', 'database_name', 'database_backend', 'schema', 'filter_only'].map(&:to_sym)
-        end
-
-        def rows
-          datasets_details.map do |d|
-            [
-              d[:id],
-              d[:datasource_name],
-              d[:database][:id],
-              d[:database][:name],
-              d[:database][:backend],
-              d[:schema],
-              d[:filter_only]
-            ]
-          end
-        end
-
-        # when displaying a list of datasets, show dashboard title as well
-        def title
-          @title ||= [id, dashboard.title].join(' ')
-        end
-
-        def dashboard
-          @dashboard ||= Superset::Dashboard::Get.new(id)
         end
       end
     end

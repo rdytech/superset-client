@@ -20,6 +20,7 @@ RSpec.describe Superset::Database::List do
       ]
     }
   end
+  let(:default_query_params) { "page:0,page_size:100" }
 
   describe '#rows' do
     before do
@@ -40,7 +41,7 @@ RSpec.describe Superset::Database::List do
     context 'for pagination' do
       context 'with defaults' do
         specify do
-          expect(subject.query_params).to eq("page:0,page_size:100")
+          expect(subject.query_params).to eq(default_query_params)
         end
       end
 
@@ -48,7 +49,7 @@ RSpec.describe Superset::Database::List do
         subject { described_class.new(page_num: 5) }
 
         specify do
-          expect(subject.query_params).to eq("page:5,page_size:100")
+          expect(subject.query_params).to eq(default_query_params.gsub('page:0', 'page:5'))
         end
       end
     end
@@ -57,7 +58,7 @@ RSpec.describe Superset::Database::List do
       subject { described_class.new(title_contains: 'acme') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:database_name,opr:ct,value:'acme')),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:database_name,opr:ct,value:'acme')),#{default_query_params}")
       end
     end
 
@@ -65,7 +66,7 @@ RSpec.describe Superset::Database::List do
       subject { described_class.new(uuid_equals: '123') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:uuid,opr:eq,value:'123')),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:uuid,opr:eq,value:'123')),#{default_query_params}")
       end
     end
   end

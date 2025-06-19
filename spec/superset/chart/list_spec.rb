@@ -74,11 +74,10 @@ RSpec.describe Superset::Chart::List do
       "viz_type"=>"dist_bar"
     }]
   end
+  let(:default_query_params) { "page:0,page_size:100" }
 
   before do
     allow(subject).to receive(:result).and_return(result)
-    #allow(subject).to receive(:superset_host).and_return(superset_host)
-    #allow(subject).to receive(:response).and_return( { 'count': 2 } )
   end
 
   describe '#rows' do
@@ -106,14 +105,14 @@ RSpec.describe Superset::Chart::List do
 
   describe '#query_params' do
     specify 'with defaults' do
-      expect(subject.query_params).to eq("page:0,page_size:100")
+      expect(subject.query_params).to eq(default_query_params)
     end
 
     context 'with name_contains filters' do
       subject { described_class.new(name_contains: 'birth') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:slice_name,opr:ct,value:'birth')),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:slice_name,opr:ct,value:'birth')),#{default_query_params}")
       end
     end
 
@@ -125,7 +124,7 @@ RSpec.describe Superset::Chart::List do
           "filters:!(" \
           "(col:slice_name,opr:ct,value:'birth')," \
           "(col:dashboards,opr:rel_m_m,value:3)" \
-          "),page:0,page_size:100")
+          "),#{default_query_params}")
       end
     end
   end
