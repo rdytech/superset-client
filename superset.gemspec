@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = "A Ruby Client for Apache Superset API"
   spec.homepage = "https://github.com/rdytech/superset-client"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = ">= 2.7.8"
 
   #spec.metadata["allowed_push_host"] = ""
 
