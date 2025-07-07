@@ -197,11 +197,12 @@ RSpec.describe Superset::Dashboard::Import do
       it "adds directory content to the zip file" do
         zip_file_double = double("Zip::File")
         expect(Zip::File).to receive(:open).with(new_zip_file, Zip::File::CREATE).and_yield(zip_file_double)
+
         expect(zip_file_double).to receive(:add).with(
-          "dashboard_export_20240321T214117/file1.yaml", "#{source}/file1.yaml"
+          "dashboard_import_#{subject.send(:timestamp)}/file1.yaml", "#{source}/file1.yaml"
         )
         expect(zip_file_double).to receive(:add).with(
-          "dashboard_export_20240321T214117/subdirectory/file2.yaml", "#{source}/subdirectory/file2.yaml"
+          "dashboard_import_#{subject.send(:timestamp)}/subdirectory/file2.yaml", "#{source}/subdirectory/file2.yaml"
         )
 
         subject.send(:source_zip_file)
@@ -235,7 +236,7 @@ RSpec.describe Superset::Dashboard::Import do
       end
 
       it "creates a zip file in the source directory" do
-        expected_path = "#{source}/dashboard_import.zip"
+        expected_path = "#{source}/dashboard_import_#{subject.send(:timestamp)}.zip"
         expect(subject.send(:source_zip_file)).to eq(expected_path)
       end
     end
@@ -277,7 +278,7 @@ RSpec.describe Superset::Dashboard::Import do
       end
 
       it "creates a zip file path using the source directory" do
-        expected_path = "#{source}/dashboard_import.zip"
+        expected_path = "#{source}/dashboard_import_#{subject.send(:timestamp)}.zip"
         expect(subject.send(:new_zip_file)).to eq(expected_path)
       end
     end

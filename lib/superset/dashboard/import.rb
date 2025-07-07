@@ -80,15 +80,25 @@ module Superset
 
         Zip::File.open(new_zip_file, Zip::File::CREATE) do |zipfile|
           Dir[File.join(source, "**", "**")].each do |file|
-            zipfile.add(file.sub("#{source}/", "#{File.basename(source)}/"), file) if File.file?(file)
+            next unless File.file?(file)
+
+            # add a base folder to the relative path: "dashboard_import_#{timestamp}"
+            zipfile.add(File.join("dashboard_import_#{timestamp}", relative_path(file)), file)
           end
         end
         new_zip_file
       end
 
+      def relative_path(file)
+        Pathname.new(file).relative_path_from(Pathname.new(source)).to_s
+      end
+
       def new_zip_file
-        new_database_name = dashboard_config[:databases].first[:content][:database_name]
-        File.join(source, "dashboard_import.zip")
+        File.join(source, "dashboard_import_#{timestamp}.zip")
+      end
+
+      def timestamp
+        @timestamp ||= Time.now.strftime("%Y%m%d%H%M%S")
       end
 
       def database_config_not_found_in_superset
