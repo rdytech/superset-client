@@ -27,7 +27,7 @@ RSpec.describe Superset::Security::Role::List do
   describe '#list' do
     specify do
       expect(subject.table.to_s).to eq(
-        "+----------------+----------------+\n" \
+        "+---------------------------------+\n" \
         "| 3 Roles for Host: some-host.com |\n" \
         "+----------------+----------------+\n" \
         "| Id             | Name           |\n" \

@@ -1,5 +1,8 @@
 ## Change Log
 
+## 0.3.0 - 2025-08-05
+* Bump terminal-table to 4.0.0
+
 ## 0.2.5 - 2025-05-22
 * add refresh dataset call in `Superset::Dataset::Refresh.call(id)`
 
@@ -79,6 +82,3 @@
 - add security/user endpoints
 - add security/role endpoints
 - add security/role/permission endpoints
-
-
-

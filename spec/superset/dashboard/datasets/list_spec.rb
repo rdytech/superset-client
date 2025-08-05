@@ -75,25 +75,25 @@ RSpec.describe Superset::Dashboard::Datasets::List do
       let(:filter_dataset_json) {
       [
         {
-          "id"=>103, 
-          "datasource_name"=>"Filter 1", 
-          "schema"=>"acme", 
+          "id"=>103,
+          "datasource_name"=>"Filter 1",
+          "schema"=>"acme",
           "database"=>{
-            "id"=>1, 
-            "name"=>"DB1", 
+            "id"=>1,
+            "name"=>"DB1",
             "backend"=>"postgres"
-          }, 
+          },
           "sql"=>"select * from acme.forecasts"
         },
         {
-          "id"=>104, 
-          "datasource_name"=>"Filter 2", 
+          "id"=>104,
+          "datasource_name"=>"Filter 2",
           "schema"=>"public",
           "database"=>{
-            "id"=>2, 
-            "name"=>"examples", 
+            "id"=>2,
+            "name"=>"examples",
             "backend"=>"postgres"
-          }, 
+          },
           "sql"=>"select * from acme_new.forecasts"
         }
       ]
@@ -117,7 +117,7 @@ RSpec.describe Superset::Dashboard::Datasets::List do
     let(:filter_dataset_json) { [] }
     it 'prints a table with the dashboard title and charts' do
       expect(subject.table.to_s).to eq(
-        "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
+        "+---------------------------------------------------------------------------------------------+\n" \
         "|                                      1: Test Dashboard                                      |\n" \
         "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
         "| Id  | Datasource name  | Database | Database name | Database backend | Schema | Filter only |\n" \
@@ -133,26 +133,26 @@ RSpec.describe Superset::Dashboard::Datasets::List do
       let(:filter_dataset_json) {
       [
         {
-          "id"=>103, 
-          "datasource_name"=>"Filter 1", 
-          "schema"=>"acme", 
+          "id"=>103,
+          "datasource_name"=>"Filter 1",
+          "schema"=>"acme",
           "database"=>{
-            "id"=>1, 
-            "name"=>"DB1", 
+            "id"=>1,
+            "name"=>"DB1",
             "backend"=>"postgres"
-          }, 
+          },
           "sql"=>"select * from acme.forecasts",
           "filter_only" => true
         },
         {
-          "id"=>104, 
-          "datasource_name"=>"Filter 2", 
+          "id"=>104,
+          "datasource_name"=>"Filter 2",
           "schema"=>"public",
           "database"=>{
-            "id"=>2, 
-            "name"=>"examples", 
+            "id"=>2,
+            "name"=>"examples",
             "backend"=>"postgres"
-          }, 
+          },
           "sql"=>"select * from acme_new.forecasts",
           "filter_only" => true
         }
@@ -160,7 +160,7 @@ RSpec.describe Superset::Dashboard::Datasets::List do
       }
       specify do
         expect(subject.table.to_s).to eq(
-          "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
+          "+---------------------------------------------------------------------------------------------+\n" \
           "|                                      1: Test Dashboard                                      |\n" \
           "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
           "| Id  | Datasource name  | Database | Database name | Database backend | Schema | Filter only |\n" \

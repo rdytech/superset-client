@@ -27,7 +27,7 @@ RSpec.describe Superset::Security::PermissionsResources::List do
   describe '#list' do
     specify do
       expect(subject.table.to_s).to eq(
-        "+----+-----------------------+----------------------------+\n" \
+        "+---------------------------------------------------------+\n" \
         "|     Superset::Security::PermissionsResources::List      |\n" \
         "+----+-----------------------+----------------------------+\n" \
         "| Id | Permission            | View menu                  |\n" \
