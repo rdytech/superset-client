@@ -20,8 +20,8 @@ Assuming your API env for ruby is setup for your target superset environment.
 
 new_import_zip = Superset::Services::ImportDashboardAcrossEnvironments.new(
   dashboard_export_zip:      'path_to/dashboard_101_export_20241010.zip',
-  target_database_yaml_file: 'path_to/env2_db_config.yaml', 
-  target_database_schema:    'acme', 
+  target_database_yaml_file: 'path_to/env2_db_config.yaml',
+  target_database_schema:    'acme',
   ).perform
 
 # now import the adjusted zip to the target superset env
@@ -142,7 +142,8 @@ With the condition that the database in staging and production are structurally 
 3. Get a copy of the production database YAML configuration file
 4. In the exported dashboard files, replace the staging database YAML with the production YAML
 5. In the dataset YAML files, replace all instances of the previously noted staging database UUID with the new production UUID
-6. Zip the files and import them to the production environment
+6. In the dataset YAML files, remove the attribute catalog.  On import the default database target catalog will be applied
+7. Zip the files and import them to the production environment
 
 The process above assumes that whoever is migrating the dashboard has a copy of the target database YAML files so that in steps 3 and 4 we can then replace the staging database YAML with the production one.
 
