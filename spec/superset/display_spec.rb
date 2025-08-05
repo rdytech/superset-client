@@ -15,7 +15,7 @@ RSpec.describe Superset::Display do
   describe "#list" do
     it "displays a table with the correct title, headings, and rows" do
       expect(dummy_instance.table.to_s).to eq(
-        "+-----+-----+-----+\n" \
+        "+-----------------+\n" \
         "|   Dummy Class   |\n" \
         "+-----+-----+-----+\n" \
         "| Foo | Bar | Baz |\n" \
