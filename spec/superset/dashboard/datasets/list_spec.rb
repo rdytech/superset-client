@@ -5,12 +5,13 @@ RSpec.describe Superset::Dashboard::Datasets::List do
   let(:dashboard_id) { 1 }
   let(:include_filter_datasets) { false }
   let(:result) do
-    [
-      {
-        'id' => 101,
-        'datasource_name' => 'Acme Forecasts',
-        'database' => { 'id' => 1, 'name' => 'DB1', 'backend' => 'postgres' },
-        'schema' => 'acme',
+    {
+      'datasets' => [
+        {
+          'id' => 101,
+          'datasource_name' => 'Acme Forecasts',
+          'database' => { 'id' => 1, 'name' => 'DB1', 'backend' => 'postgres' },
+          'schema' => 'acme',
         'sql' => 'select * from acme.forecasts'
       }.with_indifferent_access,
       {
@@ -21,6 +22,7 @@ RSpec.describe Superset::Dashboard::Datasets::List do
         'sql' => 'select * from acme_new.forecasts'
       }.with_indifferent_access
     ]
+  }
   end
 
   before do
@@ -60,10 +62,12 @@ RSpec.describe Superset::Dashboard::Datasets::List do
 
   describe '#datasets_details' do
     it 'returns a list of datasets' do
-      expect(subject.datasets_details).to eq([
-        {"id"=>101, "datasource_name"=>"Acme Forecasts", "schema"=>"acme", "database"=>{"id"=>1, "name"=>"DB1", "backend"=>"postgres"}, "sql"=>"select * from acme.forecasts"},
-        {"id"=>102, "datasource_name"=>"video_game_sales", "schema"=>"public", "database"=>{"id"=>2, "name"=>"examples", "backend"=>"postgres"}, "sql"=>"select * from acme_new.forecasts"}
-      ])
+      expect(subject.datasets_details).to eq({
+        'datasets' => [
+          {"id"=>101, "datasource_name"=>"Acme Forecasts", "schema"=>"acme", "database"=>{"id"=>1, "name"=>"DB1", "backend"=>"postgres"}, "sql"=>"select * from acme.forecasts"},
+          {"id"=>102, "datasource_name"=>"video_game_sales", "schema"=>"public", "database"=>{"id"=>2, "name"=>"examples", "backend"=>"postgres"}, "sql"=>"select * from acme_new.forecasts"}
+        ]
+      })
     end
 
     context 'returns both chart and filter datasets when include_filter_datasets is true' do

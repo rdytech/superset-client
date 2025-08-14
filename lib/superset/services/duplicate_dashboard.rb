@@ -9,15 +9,16 @@ module Superset
   module Services
     class DuplicateDashboard < Superset::Request
 
-      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :allowed_domains, :tags, :publish
+      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :allowed_domains, :tags, :publish, :ignore_duplicate_datasets
 
-      def initialize(source_dashboard_id:, target_schema:, target_database_id: , allowed_domains: [], tags: [], publish: false)
+      def initialize(source_dashboard_id:, target_schema:, target_database_id: , allowed_domains: [], tags: [], publish: false, ignore_duplicate_datasets: false)
         @source_dashboard_id = source_dashboard_id
         @target_schema = target_schema
         @target_database_id = target_database_id
         @allowed_domains = allowed_domains
         @tags = tags
         @publish = publish
+        @ignore_duplicate_datasets = ignore_duplicate_datasets
       end
 
       def perform
@@ -184,7 +185,7 @@ module Superset
 
       # retrieve the datasets that will be duplicated
       def source_dashboard_datasets
-        @source_dashboard_datasets ||= Superset::Dashboard::Datasets::List.new(dashboard_id: source_dashboard_id, include_filter_datasets: true).datasets_details
+        @source_dashboard_datasets ||= Superset::Dashboard::Datasets::List.new(dashboard_id: source_dashboard_id, include_filter_datasets: true).datasets_details['datasets']
       rescue => e
         raise "Unable to retrieve datasets for source dashboard #{source_dashboard_id}: #{e.message}"
       end
@@ -205,7 +206,7 @@ module Superset
         raise ValidationError, "One or more source dashboard filters point to a different schema than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s}" if unpermitted_filter_dataset_ids.any?
 
         # new dataset validations - Need to be commented for EU dashboard duplication as we are using the existing datasets for the new dashboard
-        raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
+        raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" if !ignore_duplicate_datasets && target_schema_matching_dataset_names.present?
         validate_source_dashboard_datasets_sql_does_not_hard_code_schema
 
         # embedded allowed_domain validations
