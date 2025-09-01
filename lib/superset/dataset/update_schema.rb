@@ -4,7 +4,7 @@ module Superset
 
       attr_reader :source_dataset_id, :target_database_id, :target_schema, :remove_copy_suffix, :catalog
 
-      def initialize(source_dataset_id: , target_database_id: , target_schema: , remove_copy_suffix: false, catalog: )
+      def initialize(source_dataset_id: , target_database_id: , target_schema: , remove_copy_suffix: false, catalog: nil )
         @source_dataset_id = source_dataset_id
         @target_database_id = target_database_id
         @target_schema = target_schema
@@ -38,7 +38,7 @@ module Superset
 
           # primary database and schema changes
           new_params.merge!("database_id": target_database_id)  # add the target database id
-          new_params['catalog'] = catalog if catalog
+          new_params['catalog'] = catalog  # if unknown, will default to nil, superset will then update to the actual schemas catalog value upon saving
           new_params['schema'] = target_schema
           new_params['owners'] = new_params['owners'].map {|o| o['id'] } # expects an array of user ids
           new_params['table_name'] = new_params['table_name'].gsub(/ \(COPY\)/, '') if remove_copy_suffix
