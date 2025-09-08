@@ -5,12 +5,15 @@
 module Superset
   module Dashboard
     class List < Superset::Request
-      attr_reader :title_contains, :title_equals, :tags_equal, :ids_not_in, :include_filter_dataset_schemas
+      attr_reader :title_contains, :title_equals,
+                  :tags_contain, :tags_match,
+                  :ids_not_in, :include_filter_dataset_schemas
 
-      def initialize(page_num: 0, title_contains: '', title_equals: '', tags_equal: [], ids_not_in: [], include_filter_dataset_schemas: false)
+      def initialize(page_num: 0, title_contains: '', title_equals: '', tags_contain: [], tags_match: [], ids_not_in: [], include_filter_dataset_schemas: false)
         @title_contains = title_contains
         @title_equals = title_equals
-        @tags_equal = tags_equal
+        @tags_contain = tags_contain
+        @tags_match = tags_match
         @ids_not_in = ids_not_in
         @include_filter_dataset_schemas = include_filter_dataset_schemas
         super(page_num: page_num)
@@ -72,15 +75,16 @@ module Superset
         filter_set = []
         filter_set << "(col:dashboard_title,opr:ct,value:'#{title_contains}')" if title_contains.present?
         filter_set << "(col:dashboard_title,opr:eq,value:'#{title_equals}')" if title_equals.present?
-        filter_set << tag_filters if tags_equal.present?
+        filter_set << tags_contain_filters if tags_contain.present?
         filter_set << ids_not_in_filters if ids_not_in.present?
+
         unless filter_set.empty?
           "filters:!(" + filter_set.join(',') + "),"
         end
       end
 
-      def tag_filters
-        tags_equal.map {|tag| "(col:tags,opr:dashboard_tags,value:'#{tag}')"}.join(',')
+      def tags_contain_filters
+        tags_contain.map {|tag| "(col:tags,opr:dashboard_tags,value:'#{tag}')"}.join(',')
       end
 
       def ids_not_in_filters
@@ -94,8 +98,8 @@ module Superset
       def validate_constructor_args
         raise InvalidParameterError, "title_contains must be a String type" unless title_contains.is_a?(String)
         raise InvalidParameterError, "title_equals must be a String type" unless title_equals.is_a?(String)
-        raise InvalidParameterError, "tags_equal must be an Array type" unless tags_equal.is_a?(Array)
-        raise InvalidParameterError, "tags_equal array must contain string only values" unless tags_equal.all? { |item| item.is_a?(String) }
+        raise InvalidParameterError, "tags_contain must be an Array type" unless tags_contain.is_a?(Array)
+        raise InvalidParameterError, "tags_contain array must contain string only values" unless tags_contain.all? { |item| item.is_a?(String) }
         raise InvalidParameterError, "ids_not_in must be an Array type" unless ids_not_in.is_a?(Array)
       end
     end

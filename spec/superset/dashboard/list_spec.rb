@@ -84,7 +84,7 @@ RSpec.describe Superset::Dashboard::List do
     end
 
     context 'with multiple filter set' do
-      subject { described_class.new(title_contains: 'birth', tags_equal: ['template']) }
+      subject { described_class.new(title_contains: 'birth', tags_contain: ['template']) }
 
       specify do
         expect(subject.query_params).to eq(
@@ -96,7 +96,7 @@ RSpec.describe Superset::Dashboard::List do
     end
 
     context 'with multiple filter set and multiple tags' do
-      subject { described_class.new(page_num: 3, title_contains: 'birth', title_equals: 'births in aust', tags_equal: ['template', 'client:acme', 'product:turbo-charged-feet']) }
+      subject { described_class.new(page_num: 3, title_contains: 'birth', title_equals: 'births in aust', tags_contain: ['template', 'client:acme', 'product:turbo-charged-feet']) }
 
       specify do
         expect(subject.query_params).to eq(
