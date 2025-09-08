@@ -109,5 +109,22 @@ RSpec.describe Superset::Dashboard::List do
           "),page:3,page_size:100")
       end
     end
+
+    context 'with multiple tags_equal filters' do
+      subject { described_class.new(tags_equal: ['client:acme', 'embedded']) }
+
+      before do
+        allow(Superset::Tag::List).to receive(:new).with(name_equals: 'client:acme').and_return(double(rows: [['101']]))
+        allow(Superset::Tag::List).to receive(:new).with(name_equals: 'embedded').and_return(double(rows: [['202']]))
+      end
+
+      specify do
+        expect(subject.query_params).to eq(
+          "filters:!(" \
+          "(col:tags,opr:dashboard_tag_id,value:101)," \
+          "(col:tags,opr:dashboard_tag_id,value:202)" \
+          "),page:0,page_size:100")
+      end
+    end
   end
 end
