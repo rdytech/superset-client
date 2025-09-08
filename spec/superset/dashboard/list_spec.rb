@@ -84,7 +84,7 @@ RSpec.describe Superset::Dashboard::List do
     end
 
     context 'with multiple filter set' do
-      subject { described_class.new(title_contains: 'birth', tags_equal: ['template']) }
+      subject { described_class.new(title_contains: 'birth', tags_contain: ['template']) }
 
       specify do
         expect(subject.query_params).to eq(
@@ -96,7 +96,7 @@ RSpec.describe Superset::Dashboard::List do
     end
 
     context 'with multiple filter set and multiple tags' do
-      subject { described_class.new(page_num: 3, title_contains: 'birth', title_equals: 'births in aust', tags_equal: ['template', 'client:acme', 'product:turbo-charged-feet']) }
+      subject { described_class.new(page_num: 3, title_contains: 'birth', title_equals: 'births in aust', tags_contain: ['template', 'client:acme', 'product:turbo-charged-feet']) }
 
       specify do
         expect(subject.query_params).to eq(
@@ -107,6 +107,23 @@ RSpec.describe Superset::Dashboard::List do
           "(col:tags,opr:dashboard_tags,value:'client:acme')," \
           "(col:tags,opr:dashboard_tags,value:'product:turbo-charged-feet')" \
           "),page:3,page_size:100")
+      end
+    end
+
+    context 'with multiple tags_equal filters' do
+      subject { described_class.new(tags_equal: ['client:acme', 'embedded']) }
+
+      before do
+        allow(Superset::Tag::List).to receive(:new).with(name_equals: 'client:acme').and_return(double(rows: [['101']]))
+        allow(Superset::Tag::List).to receive(:new).with(name_equals: 'embedded').and_return(double(rows: [['202']]))
+      end
+
+      specify do
+        expect(subject.query_params).to eq(
+          "filters:!(" \
+          "(col:tags,opr:dashboard_tag_id,value:101)," \
+          "(col:tags,opr:dashboard_tag_id,value:202)" \
+          "),page:0,page_size:100")
       end
     end
   end

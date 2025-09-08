@@ -23,7 +23,7 @@ module Superset
         # TODO filtering across all list classes can be refactored to support multiple options in a more flexible way
         filter_set = []
         filter_set << "(col:name,opr:ct,value:'#{name_contains}')" if name_contains.present?
-        filter_set << "(col:name,opr:eq,value:#{name_equals})" if name_equals.present?  
+        filter_set << "(col:name,opr:eq,value:'#{name_equals}')" if name_equals.present?
         unless filter_set.empty?
           "filters:!(" + filter_set.join(',') + "),"
         end
