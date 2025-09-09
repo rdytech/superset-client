@@ -2,6 +2,13 @@
 # Usage: Superset::Dashboard::List.new(page_num: 1, title_contains: 'Test').list
 # Usage: Superset::Dashboard::List.new(tags_equal: ['embedded', 'product:acme']).list
 
+# ########################
+# DUMPED THIS PR
+# CAN NOT DO AN IDS IN ARRAY MATCH
+# .... single id only  :(
+# #########################
+#
+#
 module Superset
   module Dashboard
     class List < Superset::Request
