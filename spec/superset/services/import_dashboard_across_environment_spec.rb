@@ -46,7 +46,6 @@ RSpec.describe Superset::Services::ImportDashboardAcrossEnvironments do
         expect(result_zip_dataset_yamls.count).to eq(1)
         config = YAML.load_file(result_zip_dataset_yamls.first)
 
-        binding.pry
         expect(config['database_uuid']).to eq(YAML.load_file(target_database_yaml_file)['uuid'])
         expect(config['schema']).to eq(target_database_schema)
         expect(config['catalog']).to eq(nil)
