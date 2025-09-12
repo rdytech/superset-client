@@ -2,8 +2,9 @@ require 'superset/services/import_dashboard_across_environment'
 
 RSpec.describe Superset::Services::ImportDashboardAcrossEnvironments do
   let(:target_database_yaml_file) { 'spec/fixtures/database-prod-examples.yaml' }
-  let(:target_database_schema) { 'public' }
-  let(:dashboard_export_zip) { 'spec/fixtures/dashboard_18_export_20240322.zip' }
+  let(:target_database_schema) { 'acme' }
+  let(:dashboard_export_zip) { 'spec/fixtures/dashboard_export_ss_v5.0.0.zip' }
+
   let(:service) { described_class.new(
     target_database_yaml_file: target_database_yaml_file, 
     target_database_schema:    target_database_schema, 
@@ -43,7 +44,12 @@ RSpec.describe Superset::Services::ImportDashboardAcrossEnvironments do
       specify 'with dataset yamls updated to include the new target database uuid' do
         result_zip_dataset_yamls =  Dir.glob(File.join(test_unziped_path, '**', 'datasets', '**', '*.yaml'))
         expect(result_zip_dataset_yamls.count).to eq(1)
-        expect(YAML.load_file(result_zip_dataset_yamls.first)[:database_uuid]).to eq(YAML.load_file(target_database_yaml_file)[:uuid])
+        config = YAML.load_file(result_zip_dataset_yamls.first)
+
+        binding.pry
+        expect(config['database_uuid']).to eq(YAML.load_file(target_database_yaml_file)['uuid'])
+        expect(config['schema']).to eq(target_database_schema)
+        expect(config['catalog']).to eq(nil)
       end
     end
   end
