@@ -5,12 +5,14 @@ RSpec.describe Superset::Dataset::UpdateSchema do
               source_dataset_id:  source_dataset_id, 
               target_database_id: target_database_id, 
               target_schema:      target_schema,
+              target_catalog:     target_catalog,
               remove_copy_suffix: remove_copy_suffix) }
 
   let(:source_dataset_id) { 226 }
   let(:source_schema) { 'schema_one' }
   let(:target_database_id) { 6 }
   let(:target_schema) { 'schema_three' }
+  let(:target_catalog) { 'catalog_group_3' }
   let(:remove_copy_suffix) { false }
 
   let(:source_dataset) do
@@ -60,6 +62,7 @@ RSpec.describe Superset::Dataset::UpdateSchema do
         "normalize_columns"=>false,
         "offset"=>0,
         "owners"=>[],
+        "catalog"=>"catalog_group_1",
         "schema"=>source_schema,
         "sql"=>"select count(*),\nservice\n\nfrom blahblah \ngroup by service",
         "table_name"=>"JR SP Service Counts (COPY)",
@@ -130,8 +133,9 @@ RSpec.describe Superset::Dataset::UpdateSchema do
 
   describe '#params_updated' do
     context 'with remove_copy_suffix true' do
-      specify 'set the new target schema and target database correctly' do
+      specify 'set the new target schema, catalog, database correctly' do
         expect(subject.params_updated['schema']).to eq(target_schema)
+        expect(subject.params_updated['catalog']).to eq(target_catalog)
         expect(subject.params_updated['database_id']).to eq(target_database_id)
         expect(subject.params_updated['table_name']).to eq('JR SP Service Counts (COPY)') # unchanged if remove_copy_suffix is false
       end

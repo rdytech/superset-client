@@ -100,8 +100,12 @@ module Superset
             new_dataset_id = existing_datasets[0]["id"] # assuming that we do not name multiple datasets with same name in a single schema
           else
             new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: new_dataset_name).perform
-            # update the new dataset with the target schema and target database
-            Superset::Dataset::UpdateSchema.new(source_dataset_id: new_dataset_id, target_database_id: target_database_id, target_schema: target_schema).perform
+            # update the new dataset with the target schema, database, catalog
+            Superset::Dataset::UpdateSchema.new(
+              source_dataset_id:  new_dataset_id,
+              target_database_id: target_database_id,
+              target_schema:      target_schema,
+              target_catalog:     target_database_catalog).perform
           end
           # keep track of the previous dataset and the matching new dataset_id
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
@@ -261,6 +265,13 @@ module Superset
 
       def source_dashboard_filter_dataset_ids
         @filter_dataset_ids ||= source_dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact.uniq
+      end
+
+      # currently does not support multiple catalogs, assumption is that 1 catalog is used per database
+      def target_database_catalog
+        catalogs = Superset::Database::GetCatalogs.new(target_database_id).catalogs
+        raise ValidationError, "Target Database #{target_database_id} has multiple catalogs" if catalogs.size > 1
+        catalogs.first
       end
 
       # Primary Assumption is that all charts datasets on the source dashboard are pointing to the same database schema
