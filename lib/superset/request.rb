@@ -5,12 +5,13 @@ module Superset
     class InvalidParameterError < StandardError; end
     class ValidationError < StandardError; end
 
-    PAGE_SIZE = 100
+    DEFAULT_PAGE_SIZE = 100
 
-    attr_accessor :page_num
+    attr_accessor :page_num, :page_size
 
-    def initialize(page_num: 0)
+    def initialize(page_num: 0, page_size: nil)
       @page_num = page_num
+      @page_size = page_size || DEFAULT_PAGE_SIZE
     end
 
     def self.call
@@ -51,7 +52,8 @@ module Superset
     end
 
     def pagination
-      "page:#{page_num},page_size:#{PAGE_SIZE}"
+      raise InvalidParameterError, "page_size max is 1000 records" if page_size.to_i > 1000
+      "page:#{page_num},page_size:#{page_size}"
     end
 
     def filters

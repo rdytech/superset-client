@@ -4,11 +4,11 @@ module Superset
 
       attr_reader :name_contains, :dashboard_id_eq, :dataset_id_eq
 
-      def initialize(page_num: 0, name_contains: '', dashboard_id_eq: '', dataset_id_eq: '')
+      def initialize(name_contains: '', dashboard_id_eq: '', dataset_id_eq: '', **kwargs)
         @name_contains = name_contains
         @dashboard_id_eq = dashboard_id_eq
         @dataset_id_eq = dataset_id_eq
-        super(page_num: page_num)
+        super(**kwargs)
       end
 
       def self.call

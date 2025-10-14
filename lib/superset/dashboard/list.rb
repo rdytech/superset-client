@@ -9,14 +9,14 @@ module Superset
                   :tags_contain, :tags_equal,
                   :ids_not_in, :include_filter_dataset_schemas
 
-      def initialize(page_num: 0, title_contains: '', title_equals: '', tags_contain: [], tags_equal: [], ids_not_in: [], include_filter_dataset_schemas: false)
+      def initialize(page_num: 0, page_size: nil, title_contains: '', title_equals: '', tags_contain: [], tags_equal: [], ids_not_in: [], include_filter_dataset_schemas: false)
         @title_contains = title_contains
         @title_equals = title_equals
         @tags_contain = tags_contain
         @tags_equal = tags_equal
         @ids_not_in = ids_not_in
         @include_filter_dataset_schemas = include_filter_dataset_schemas
-        super(page_num: page_num)
+        super(page_num: page_num, page_size: page_size)
       end
 
       def self.call
