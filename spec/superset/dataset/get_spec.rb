@@ -35,7 +35,13 @@ RSpec.describe Superset::Dataset::Get do
 
   describe '#rows' do
     specify do
-      expect(subject.rows).to eq [["public.Birth Names Counts", "public", "examples", 1]]
+      expect(subject.rows).to eq [["Birth Names Counts", "public", "examples", 1]]
+    end
+  end
+
+  describe '#to_h' do
+    specify do
+      expect(subject.to_h).to eq({ title: "Birth Names Counts", schema: "public", database_name: "examples", database_id: 1 })
     end
   end
 end

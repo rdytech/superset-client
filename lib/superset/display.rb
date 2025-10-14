@@ -7,28 +7,27 @@ module Superset
     def table
       Terminal::Table.new(
         title: title,
-        headings: headings,
+        headings: list_attributes.map(&:to_s).map(&:humanize),
         rows: rows
       )
     end
 
     def rows
-      result.map do |d|
-        list_attributes.map { |la| d[la].to_s }
+      to_h.map { |d| list_attributes.map { |la| d[la].to_s } }
+    end
+
+    def to_h
+      if result.is_a?(Hash)
+        list_attributes.to_h { |la| [la, result[la]] }
+      else
+        result.map do |d|
+          list_attributes.to_h { |la| [la, d[la]] }
+        end
       end
     end
 
     def title
       self.class.to_s
-    end
-
-    def headings
-      headings = display_headers ? display_headers : list_attributes
-      headings.map(&:to_s).map(&:humanize)
-    end
-
-    def display_headers
-      # optionally override this method to display custom headers
     end
 
     def list_attributes

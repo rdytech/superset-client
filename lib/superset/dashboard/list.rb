@@ -53,9 +53,13 @@ module Superset
       end
 
       def rows
+        to_h.map { |d| list_attributes.map { |la| d[la] } }
+      end
+
+      def to_h
         result.map do |d|
-          list_attributes.map do |la|
-            la == :url ? "#{superset_host}#{d[la]}" : d[la]
+          list_attributes.to_h do |la|
+            la == :url ? [la, "#{superset_host}#{d[la]}"] : [la, d[la]]
           end
         end
       end
