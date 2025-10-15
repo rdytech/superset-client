@@ -32,6 +32,10 @@ module Superset
       end
     end
 
+    def ids
+      result.map { |d| d[:id] }
+    end
+
     def title
       self.class.to_s
     end

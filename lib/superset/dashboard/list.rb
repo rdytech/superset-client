@@ -69,7 +69,7 @@ module Superset
       end
 
       def ids
-        result.map { |d| d[:id] }
+        result.is_a?(Hash) ? [result[:id]] : result.map { |d| d[:id] }
       end
 
       private
