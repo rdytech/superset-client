@@ -3,7 +3,6 @@ module Superset
     class List < Superset::Request
       attr_reader :title_contains, :title_equals, :schema_equals, :database_id_eq
 
-#      def initialize(page_num: 0, page_size: nil, title_contains: '', title_equals: '', schema_equals: '', database_id_eq: '')
       def initialize(title_contains: '', title_equals: '', schema_equals: '', database_id_eq: '', **kwargs)
         @title_contains = title_contains
         @title_equals = title_equals
