@@ -13,7 +13,13 @@ module Superset
     end
 
     def rows
-      to_h.map { |d| list_attributes.map { |la| d[la].to_s } }
+      if result.is_a?(Hash)
+        list_attributes.map { |la| result[la].to_s }
+      else
+        result.map do |d|
+          list_attributes.map { |la| d[la].to_s }
+        end
+      end
     end
 
     def to_h
