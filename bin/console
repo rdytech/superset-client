@@ -74,5 +74,37 @@ puts "Your accessible Superset Database connections are: Superset::Database::Lis
 
 Superset::Database::List.call
 
+# Auto-logout functionality.  Can override default timeout by setting CONSOLE_TIMEOUT env var (in seconds)
+TIMEOUT_SECONDS = ENV.fetch('CONSOLE_TIMEOUT', 1800).to_i # Default 30 minutes
+@last_activity = Time.now
+
+def reset_timeout
+  @last_activity = Time.now
+end
+
+def check_timeout
+  if Time.now - @last_activity > TIMEOUT_SECONDS
+    puts "\n\n>>> Session timed out after #{TIMEOUT_SECONDS / 60} minutes of inactivity. Goodbye! <<<"
+    exit(0)
+  end
+end
+
+# Set up timeout checking
+timeout_thread = Thread.new do
+  loop do
+    sleep 30 # Check every 30 seconds
+    check_timeout
+  end
+end
+
+# Hook into Pry to reset timeout on activity
+Pry.config.hooks.add_hook(:before_eval, :reset_timeout) do
+  reset_timeout
+end
+
+at_exit { timeout_thread.kill }
+
+puts "\n>>> Auto-logout enabled: #{TIMEOUT_SECONDS / 60} minutes of inactivity will close the session <<<"
+
 Pry.start(__FILE__)
 
