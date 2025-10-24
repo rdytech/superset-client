@@ -1,7 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe Superset::Security::User::List do
-  subject { described_class.new }
+  subject { described_class.new( **params ) }
+  let(:params) { {} }
   let(:superset_host) { 'https://test.superset.host.com' }
   let(:result) do
     [{
@@ -42,7 +43,7 @@ RSpec.describe Superset::Security::User::List do
   end
 
   describe '#list' do
-    before { stub_const("Superset::Request::PAGE_SIZE", "3") }
+    let(:params) { { page_size: 3 } }
 
     specify do
       expect(subject.table.to_s).to eq(

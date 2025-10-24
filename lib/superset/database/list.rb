@@ -6,10 +6,10 @@ module Superset
     class List < Superset::Request
       attr_reader :title_contains, :uuid_equals
 
-      def initialize(page_num: 0, title_contains: '', uuid_equals: '')
+      def initialize(title_contains: '', uuid_equals: '', **kwargs)
         @title_contains = title_contains
         @uuid_equals = uuid_equals
-        super(page_num: page_num)
+        super(**kwargs)
       end
 
       def self.call

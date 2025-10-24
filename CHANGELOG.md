@@ -1,5 +1,14 @@
 ## Change Log
 
+## 0.2.7 - 2025-10-16
+* add to_h method to list classes for Hash output
+* add ids method to list classes for array of ids output
+* add ability to over ride default page_size
+* add ruby console auto timeout set to 30 mins by default
+* add GetCatalogs endpoint caller
+* fix catalog bug related to dashboard export and import across env
+* add tag_equals param to dashboard list class
+
 ## 0.2.6 - 2025-08-05
 * Bump terminal-table from 1.8.0 to 4.0.0
 

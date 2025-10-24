@@ -2,13 +2,13 @@ module Superset
   module Chart
     class List < Superset::Request
 
-      attr_reader :name_contains, :dashboard_id_eq, :dataset_id_eq
+      attr_reader :title_contains, :dashboard_id_eq, :dataset_id_eq
 
-      def initialize(page_num: 0, name_contains: '', dashboard_id_eq: '', dataset_id_eq: '')
-        @name_contains = name_contains
+      def initialize(title_contains: '', dashboard_id_eq: '', dataset_id_eq: '', **kwargs)
+        @title_contains = title_contains
         @dashboard_id_eq = dashboard_id_eq
         @dataset_id_eq = dataset_id_eq
-        super(page_num: page_num)
+        super(**kwargs)
       end
 
       def self.call
@@ -38,7 +38,7 @@ module Superset
       def filters
         # TODO filtering across all classes needs a refactor to support multiple options in a more flexible way
         filter_set = []
-        filter_set << "(col:slice_name,opr:ct,value:'#{name_contains}')" if name_contains.present?
+        filter_set << "(col:slice_name,opr:ct,value:'#{title_contains}')" if title_contains.present?
         filter_set << "(col:dashboards,opr:rel_m_m,value:#{dashboard_id_eq})" if dashboard_id_eq.present? # rel many to many
         filter_set << "(col:datasource_id,opr:eq,value:#{dataset_id_eq})" if dataset_id_eq.present?
 

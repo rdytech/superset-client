@@ -9,14 +9,14 @@ module Superset
                   :tags_contain, :tags_equal,
                   :ids_not_in, :include_filter_dataset_schemas
 
-      def initialize(page_num: 0, title_contains: '', title_equals: '', tags_contain: [], tags_equal: [], ids_not_in: [], include_filter_dataset_schemas: false)
+      def initialize(title_contains: '', title_equals: '', tags_contain: [], tags_equal: [], ids_not_in: [], include_filter_dataset_schemas: false, **kwargs)
         @title_contains = title_contains
         @title_equals = title_equals
         @tags_contain = tags_contain
         @tags_equal = tags_equal
         @ids_not_in = ids_not_in
         @include_filter_dataset_schemas = include_filter_dataset_schemas
-        super(page_num: page_num)
+        super(**kwargs)
       end
 
       def self.call
@@ -60,8 +60,16 @@ module Superset
         end
       end
 
+      def to_h
+        result.map do |d|
+          list_attributes.to_h do |la|
+            la == :url ? [la, "#{superset_host}#{d[la]}"] : [la, d[la]]
+          end
+        end
+      end
+
       def ids
-        result.map { |d| d[:id] }
+        result.is_a?(Hash) ? [result[:id]] : result.map { |d| d[:id] }
       end
 
       private

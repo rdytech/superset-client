@@ -18,7 +18,11 @@ module Superset
       end
 
       def rows
-        [ [title, schema, database_name, database_id] ]
+        [to_h.values]
+      end
+
+      def to_h
+        list_attributes.to_h { |a| [a, send(a)] }
       end
 
       def schema
@@ -26,7 +30,7 @@ module Superset
       end
 
       def title
-        result['name']
+        result['table_name']
       end
 
       def database_name
@@ -47,8 +51,8 @@ module Superset
         "dataset/#{id}"
       end
 
-      def display_headers
-        %w[title schema database_name, database_id]
+      def list_attributes
+        [:title, :schema, :database_name, :database_id]
       end
     end
   end
