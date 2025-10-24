@@ -7,15 +7,16 @@ module Superset
   module Dashboard
     module Datasets
       class List < Superset::Request
-        attr_reader :id, :include_filter_datasets # id - dashboard id
+        attr_reader :id, :include_filter_datasets, :separate_shared_datasets # id - dashboard id
 
         def self.call(id)
           self.new(id).list
         end
 
-        def initialize(dashboard_id:, include_filter_datasets: false)
+        def initialize(dashboard_id:, include_filter_datasets: false, separate_shared_datasets: false)
           @id = dashboard_id
           @include_filter_datasets = include_filter_datasets
+          @separate_shared_datasets = separate_shared_datasets
         end
 
         def perform
@@ -25,7 +26,7 @@ module Superset
 
         def schemas
           @schemas ||= begin
-            all_dashboard_schemas = datasets_details.map {|d| d[:schema] }.uniq
+            all_dashboard_schemas = datasets_details["datasets"].map {|d| d[:schema] }.uniq
 
             # For the current superset setup we will assume a dashboard datasets will point to EXACTLY one schema, their own.
             # if not .. we need to know about it. Potentially we could override this check if others do not consider it a problem.
@@ -40,12 +41,16 @@ module Superset
           chart_datasets = result.map do |details|
             details.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => details['database'].slice('id', 'name', 'backend')).with_indifferent_access
           end
-          return chart_datasets unless include_filter_datasets
+          dashboard_datasets = {'datasets' => chart_datasets, 'shared_datasets' => []}
+          return dashboard_datasets unless include_filter_datasets
           chart_dataset_ids = chart_datasets.map{|d| d['id'] }
           filter_dataset_ids_not_used_in_charts = filter_dataset_ids - chart_dataset_ids
-          return chart_datasets if filter_dataset_ids_not_used_in_charts.empty?
+          return dashboard_datasets if filter_dataset_ids_not_used_in_charts.empty?
           # returning chart and filter datasets
-          chart_datasets + filter_datasets(filter_dataset_ids_not_used_in_charts)
+          filter_datasets = filter_datasets(filter_dataset_ids_not_used_in_charts)
+          dashboard_datasets['datasets'] += filter_datasets[:datasets]
+          dashboard_datasets['shared_datasets'] += filter_datasets[:shared_datasets]
+          return dashboard_datasets
         end
 
         private
@@ -55,16 +60,25 @@ module Superset
         end
 
         def filter_datasets(filter_dataset_ids_not_used_in_charts)
-          filter_dataset_ids_not_used_in_charts.map do |filter_dataset_id|
-            filter_dataset = Superset::Dataset::Get.new(filter_dataset_id).result
-            database_info = {
-              'id' => filter_dataset['database']['id'],
-              'name' => filter_dataset['database']['database_name'],
-              'backend' => filter_dataset['database']['backend']
-            }
-            filter_dataset.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => database_info, 'filter_only': true).with_indifferent_access
+          filter_dataset_ids_not_used_in_charts.each_with_object({datasets: [], shared_datasets: []}) do |filter_dataset_id, result|
+            dataset = Superset::Dataset::Get.new(filter_dataset_id).result
+            if separate_shared_datasets && JSON.parse(dataset['extra'] || "{}")["shared"]
+              result[:shared_datasets] << sliced_dataset(dataset)
+            else
+              result[:datasets] << sliced_dataset(dataset)
+            end
           end
         end
+
+        def sliced_dataset(dataset)
+          database_info = {
+            'id' => dataset['database']['id'],
+            'name' => dataset['database']['database_name'],
+            'backend' => dataset['database']['backend']
+          }
+          dataset.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => database_info, 'filter_only': true).with_indifferent_access
+        end
+
 
         def route
           "dashboard/#{id}/datasets"
@@ -75,7 +89,7 @@ module Superset
         end
 
         def rows
-          datasets_details.map do |d|
+          datasets_details["datasets"].map do |d|
             [
               d[:id],
               d[:datasource_name],
