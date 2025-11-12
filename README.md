@@ -22,6 +22,9 @@ Build, bundle and open a ruby console
 docker-compose build
 docker-compose run --rm app bundle install
 docker-compose run --rm app bin/console
+
+# note .. windows users may need to call ruby the bin/console file
+docker-compose run --rm app ruby bin/console
 ```
 
 ## Setup Locally ( no docker ) 
