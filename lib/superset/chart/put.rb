@@ -2,7 +2,7 @@
 #
 # Usage:
 # params = { owners: [ 58, 3 ] }
-# Superset::Chart::Put.new(object_id: 202, params: params ).perform
+# Superset::Chart::Put.new(target_id: 202, params: params ).perform
 
 module Superset
   module Chart
@@ -11,7 +11,7 @@ module Superset
       private
 
       def route
-        "chart/#{object_id}"
+        "chart/#{target_id}"
       end
     end
   end

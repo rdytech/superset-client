@@ -215,7 +215,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
           let!(:tags) {  ["embedded", "product:some-product-name", "client:#{target_schema}"] }
 
           before do
-            expect(Superset::Tag::AddToObject).to receive(:new).with(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard_id, tags: tags).and_return(double(perform: true))
+            expect(Superset::Tag::AddToObject).to receive(:new).with(object_type_id: ObjectType::DASHBOARD, target_id: new_dashboard_id, tags: tags).and_return(double(perform: true))
           end
 
           specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }

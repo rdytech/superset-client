@@ -67,7 +67,7 @@ module Superset
       def add_tags_to_new_dashboard
         return unless tags.present?
 
-        Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard.id, tags: tags).perform
+        Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD, target_id: new_dashboard.id, tags: tags).perform
         logger.info "  Added tags to dashboard #{new_dashboard.id}: #{tags}"
       rescue => e
         # catching tag error and display in log .. but also alowing the process to finish logs as tag error is fairly insignificant
