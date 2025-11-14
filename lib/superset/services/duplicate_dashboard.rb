@@ -164,11 +164,11 @@ module Superset
 
       def update_source_dashboard_json_metadata
         logger.info "  Updated new Dashboard json_metadata charts with new dataset ids"
-        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => @new_dashboard_json_metadata_configuration.to_json }).perform
+        Superset::Dashboard::Put.new(target_id: new_dashboard.id, params: { "json_metadata" => @new_dashboard_json_metadata_configuration.to_json }).perform
       end
 
       def publish_dashboard
-        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { published: publish } ).perform
+        Superset::Dashboard::Put.new(target_id: new_dashboard.id, params: { published: publish } ).perform
       end
 
       def new_dashboard

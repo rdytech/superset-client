@@ -133,7 +133,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_2, target_dataset_id: new_dataset_2, target_dashboard_id: new_dashboard_id).and_return(double(perform: true))
 
         # update dashboard json metadata chart datasets
-        expect(Superset::Dashboard::Put).to receive(:new).once.with(target_dashboard_id: new_dashboard_id, params: { 'json_metadata' => json_metadata_updated_settings.to_json }).and_return(double(perform: true))
+        expect(Superset::Dashboard::Put).to receive(:new).once.with(target_id: new_dashboard_id, params: { 'json_metadata' => json_metadata_updated_settings.to_json }).and_return(double(perform: true))
       end
 
       context 'completes duplicate process' do
@@ -226,7 +226,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         context 'excluded from params' do
           before do
             expect(Superset::Dashboard::Put).to_not receive(:new).with(
-              target_dashboard_id: new_dashboard_id,
+              target_id: new_dashboard_id,
               params: { published: false })
           end
 
@@ -248,7 +248,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
 
           before do
             expect(Superset::Dashboard::Put).to receive(:new).with(
-              target_dashboard_id: new_dashboard_id,
+              target_id: new_dashboard_id,
               params: { published: true }).and_return(double(perform: true))
           end
 
