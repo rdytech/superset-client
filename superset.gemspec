@@ -35,20 +35,20 @@ Gem::Specification.new do |spec|
   ]
 
   # Uncomment to register a new dependency of your gem
-  spec.add_dependency "dotenv", "~> 2.0"
+  spec.add_dependency "dotenv", ">= 2.0"
   spec.add_dependency "json", "~> 2.0"
   spec.add_dependency "terminal-table", "~> 4.0"
-  spec.add_dependency "rake", "~> 13.0"
-  spec.add_dependency "rollbar", "~> 3.0"
-  spec.add_dependency "require_all", "~> 3.0"
-  spec.add_dependency "rubyzip", "~> 1.0"
+  spec.add_dependency "rake", ">= 13.0"
+  spec.add_dependency "rollbar", ">= 3.0"
+  spec.add_dependency "require_all", ">= 3.0"
+  spec.add_dependency "rubyzip", ">= 1.0"
   spec.add_dependency "faraday", "~> 1.0"
   spec.add_dependency "faraday-multipart", "~> 1.0"
-  spec.add_dependency "enumerate_it", "~> 1.7"
+  spec.add_dependency "enumerate_it", ">= 1.7"
 
-  spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "rubocop", "~> 1.0"
-  spec.add_development_dependency "pry", "~> 0.14"
+  spec.add_development_dependency "rspec", ">= 3.0"
+  spec.add_development_dependency "rubocop", ">= 1.0"
+  spec.add_development_dependency "pry", ">= 0.14"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html

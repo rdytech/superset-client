@@ -15,20 +15,15 @@ PATH
   remote: .
   specs:
     superset (0.2.7)
-<<<<<<< HEAD
-      dotenv (~> 2.7)
-      enumerate_it (~> 1.7.0)
-=======
-      dotenv (~> 2.0)
-      enumerate_it (~> 1.7)
->>>>>>> 1fb4ae9 (Upgrade to ruby >=3, update specs)
+      dotenv (>= 2.0)
+      enumerate_it (>= 1.7)
       faraday (~> 1.0)
       faraday-multipart (~> 1.0)
       json (~> 2.0)
-      rake (~> 13.0)
-      require_all (~> 3.0)
-      rollbar (~> 3.0)
-      rubyzip (~> 1.0)
+      rake (>= 13.0)
+      require_all (>= 3.0)
+      rollbar (>= 3.0)
+      rubyzip (>= 1.0)
       terminal-table (~> 4.0)
 
 GEM
@@ -160,9 +155,9 @@ PLATFORMS
 
 DEPENDENCIES
   happi!
-  pry (~> 0.14)
-  rspec (~> 3.0)
-  rubocop (~> 1.0)
+  pry (>= 0.14)
+  rspec (>= 3.0)
+  rubocop (>= 1.0)
   superset!
 
 BUNDLED WITH
