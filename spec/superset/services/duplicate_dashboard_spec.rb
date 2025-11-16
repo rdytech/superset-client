@@ -307,7 +307,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
           expect { subject.perform }.to raise_error(Superset::Request::ValidationError,
             "One or more source dashboard filters point to a different schema than the dashboard charts. " \
             "Identified Unpermittied Filter Dataset Ids are " \
-            "[{:filter_dataset_id=>#{invalid_filter_dataset_id}, :filter_schema=>\"#{invalid_filter_dataset_schema}\"}]")
+            "[{filter_dataset_id: #{invalid_filter_dataset_id}, filter_schema: \"#{invalid_filter_dataset_schema}\"}]")
         end
       end
 
@@ -327,8 +327,8 @@ RSpec.describe Superset::Services::DuplicateDashboard do
           expect { subject.perform }.to raise_error(Superset::Request::ValidationError,
             "One or more source dashboard filters point to a different schema than the dashboard charts. " \
             "Identified Unpermittied Filter Dataset Ids are " \
-            "[{:filter_dataset_id=>#{invalid_filter_dataset_id}, :filter_schema=>\"#{invalid_filter_dataset_schema}\"}, " \
-            "{:filter_dataset_id=>#{invalid_filter_dataset_id_2}, :filter_schema=>\"#{invalid_filter_dataset_schema_2}\"}]")
+            "[{filter_dataset_id: #{invalid_filter_dataset_id}, filter_schema: \"#{invalid_filter_dataset_schema}\"}, " \
+            "{filter_dataset_id: #{invalid_filter_dataset_id_2}, filter_schema: \"#{invalid_filter_dataset_schema_2}\"}]")
         end
       end
 

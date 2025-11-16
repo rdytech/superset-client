@@ -27,17 +27,19 @@ RSpec.describe Superset::Security::PermissionsResources::List do
   describe '#list' do
     specify do
       expect(subject.table.to_s).to eq(
-        "+---------------------------------------------------------+\n" \
-        "|     Superset::Security::PermissionsResources::List      |\n" \
-        "+----+-----------------------+----------------------------+\n" \
-        "| Id | Permission            | View menu                  |\n" \
-        "+----+-----------------------+----------------------------+\n" \
-        "| 1  | {\"name\"=>\"can_read\"}  | {\"name\"=>\"SavedQuery\"}     |\n" \
-        "| 2  | {\"name\"=>\"can_write\"} | {\"name\"=>\"SavedQuery\"}     |\n" \
-        "| 3  | {\"name\"=>\"can_read\"}  | {\"name\"=>\"CssTemplate\"}    |\n" \
-        "| 4  | {\"name\"=>\"can_write\"} | {\"name\"=>\"CssTemplate\"}    |\n" \
-        "| 5  | {\"name\"=>\"can_read\"}  | {\"name\"=>\"ReportSchedule\"} |\n" \
-        "+----+-----------------------+----------------------------+"
+        <<~TABLE.chomp
+          +-------------------------------------------------------------+
+          |       Superset::Security::PermissionsResources::List        |
+          +----+-------------------------+------------------------------+
+          | Id | Permission              | View menu                    |
+          +----+-------------------------+------------------------------+
+          | 1  | {"name" => "can_read"}  | {"name" => "SavedQuery"}     |
+          | 2  | {"name" => "can_write"} | {"name" => "SavedQuery"}     |
+          | 3  | {"name" => "can_read"}  | {"name" => "CssTemplate"}    |
+          | 4  | {"name" => "can_write"} | {"name" => "CssTemplate"}    |
+          | 5  | {"name" => "can_read"}  | {"name" => "ReportSchedule"} |
+          +----+-------------------------+------------------------------+
+        TABLE
       )
     end
   end

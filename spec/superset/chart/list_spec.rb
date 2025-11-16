@@ -97,7 +97,7 @@ RSpec.describe Superset::Chart::List do
       expect(subject.rows_with_dashboards).to eq(
         [
           ["54672", "Top 10 Placement Managed by", "[]"],
-          ["54689", "Bryan's Test A", "[{\"dashboard_title\"=>\"Embedded Test 1 (COPY)\", \"id\"=>118}]"]
+          ["54689", "Bryan's Test A", "[{\"dashboard_title\" => \"Embedded Test 1 (COPY)\", \"id\" => 118}]"]
         ]
       )
     end

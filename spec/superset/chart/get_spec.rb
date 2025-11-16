@@ -43,8 +43,8 @@ RSpec.describe Superset::Chart::Get do
       expect(subject.rows).to eq [
         "54507", 
         "JRStg DoB per Year", 
-        "[{\"first_name\"=>\"Jay\", \"id\"=>9, \"last_name\"=>\"Bee\"}, {\"first_name\"=>\"Ron\", \"id\"=>8, \"last_name\"=>\"Vee\"}]"
-      ]
+        "[{\"first_name\" => \"Jay\", \"id\" => 9, \"last_name\" => \"Bee\"}, {\"first_name\" => \"Ron\", \"id\" => 8, \"last_name\" => \"Vee\"}]"
+      ]]
     end
   end
 
