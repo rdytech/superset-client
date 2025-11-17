@@ -67,7 +67,7 @@ module Superset
       def add_tags_to_new_dashboard
         return unless tags.present?
 
-        Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD, object_id: new_dashboard.id, tags: tags).perform
+        Superset::Tag::AddToObject.new(object_type_id: ObjectType::DASHBOARD, target_id: new_dashboard.id, tags: tags).perform
         logger.info "  Added tags to dashboard #{new_dashboard.id}: #{tags}"
       rescue => e
         # catching tag error and display in log .. but also alowing the process to finish logs as tag error is fairly insignificant
@@ -164,11 +164,11 @@ module Superset
 
       def update_source_dashboard_json_metadata
         logger.info "  Updated new Dashboard json_metadata charts with new dataset ids"
-        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { "json_metadata" => @new_dashboard_json_metadata_configuration.to_json }).perform
+        Superset::Dashboard::Put.new(target_id: new_dashboard.id, params: { "json_metadata" => @new_dashboard_json_metadata_configuration.to_json }).perform
       end
 
       def publish_dashboard
-        Superset::Dashboard::Put.new(target_dashboard_id: new_dashboard.id, params: { published: publish } ).perform
+        Superset::Dashboard::Put.new(target_id: new_dashboard.id, params: { published: publish } ).perform
       end
 
       def new_dashboard
