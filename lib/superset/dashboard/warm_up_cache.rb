@@ -35,7 +35,7 @@ module Superset
       end
 
       def fetch_dataset_details(dashboard_id)
-        Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id).datasets_details.map { |dataset| dataset['database'].slice('name').merge(dataset.slice('datasource_name'))}
+        Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id).datasets_details['datasets'].map { |dataset| dataset['database'].slice('name').merge(dataset.slice('datasource_name'))}
       end
     end
   end

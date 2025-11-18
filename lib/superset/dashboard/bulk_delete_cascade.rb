@@ -9,10 +9,11 @@ module Superset
     class BulkDeleteCascade
       class InvalidParameterError < StandardError; end
 
-      attr_reader :dashboard_ids
+      attr_reader :dashboard_ids, :ignore_shared_datasets
 
-      def initialize(dashboard_ids: [])
+      def initialize(dashboard_ids: [], ignore_shared_datasets: false)
         @dashboard_ids = dashboard_ids
+        @ignore_shared_datasets = ignore_shared_datasets
       end
 
       def perform
@@ -31,7 +32,7 @@ module Superset
       private
 
       def delete_datasets(dashboard_id)
-        datasets_to_delete = Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id).datasets_details.map{|d| d[:id] }
+        datasets_to_delete = Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id, separate_shared_datasets: ignore_shared_datasets).datasets_details["datasets"].map{|d| d[:id] }
         Superset::Dataset::BulkDelete.new(dataset_ids: datasets_to_delete).perform if datasets_to_delete.any?
       end
 
