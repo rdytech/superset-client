@@ -48,6 +48,20 @@ module Superset
           chart_datasets + filter_datasets(filter_dataset_ids_not_used_in_charts)
         end
 
+        def rows
+          datasets_details.map do |d|
+            [
+              d[:id],
+              d[:datasource_name],
+              d[:database][:id],
+              d[:database][:name],
+              d[:database][:backend],
+              d[:schema],
+              d[:filter_only]
+            ]
+          end
+        end
+
         private
 
         def filter_dataset_ids
@@ -72,20 +86,6 @@ module Superset
 
         def list_attributes
           ['id', 'datasource_name', 'database_id', 'database_name', 'database_backend', 'schema', 'filter_only'].map(&:to_sym)
-        end
-
-        def rows
-          datasets_details.map do |d|
-            [
-              d[:id],
-              d[:datasource_name],
-              d[:database][:id],
-              d[:database][:name],
-              d[:database][:backend],
-              d[:schema],
-              d[:filter_only]
-            ]
-          end
         end
 
         # when displaying a list of datasets, show dashboard title as well
