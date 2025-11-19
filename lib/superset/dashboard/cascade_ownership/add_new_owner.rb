@@ -26,7 +26,7 @@ module Superset
         def add_user_to_charts_ownership
           chart_ids = Superset::Dashboard::Charts::List.new(dashboard_id).ids
           chart_ids.each do |chart_id|
-            current_chart_owner_ids = Superset::Chart::Get.new(chart_id).result.first['owners'].map{|c| c['id']}
+            current_chart_owner_ids = Superset::Chart::Get.new(chart_id).result['owners'].map{|c| c['id']}
             next if current_chart_owner_ids.include?(user_id)
 
             Superset::Chart::Put.new(target_id: chart_id, params: { "owners":  current_chart_owner_ids << user_id }).perform
