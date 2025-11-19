@@ -247,11 +247,5 @@ RSpec.describe Superset::Dashboard::CascadeOwnership::AddNewOwner do
       end
     end
   end
-
-  describe '#params' do
-    it 'returns params hash with user_id as owner' do
-      expect(subject.params).to eq({ owners: [user_id] })
-    end
-  end
 end
 

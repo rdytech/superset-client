@@ -18,6 +18,12 @@ module Superset
           add_user_to_datasets_ownership
         end
 
+        private
+        
+        def params
+          { "owners": [ user_id ] }
+        end
+
         def add_user_to_dashboard_ownership
           return if current_dashboard_owner_ids.include?(user_id)
           Superset::Dashboard::Put.new(target_id: dashboard_id, params: { "owners":  current_dashboard_owner_ids << user_id }).perform
@@ -42,12 +48,6 @@ module Superset
             Superset::Dataset::Put.new(target_id: dataset_id, params: { "owners":  current_dataset_owner_ids << user_id }).perform
           end
         end
-
-        def params
-          { "owners": [ user_id ] }
-        end
-
-        private
 
         def current_dashboard_owner_ids
           @current_dashboard_owner_ids ||= Superset::Dashboard::Get.new(dashboard_id).result['owners'].map{|i| i['id'] }
