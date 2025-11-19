@@ -1,5 +1,5 @@
-# 1: Use ruby 2.7 as base:
-FROM ruby:2.7
+# 1: Use ruby 3.4.4 as base:
+FROM ruby:3.4.4
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
