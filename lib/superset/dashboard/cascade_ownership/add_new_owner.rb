@@ -19,10 +19,6 @@ module Superset
         end
 
         private
-        
-        def params
-          { "owners": [ user_id ] }
-        end
 
         def add_user_to_dashboard_ownership
           return if current_dashboard_owner_ids.include?(user_id)
