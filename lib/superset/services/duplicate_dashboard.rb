@@ -94,13 +94,13 @@ module Superset
         source_dashboard_datasets.each do |dataset|
           # duplicate the dataset, renaming to use of suffix as the target_schema OR target_dataset_suffix_override value
           # reason: there is a bug(or feature) in the SS where a dataset name must be uniq when duplicating
-          new_dataset_name = new_dataset_name(dataset[:datasource_name])
-          existing_datasets = Superset::Dataset::List.new(title_equals: new_dataset_name, schema_equals: target_schema).result
+          target_dataset_name = new_dataset_name(dataset[:datasource_name])
+          existing_datasets = Superset::Dataset::List.new(title_equals: target_dataset_name, schema_equals: target_schema).result
           if existing_datasets.any?
-            logger.info "  Dataset #{new_dataset_name} already exists. Reusing it"
+            logger.info "  Dataset #{target_dataset_name} already exists. Reusing it"
             new_dataset_id = existing_datasets[0]["id"]
           else
-            new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: new_dataset_name).perform
+            new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: target_dataset_name).perform
             # update the new dataset with the target schema, database, catalog
             Superset::Dataset::UpdateSchema.new(
               source_dataset_id:  new_dataset_id,
@@ -227,7 +227,7 @@ module Superset
 
       def validate_source_dashboard_datasets_sql_does_not_hard_code_schema
         errors = source_dashboard_datasets.map do |dataset|
-          "The Dataset ID #{dataset[:id]} SQL query is hard coded with the schema value and can not be duplicated cleanly.  " +
+          "The Dataset ID #{dataset[:id]} SQL query is hard coded with the schema value: #{dataset[:schema]}. This indicates that the dataset can not be duplicated cleanly to point to the target schema.  " +
             "Remove all direct embedded schema calls from the Dataset SQL query before continuing." if dataset[:sql].include?("#{dataset[:schema]}.")
         end.compact
         raise ValidationError, errors.join("\n") unless errors.empty?
