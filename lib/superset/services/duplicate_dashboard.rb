@@ -9,9 +9,9 @@ module Superset
   module Services
     class DuplicateDashboard < Superset::Request
 
-      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :target_dataset_suffix_override, :allowed_domains, :tags, :publish
+      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :target_dataset_suffix_override, :allowed_domains, :tags, :publish, :target_catalog_name
 
-      def initialize(source_dashboard_id:, target_schema:, target_database_id: , target_dataset_suffix_override: nil, allowed_domains: [], tags: [], publish: false)
+      def initialize(source_dashboard_id:, target_schema:, target_database_id: , target_dataset_suffix_override: nil, allowed_domains: [], tags: [], publish: false, target_catalog_name: nil)
         @source_dashboard_id = source_dashboard_id
         @target_schema = target_schema
         @target_database_id = target_database_id
@@ -19,6 +19,7 @@ module Superset
         @allowed_domains = allowed_domains
         @tags = tags
         @publish = publish
+        @target_catalog_name = target_catalog_name
       end
 
       def perform
@@ -63,7 +64,7 @@ module Superset
         @new_dashboard_json_metadata_configuration ||= new_dashboard.json_metadata
       end
 
-      private
+      # private
 
       def add_tags_to_new_dashboard
         return unless tags.present?
@@ -91,14 +92,13 @@ module Superset
 
       def duplicate_source_dashboard_datasets
         source_dashboard_datasets.each do |dataset|
-          # duplicate the dataset, renaming to use of suffix as the target_schema
-          # reason: there is a bug(or feature) in the SS API where a dataset name must be uniq when duplicating.  
-          # (note however renaming in the GUI to a dup name works fine)
-          new_dataset_name = new_dataset_name(dataset)
+          # duplicate the dataset, renaming to use of suffix as the target_schema OR target_dataset_suffix_override value
+          # reason: there is a bug(or feature) in the SS where a dataset name must be uniq when duplicating
+          new_dataset_name = new_dataset_name(dataset[:datasource_name])
           existing_datasets = Superset::Dataset::List.new(title_equals: new_dataset_name, schema_equals: target_schema).result
           if existing_datasets.any?
-            logger.info "Dataset #{existing_datasets[0]["table_name"]} already exists. Reusing it"
-            new_dataset_id = existing_datasets[0]["id"] # assuming that we do not name multiple datasets with same name in a single schema
+            logger.info "  Dataset #{new_dataset_name} already exists. Reusing it"
+            new_dataset_id = existing_datasets[0]["id"]
           else
             new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: new_dataset_name).perform
             # update the new dataset with the target schema, database, catalog
@@ -106,7 +106,7 @@ module Superset
               source_dataset_id:  new_dataset_id,
               target_database_id: target_database_id,
               target_schema:      target_schema,
-              target_catalog:     target_database_catalog).perform
+              target_catalog:     target_database_catalog_name).perform
           end
           # keep track of the previous dataset and the matching new dataset_id
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
@@ -115,9 +115,9 @@ module Superset
 
       # if a suffix is provided, use it to suffix the dataset name
       # if no suffix is provided, use the schema name as the suffix
-      def new_dataset_name(dataset)
-        return "#{dataset[:datasource_name]}-#{target_schema}" if target_dataset_suffix_override.blank?
-        "#{dataset[:datasource_name]}-#{target_dataset_suffix_override.downcase}"
+      def new_dataset_name(dataset_name)
+        return "#{dataset_name}-#{target_schema}" if target_dataset_suffix_override.blank?
+        "#{dataset_name}-#{target_dataset_suffix_override.downcase}"
       end
 
       def update_charts_with_new_datasets
@@ -203,6 +203,7 @@ module Superset
 
       def validate_params
         start_log_msg
+        #binding.pry
         # params validations
         raise  InvalidParameterError, "source_dashboard_id integer is required" unless source_dashboard_id.present? && source_dashboard_id.is_a?(Integer)
         raise  InvalidParameterError, "target_schema string is required" unless target_schema.present? && target_schema.is_a?(String)
@@ -217,7 +218,7 @@ module Superset
         raise ValidationError, "One or more source dashboard filters point to a different schema than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s}" if unpermitted_filter_dataset_ids.any?
 
         # new dataset validations - Need to be commented for EU dashboard duplication as we are using the existing datasets for the new dashboard
-        raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
+        raise ValidationError, "DATASET NAME CONFLICT: The Target Database #{target_database_id} with Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
         validate_source_dashboard_datasets_sql_does_not_hard_code_schema
 
         # embedded allowed_domain validations
@@ -253,13 +254,14 @@ module Superset
         source_dashboard_datasets.map { |dataset| dataset[:datasource_name] }.uniq
       end
 
-      # identify any already existing datasets in the target schema that have the same name as the source dashboard datasets
+      # identify any already existing datasets in the target database and schema that have the same name as the source dashboard datasets + suffix
       # note this is prior to adding the (COPY) suffix
-      # here we will need to decide if we want to use the existing dataset or not see NEP-????
+      # here we will need to decide if we want to use the existing dataset or not
       # for now we will exit with an error if we find any existing datasets of the same name
       def target_schema_matching_dataset_names
         @target_schema_matching_dataset_names ||= source_dashboard_dataset_names.map do |source_dataset_name|
-          existing_names = Superset::Dataset::List.new(title_contains: source_dataset_name, schema_equals: target_schema).result.map{|t|t['table_name']}.uniq # contains match to cover with suffix as well
+          source_dataset_name_with_suffix = new_dataset_name(source_dataset_name)
+          existing_names = Superset::Dataset::List.new(title_contains: source_dataset_name_with_suffix, database_id_eq: target_database_id, schema_equals: target_schema).result.map{|t|t['table_name']}.uniq # contains match to cover with suffix as well
           unless existing_names.flatten.empty?
             logger.error "  HALTING PROCESS: Schema #{target_schema} already has Dataset called #{existing_names}"
           end
@@ -275,11 +277,13 @@ module Superset
         @filter_dataset_ids ||= source_dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact.uniq
       end
 
-      # currently does not support multiple catalogs, assumption is that 1 catalog is used per database
-      def target_database_catalog
+      # if multiple catalogs are present, the target_catalog_name must be provided, otherwise use the first catalog
+      def validated_target_database_catalog_name
         catalogs = Superset::Database::GetCatalogs.new(target_database_id).catalogs
-        raise ValidationError, "Target Database #{target_database_id} has multiple catalogs" if catalogs.size > 1
-        catalogs.first
+        return target_catalog_name if catalogs.include?(target_catalog_name)
+
+        raise ValidationError, "Target Database #{target_database_id} has multiple catalogs, must provide target_catalog_name" if catalogs.size > 1 && target_catalog_name.blank?
+        @target_database_catalog_name ||= catalogs.find { |c| c['name'] == target_catalog_name } || catalogs.first
       end
 
       # Primary Assumption is that all charts datasets on the source dashboard are pointing to the same database schema
