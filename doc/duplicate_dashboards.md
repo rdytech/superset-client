@@ -36,7 +36,7 @@ then you could go ahead and run something like this.
 ```ruby
 Superset::Services::DuplicateDashboard.new(
     source_dashboard_id: 90,
-    target_schema: 'public',
+    target_schema: 'client_1',
     target_database_id: 2
   ).perform
 
@@ -47,12 +47,12 @@ Superset::Services::DuplicateDashboard.new(
 # cat log/superset-client.log
 # INFO -- : >>>>>>>>>>>>>>>>> Starting DuplicateDashboard Service <<<<<<<<<<<<<<<<<<<<<<
 # INFO -- : Source Dashboard URL: https://your-superset-host/superset/dashboard/90/
-# INFO -- : Duplicating dashboard 90 into Target Schema: public in database 2
+# INFO -- : Duplicating dashboard 90 into Target Schema: client_1 in database 2
 # INFO -- :   Copy Dashboard/Charts Completed - New Dashboard ID: 401
 # INFO -- : Duplicating Source Dataset examples.video_game_sales with id 11
-# INFO -- :     Finished. Duplicate Dataset Name video_game_sales-example_two with id 542
-# INFO -- :     Validating Dataset ID: 542 schema update to public on Database: 2
-# INFO -- :     Successfully updated dataset schema to public on Database: 2
+# INFO -- :     Finished. Duplicate Dataset Name video_game_sales-example_two-client_1 with id 542
+# INFO -- :     Validating Dataset ID: 542 schema update to client_1 on Database: 2
+# INFO -- :     Successfully updated dataset schema to client_1 on Database: 2
 # INFO -- : Updating Charts to point to New Datasets and updating Dashboard json_metadata ...
 # INFO -- :   Update Chart 55752 to new dataset_id 542
 # INFO -- :   Updated new Dashboard json_metadata charts with new dataset ids
@@ -71,13 +71,33 @@ If your using the embedded dashboards you can also provied attributes for
 ```ruby
 Superset::Services::DuplicateDashboard.new(
     source_dashboard_id: 37,
-    target_schema: 'public',
+    target_schema: 'client_1',
     target_database_id: 2,
     allowed_domains: ["https://wylee-coyote-domain/"],
     tags: ["product:acme_fu", "client:wylee_coyote", "embedded"],
     publish: true
   ).perform
+
+
+
 ```
+
+## Duplication when schemas are not used
+
+If your multitenant setup is at the database level, and database structures are replicated into the same base schema, ie public,
+then the target resulted datasets name must be overidden in order to get around the superset uniq datasets name validation restriction.  This can be done through the parameter 'target_dataset_suffix_override'.
+
+```ruby
+Superset::Services::DuplicateDashboard.new(
+    source_dashboard_id: 90,
+    target_schema: 'public',
+    target_database_id: 2
+    target_dataset_suffix_override: 'client_1' 
+  ).perform
+
+```
+
+
 
 ### What is my Database ID ?
 
