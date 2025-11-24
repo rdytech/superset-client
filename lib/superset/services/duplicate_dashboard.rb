@@ -106,7 +106,7 @@ module Superset
               source_dataset_id:  new_dataset_id,
               target_database_id: target_database_id,
               target_schema:      target_schema,
-              target_catalog:     target_database_catalog_name).perform
+              target_catalog:     validated_target_database_catalog_name).perform
           end
           # keep track of the previous dataset and the matching new dataset_id
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
@@ -283,7 +283,7 @@ module Superset
         return target_catalog_name if catalogs.include?(target_catalog_name)
 
         raise ValidationError, "Target Database #{target_database_id} has multiple catalogs, must provide target_catalog_name" if catalogs.size > 1 && target_catalog_name.blank?
-        @target_database_catalog_name ||= catalogs.find { |c| c['name'] == target_catalog_name } || catalogs.first
+        @validated_target_database_catalog_name ||= catalogs.find { |c| c['name'] == target_catalog_name } || catalogs.first
       end
 
       # Primary Assumption is that all charts datasets on the source dashboard are pointing to the same database schema

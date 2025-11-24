@@ -376,7 +376,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         let(:existing_target_datasets_list) {[ 'Dataset 1 (COPY)', 'Dataset 2 (COPY)' ]}
         specify do
           expect { subject.perform }.to raise_error(Superset::Request::ValidationError,
-            "DATASET NAME CONFLICT: The Target Schema schema_two already has existing datasets named: Dataset 1 (COPY),Dataset 2 (COPY)")
+            "DATASET NAME CONFLICT: The Target Database 6 with Schema schema_two already has existing datasets named: Dataset 1 (COPY),Dataset 2 (COPY)")
         end
       end
     end
