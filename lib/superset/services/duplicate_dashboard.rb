@@ -9,12 +9,13 @@ module Superset
   module Services
     class DuplicateDashboard < Superset::Request
 
-      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :allowed_domains, :tags, :publish
+      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :target_dataset_suffix_override, :allowed_domains, :tags, :publish
 
-      def initialize(source_dashboard_id:, target_schema:, target_database_id: , allowed_domains: [], tags: [], publish: false)
+      def initialize(source_dashboard_id:, target_schema:, target_database_id: , target_dataset_suffix_override: nil, allowed_domains: [], tags: [], publish: false)
         @source_dashboard_id = source_dashboard_id
         @target_schema = target_schema
         @target_database_id = target_database_id
+        @target_dataset_suffix_override = target_dataset_suffix_override
         @allowed_domains = allowed_domains
         @tags = tags
         @publish = publish
@@ -93,7 +94,7 @@ module Superset
           # duplicate the dataset, renaming to use of suffix as the target_schema
           # reason: there is a bug(or feature) in the SS API where a dataset name must be uniq when duplicating.  
           # (note however renaming in the GUI to a dup name works fine)
-          new_dataset_name = "#{dataset[:datasource_name]}-#{target_schema}"
+          new_dataset_name = new_dataset_name(dataset)
           existing_datasets = Superset::Dataset::List.new(title_equals: new_dataset_name, schema_equals: target_schema).result
           if existing_datasets.any?
             logger.info "Dataset #{existing_datasets[0]["table_name"]} already exists. Reusing it"
@@ -110,6 +111,13 @@ module Superset
           # keep track of the previous dataset and the matching new dataset_id
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
         end
+      end
+
+      # if a suffix is provided, use it to suffix the dataset name
+      # if no suffix is provided, use the schema name as the suffix
+      def new_dataset_name(dataset)
+        return "#{dataset[:datasource_name]}-#{target_schema}" if target_dataset_suffix_override.blank?
+        "#{dataset[:datasource_name]}-#{target_dataset_suffix_override.downcase}"
       end
 
       def update_charts_with_new_datasets

@@ -6,6 +6,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
               source_dashboard_id: source_dashboard_id,
               target_schema:       target_schema,
               target_database_id:  target_database_id,
+              target_dataset_suffix_override: target_dataset_suffix_override,
               allowed_domains:     allowed_domains,
               tags:                tags ) }
 
@@ -15,6 +16,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
   let(:target_schema) { 'schema_two' }
   let(:target_database_id) { 6 }
   let(:target_catalog) { 'catalog_group_1' }
+  let(:target_dataset_suffix_override) { nil }
   let(:allowed_domains) { [] }
   let(:tags) { [] }
   let(:target_database_available_schemas) { ['schema_one', 'schema_two', 'schema_three'] }
@@ -110,9 +112,6 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         # retrieving the source database catalog
         expect(Superset::Database::GetCatalogs).to receive(:new).with(target_database_id).and_return(double(catalogs: [target_catalog]))
 
-        # duplicating the current datasets
-        expect(Superset::Dataset::Duplicate).not_to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1-schema_two")
-        expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2-schema_two").and_return(double(perform: new_dataset_2))
 
         # updating the new datasets to point to the target schema and target database
         expect(Superset::Dataset::UpdateSchema).not_to receive(:new).with(source_dataset_id: new_dataset_1, target_database_id: target_database_id, target_schema: target_schema)
@@ -121,142 +120,173 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         # getting the list of charts for the source dashboard
         allow(Superset::Dashboard::Charts::List).to receive(:new).with(source_dashboard_id).and_return(double(result: [{ 'slice_name' => "chart 1", "id" => source_chart_1}, { 'slice_name' => "chart 2", "id" => source_chart_2}])) # , chart_ids: [source_chart_1, source_chart_2]
         allow(Superset::Dashboard::Charts::List).to receive(:new).with(new_dashboard_id).and_return(double(result: [{ 'slice_name' => "chart 1", "id" => new_chart_1}, { 'slice_name' => "chart 2", "id" => new_chart_2}]))
-        allow(Superset::Dataset::List).to receive(:new).with(title_equals: "Dataset 1-schema_two", schema_equals: target_schema).and_return(double(result: [{id: 301}]))
-        allow(Superset::Dataset::List).to receive(:new).with(title_equals: "Dataset 2-schema_two", schema_equals: target_schema).and_return(double(result: []))
 
         # getting the current dataset_id for the new charts .. still pointing to the old datasets
         expect(Superset::Chart::Get).to receive(:new).with(new_chart_1).and_return(double(datasource_id: source_dataset_1))
         expect(Superset::Chart::Get).to receive(:new).with(new_chart_2).and_return(double(datasource_id: source_dataset_2))
 
-        # updating the new charts to point to the new datasets
-        expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_1, target_dataset_id: new_dataset_1, target_dashboard_id: new_dashboard_id).and_return(double(perform: true))
-        expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_2, target_dataset_id: new_dataset_2, target_dashboard_id: new_dashboard_id).and_return(double(perform: true))
 
         # update dashboard json metadata chart datasets
         expect(Superset::Dashboard::Put).to receive(:new).once.with(target_id: new_dashboard_id, params: { 'json_metadata' => json_metadata_updated_settings.to_json }).and_return(double(perform: true))
       end
 
-      context 'completes duplicate process' do
-        context 'and returns the new dashboard details' do
-          specify do
-            expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false})
-          end
+      context 'with dataset suffix using schema names' do
+        before do                  
+          # duplicating the current datasets where 'Dataset 1-schema_two' already exists
+          allow(Superset::Dataset::List).to receive(:new).with(title_equals: "Dataset 1-schema_two", schema_equals: target_schema).and_return(double(result: [{id: 301}]))
+          allow(Superset::Dataset::List).to receive(:new).with(title_equals: "Dataset 2-schema_two", schema_equals: target_schema).and_return(double(result: []))
+
+          expect(Superset::Dataset::Duplicate).not_to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1-schema_two")
+          expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2-schema_two").and_return(double(perform: new_dataset_2))
+                  # updating the new charts to point to the new datasets
+          expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_1, target_dataset_id: new_dataset_1, target_dashboard_id: new_dashboard_id).and_return(double(perform: true))
+          expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_2, target_dataset_id: new_dataset_2, target_dashboard_id: new_dashboard_id).and_return(double(perform: true))
+
         end
 
-        context 'and updates the json_metadata as expected' do
-          context 'with stardard json metadata ids' do
+        context 'completes duplicate process' do
+          context 'and returns the new dashboard details' do
             specify do
-              expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_initial_settings)
-              subject.perform
-              expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_updated_settings)
+              expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false})
             end
           end
 
-          context 'with non stardard json metadata ids to confirm gsub' do
-            let(:source_chart_1) { 11 }
-            let(:source_chart_2) { 1111 }
-            let(:json_metadata_initial_settings) do
-              {
-                "chart_configuration"=>
-                  { "#{source_chart_1}"=>{"id"=>source_chart_1, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[source_chart_2]}} ,
-                    "#{source_chart_2}"=>{"id"=>source_chart_2, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[source_chart_1]}} } ,
-                "global_chart_configuration"=>{"scope"=>{"rootPath"=>["ROOT_ID"], "excluded"=>[]}, "chartsInScope"=>[source_chart_1, source_chart_2]},
-                "native_filter_configuration"=>[]
-              }
+          context 'and updates the json_metadata as expected' do
+            context 'with stardard json metadata ids' do
+              specify do
+                expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_initial_settings)
+                subject.perform
+                expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_updated_settings)
+              end
             end
 
-            let(:new_chart_1) { 222 }
-            let(:new_chart_2) { 22222 }
-            let!(:json_metadata_updated_settings) do
-              {
-                "chart_configuration"=>
-                  { "#{new_chart_1}"=>{"id"=>new_chart_1, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[new_chart_2]}} ,
-                    "#{new_chart_2}"=>{"id"=>new_chart_2, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[new_chart_1]}} } ,
-                "global_chart_configuration"=>{"scope"=>{"rootPath"=>["ROOT_ID"], "excluded"=>[]}, "chartsInScope"=>[new_chart_1, new_chart_2]},
-                "native_filter_configuration"=>[]
-              }
+            context 'with non stardard json metadata ids to confirm gsub' do
+              let(:source_chart_1) { 11 }
+              let(:source_chart_2) { 1111 }
+              let(:json_metadata_initial_settings) do
+                {
+                  "chart_configuration"=>
+                    { "#{source_chart_1}"=>{"id"=>source_chart_1, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[source_chart_2]}} ,
+                      "#{source_chart_2}"=>{"id"=>source_chart_2, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[source_chart_1]}} } ,
+                  "global_chart_configuration"=>{"scope"=>{"rootPath"=>["ROOT_ID"], "excluded"=>[]}, "chartsInScope"=>[source_chart_1, source_chart_2]},
+                  "native_filter_configuration"=>[]
+                }
+              end
+
+              let(:new_chart_1) { 222 }
+              let(:new_chart_2) { 22222 }
+              let!(:json_metadata_updated_settings) do
+                {
+                  "chart_configuration"=>
+                    { "#{new_chart_1}"=>{"id"=>new_chart_1, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[new_chart_2]}} ,
+                      "#{new_chart_2}"=>{"id"=>new_chart_2, "crossFilters"=>{"scope"=>"global", "chartsInScope"=>[new_chart_1]}} } ,
+                  "global_chart_configuration"=>{"scope"=>{"rootPath"=>["ROOT_ID"], "excluded"=>[]}, "chartsInScope"=>[new_chart_1, new_chart_2]},
+                  "native_filter_configuration"=>[]
+                }
+              end
+
+              specify do
+                expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_initial_settings)
+                subject.perform
+                expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_updated_settings)
+              end
+            end
+          end
+        end
+
+        context 'and embedded domains' do
+          context 'are empty' do
+            before do
+              expect(Superset::Dashboard::Embedded::Put).to_not receive(:new)
             end
 
-            specify do
-              expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_initial_settings)
-              subject.perform
-              expect(subject.new_dashboard_json_metadata_configuration).to eq(json_metadata_updated_settings)
+            specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
+          end
+
+          context 'are not empty' do
+            let(:allowed_domains) { ['domain1.com', 'domain2.com'] }
+
+            before do
+              expect(Superset::Dashboard::Embedded::Put).to receive(:new).with(dashboard_id: new_dashboard_id, allowed_domains: allowed_domains).and_return(double(result: { allowed_domains: allowed_domains }))
+            end
+
+            specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
+          end
+        end
+
+        context 'and tags' do
+          context 'are empty' do
+            specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
+          end
+
+          context 'are not empty' do
+            let!(:tags) {  ["embedded", "product:some-product-name", "client:#{target_schema}"] }
+
+            before do
+              expect(Superset::Tag::AddToObject).to receive(:new).with(object_type_id: ObjectType::DASHBOARD, target_id: new_dashboard_id, tags: tags).and_return(double(perform: true))
+            end
+
+            specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
+          end
+        end
+
+        context 'and publish attr is' do
+          context 'excluded from params' do
+            before do
+              expect(Superset::Dashboard::Put).to_not receive(:new).with(
+                target_id: new_dashboard_id,
+                params: { published: false })
+            end
+
+            specify 'defaults to false' do
+              expect(subject.perform).to eq( {
+                new_dashboard_id: 2,
+                new_dashboard_url: "http://superset-host.com/superset/dashboard/2",
+                published: false
+              })
             end
           end
-        end
-      end
 
-      context 'and embedded domains' do
-        context 'are empty' do
-          before do
-            expect(Superset::Dashboard::Embedded::Put).to_not receive(:new)
-          end
+          context 'included in params as true' do
+            subject { described_class.new(
+                source_dashboard_id: source_dashboard_id,
+                target_schema:       target_schema,
+                target_database_id:  target_database_id,
+                publish:           true ) }
 
-          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
-        end
+            before do
+              expect(Superset::Dashboard::Put).to receive(:new).with(
+                target_id: new_dashboard_id,
+                params: { published: true }).and_return(double(perform: true))
+            end
 
-        context 'are not empty' do
-          let(:allowed_domains) { ['domain1.com', 'domain2.com'] }
-
-          before do
-            expect(Superset::Dashboard::Embedded::Put).to receive(:new).with(dashboard_id: new_dashboard_id, allowed_domains: allowed_domains).and_return(double(result: { allowed_domains: allowed_domains }))
-          end
-
-          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
-        end
-      end
-
-      context 'and tags' do
-        context 'are empty' do
-          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
-        end
-
-        context 'are not empty' do
-          let!(:tags) {  ["embedded", "product:some-product-name", "client:#{target_schema}"] }
-
-          before do
-            expect(Superset::Tag::AddToObject).to receive(:new).with(object_type_id: ObjectType::DASHBOARD, target_id: new_dashboard_id, tags: tags).and_return(double(perform: true))
-          end
-
-          specify { expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false}) }
-        end
-      end
-
-      context 'and publish attr is' do
-        context 'excluded from params' do
-          before do
-            expect(Superset::Dashboard::Put).to_not receive(:new).with(
-              target_id: new_dashboard_id,
-              params: { published: false })
-          end
-
-          specify 'defaults to false' do
-            expect(subject.perform).to eq( {
+            specify { expect(subject.perform).to eq( {
               new_dashboard_id: 2,
               new_dashboard_url: "http://superset-host.com/superset/dashboard/2",
-              published: false
-            })
+              published: true
+              }) }
           end
         end
+      end
 
-        context 'included in params as true' do
-          subject { described_class.new(
-              source_dashboard_id: source_dashboard_id,
-              target_schema:       target_schema,
-              target_database_id:  target_database_id,
-              publish:           true ) }
+      context 'with dataset suffix using target_dataset_suffix_override' do
+        let(:target_dataset_suffix_override) { 'acme' }
 
-          before do
-            expect(Superset::Dashboard::Put).to receive(:new).with(
-              target_id: new_dashboard_id,
-              params: { published: true }).and_return(double(perform: true))
-          end
+        before do                  
+          # duplicating the current datasets where 'Dataset 1-acem' already exists
+          allow(Superset::Dataset::List).to receive(:new).with(title_equals: "Dataset 1-acme", schema_equals: target_schema).and_return(double(result: [{id: 301}]))
+          allow(Superset::Dataset::List).to receive(:new).with(title_equals: "Dataset 2-acme", schema_equals: target_schema).and_return(double(result: []))
 
-          specify { expect(subject.perform).to eq( {
-            new_dashboard_id: 2,
-            new_dashboard_url: "http://superset-host.com/superset/dashboard/2",
-            published: true
-            }) }
+          expect(Superset::Dataset::Duplicate).not_to receive(:new).with(source_dataset_id: source_dataset_1, new_dataset_name: "Dataset 1-acme")
+          expect(Superset::Dataset::Duplicate).to receive(:new).with(source_dataset_id: source_dataset_2, new_dataset_name: "Dataset 2-acme").and_return(double(perform: new_dataset_2))
+                  # updating the new charts to point to the new datasets
+          expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_1, target_dataset_id: new_dataset_1, target_dashboard_id: new_dashboard_id).and_return(double(perform: true))
+          expect(Superset::Chart::UpdateDataset).to receive(:new).with(chart_id: new_chart_2, target_dataset_id: new_dataset_2, target_dashboard_id: new_dashboard_id).and_return(double(perform: true))
+
+        end
+
+        specify do
+          expect(subject.perform).to eq( { new_dashboard_id: 2, new_dashboard_url: "http://superset-host.com/superset/dashboard/2", published: false})
         end
       end
     end
