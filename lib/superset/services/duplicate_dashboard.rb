@@ -65,26 +65,11 @@ module Superset
         raise e
       end
 
-      # remove the confirmed duplicated objects if the process fails
-      # do not use Dashboard::BulkDeleteCascade here as it may remove datasets from the source dashboard as well
-      def remove_duplicated_objects
-        logger.info "Removing duplicated objects ..."
-
-        new_dataset_ids = dataset_duplication_tracker.map { |dataset| dataset[:new_dataset_id] }
-        Superset::Dataset::BulkDelete.new(dataset_ids: new_dataset_ids).perform if new_dataset_ids.any?
-
-        new_chart_ids = new_charts_list.map { |r| r['id'] }
-        Superset::Chart::BulkDelete.new(chart_ids: new_chart_ids).perform if new_chart_ids.any?
-
-        Superset::Dashboard::Delete.new(dashboard_id: new_dashboard.id).perform if new_dashboard.id.present?
-        logger.info "Removed duplicated objects successfully."
-      end
-
       def new_dashboard_json_metadata_configuration
         @new_dashboard_json_metadata_configuration ||= new_dashboard.json_metadata
       end
 
-      # private
+      private
 
       def add_tags_to_new_dashboard
         return unless tags.present?
@@ -226,7 +211,6 @@ module Superset
 
       def validate_params
         start_log_msg
-        #binding.pry
         # params validations
         raise  InvalidParameterError, "source_dashboard_id integer is required" unless source_dashboard_id.present? && source_dashboard_id.is_a?(Integer)
         raise  InvalidParameterError, "target_schema string is required" unless target_schema.present? && target_schema.is_a?(String)
@@ -324,6 +308,21 @@ module Superset
             {  filter_dataset_id: filter_dataset, filter_schema: filter_dataset_schema  } if [filter_dataset_schema] != source_dashboard_schemas
           end.compact
         end
+      end
+
+      # remove the confirmed duplicated objects if the process fails
+      # do not use Dashboard::BulkDeleteCascade here as it may remove datasets from the source dashboard as well
+      def remove_duplicated_objects
+        logger.info "Removing duplicated objects ..."
+
+        new_dataset_ids = dataset_duplication_tracker.map { |dataset| dataset[:new_dataset_id] }.compact
+        Superset::Dataset::BulkDelete.new(dataset_ids: new_dataset_ids).perform if new_dataset_ids.any?
+
+        new_chart_ids = new_charts_list.map { |r| r['id'] }.compact
+        Superset::Chart::BulkDelete.new(chart_ids: new_chart_ids).perform if new_chart_ids.any?
+
+        Superset::Dashboard::Delete.new(dashboard_id: new_dashboard.id).perform if new_dashboard.id.present?
+        logger.info "Removed duplicated objects successfully."
       end
 
       def logger

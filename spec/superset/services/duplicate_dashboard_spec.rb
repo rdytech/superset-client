@@ -112,7 +112,6 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         # retrieving the source database catalog
         expect(Superset::Database::GetCatalogs).to receive(:new).with(target_database_id).and_return(double(catalogs: [target_catalog]))
 
-
         # updating the new datasets to point to the target schema and target database
         expect(Superset::Dataset::UpdateSchema).not_to receive(:new).with(source_dataset_id: new_dataset_1, target_database_id: target_database_id, target_schema: target_schema)
         expect(Superset::Dataset::UpdateSchema).to receive(:new).with(source_dataset_id: new_dataset_2, target_database_id: target_database_id, target_schema: target_schema, target_catalog: target_catalog).and_return(double(perform: new_dataset_2))
@@ -124,7 +123,6 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         # getting the current dataset_id for the new charts .. still pointing to the old datasets
         expect(Superset::Chart::Get).to receive(:new).with(new_chart_1).and_return(double(datasource_id: source_dataset_1))
         expect(Superset::Chart::Get).to receive(:new).with(new_chart_2).and_return(double(datasource_id: source_dataset_2))
-
 
         # update dashboard json metadata chart datasets
         expect(Superset::Dashboard::Put).to receive(:new).once.with(target_id: new_dashboard_id, params: { 'json_metadata' => json_metadata_updated_settings.to_json }).and_return(double(perform: true))
@@ -265,6 +263,19 @@ RSpec.describe Superset::Services::DuplicateDashboard do
               new_dashboard_url: "http://superset-host.com/superset/dashboard/2",
               published: true
               }) }
+          end
+        end
+
+        context 'when rollback on error is triggered' do
+          before do
+            allow(subject).to receive(:add_tags_to_new_dashboard).and_raise(Superset::Request::ValidationError, "Test Error")
+            expect(Superset::Dataset::BulkDelete).to receive(:new).with(dataset_ids: [new_dataset_1, new_dataset_2]).and_return(double(perform: true))
+            expect(Superset::Chart::BulkDelete).to receive(:new).with(chart_ids: [new_chart_1, new_chart_2]).and_return(double(perform: true))
+            expect(Superset::Dashboard::Delete).to receive(:new).with(dashboard_id: new_dashboard_id).and_return(double(perform: true))
+          end
+
+          specify do
+            expect { subject.perform }.to raise_error(Superset::Request::ValidationError, "Test Error")
           end
         end
       end
