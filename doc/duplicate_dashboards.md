@@ -82,20 +82,39 @@ Superset::Services::DuplicateDashboard.new(
 
 ```
 
-## Duplication when schemas are not used
+## Duplication when DB schemas are not used
 
 If your multitenant setup is at the database level, and database structures are replicated into the same base schema, ie public,
-then the target resulted datasets name must be overidden in order to get around the superset uniq datasets name validation restriction.  This can be done through the parameter 'target_dataset_suffix_override'.
+then the target resulted datasets name must be overridden in order to get around the superset unique datasets name validation restriction.  This can be done through the parameter 'target_dataset_suffix_override'.
 
 ```ruby
 Superset::Services::DuplicateDashboard.new(
     source_dashboard_id: 90,
     target_schema: 'public',
-    target_database_id: 2
+    target_database_id: 2,
     target_dataset_suffix_override: 'client_1' 
   ).perform
 
 ```
+
+## Duplication now supports catalogs
+
+If you Database infrastructure uses catalogs, you can provide the target catalog as a paramater.
+If there is only 1 catalog in the target database, then it will be used by default.
+
+If multiple catalogs exist, and no catalog option is provided, an error will be raised.
+
+```ruby
+Superset::Services::DuplicateDashboard.new(
+    source_dashboard_id: 90,
+    target_schema: 'public',
+    target_database_id: 2,
+    target_dataset_suffix_override: 'client_1',
+    target_catalog_name: 'staging_client_1',
+  ).perform
+
+```
+
 
 
 

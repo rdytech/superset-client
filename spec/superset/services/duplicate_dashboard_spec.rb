@@ -269,7 +269,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         context 'when rollback on error is triggered' do
           before do
             allow(subject).to receive(:add_tags_to_new_dashboard).and_raise(Superset::Request::ValidationError, "Test Error")
-            expect(Superset::Dataset::BulkDelete).to receive(:new).with(dataset_ids: [new_dataset_1, new_dataset_2]).and_return(double(perform: true))
+            expect(Superset::Dataset::©ulkDelete).to receive(:new).with(dataset_ids: [new_dataset_1, new_dataset_2]).and_return(double(perform: true))
             expect(Superset::Chart::BulkDelete).to receive(:new).with(chart_ids: [new_chart_1, new_chart_2]).and_return(double(perform: true))
             expect(Superset::Dashboard::Delete).to receive(:new).with(dashboard_id: new_dashboard_id).and_return(double(perform: true))
           end
@@ -284,7 +284,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         let(:target_dataset_suffix_override) { 'acme' }
 
         before do                  
-          # duplicating the current datasets where 'Dataset 1-acem' already exists
+          # duplicating the current datasets where 'Dataset 1-acme' already exists
           allow(Superset::Dataset::List).to receive(:new).with(title_equals: "Dataset 1-acme", schema_equals: target_schema).and_return(double(result: [{id: 301}]))
           allow(Superset::Dataset::List).to receive(:new).with(title_equals: "Dataset 2-acme", schema_equals: target_schema).and_return(double(result: []))
 

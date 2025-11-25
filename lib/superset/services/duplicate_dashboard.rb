@@ -235,7 +235,7 @@ module Superset
       def validate_source_dashboard_datasets_sql_does_not_hard_code_schema
         errors = source_dashboard_datasets.map do |dataset|
           "The Dataset ID #{dataset[:id]} SQL query is hard coded with the schema value: #{dataset[:schema]}. This indicates that the dataset can not be duplicated cleanly to point to the target schema.  " +
-            "Remove all direct embedded schema calls from the Dataset SQL query before continuing." if dataset[:sql].include?("#{dataset[:schema]}.")
+            "Remove all direct embedded schema calls from the Dataset SQL query before continuing." if dataset[:sql]&.include?("#{dataset[:schema]}.")
         end.compact
         raise ValidationError, errors.join("\n") unless errors.empty?
       end
@@ -268,7 +268,7 @@ module Superset
       def target_schema_matching_dataset_names
         @target_schema_matching_dataset_names ||= source_dashboard_dataset_names.map do |source_dataset_name|
           source_dataset_name_with_suffix = new_dataset_name(source_dataset_name)
-          puts "source_dataset_name_with_suffix: #{source_dataset_name_with_suffix}"
+
           existing_names = Superset::Dataset::List.new(title_contains: source_dataset_name_with_suffix, database_id_eq: target_database_id, schema_equals: target_schema).result.map{|t|t['table_name']}.uniq # contains match to cover with suffix as well
           unless existing_names.flatten.empty?
             logger.error "  HALTING PROCESS: Schema #{target_schema} already has Dataset called #{existing_names}"
@@ -315,10 +315,10 @@ module Superset
       def remove_duplicated_objects
         logger.info "Removing duplicated objects ..."
 
-        new_dataset_ids = dataset_duplication_tracker.map { |dataset| dataset[:new_dataset_id] }.compact
+        new_dataset_ids = dataset_duplication_tracker&.map { |dataset| dataset[:new_dataset_id] }.compact
         Superset::Dataset::BulkDelete.new(dataset_ids: new_dataset_ids).perform if new_dataset_ids.any?
 
-        new_chart_ids = new_charts_list.map { |r| r['id'] }.compact
+        new_chart_ids = new_charts_list&.map { |r| r['id'] }.compact
         Superset::Chart::BulkDelete.new(chart_ids: new_chart_ids).perform if new_chart_ids.any?
 
         Superset::Dashboard::Delete.new(dashboard_id: new_dashboard.id).perform if new_dashboard.id.present?
