@@ -29,7 +29,7 @@ docker-compose run --rm app ruby bin/console
 
 ## Setup Locally ( no docker )
 
-Requires Ruby >= 3.0.0
+Requires Ruby >= 3
 
 Bundle install and open a ruby console.
 

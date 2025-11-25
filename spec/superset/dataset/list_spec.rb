@@ -56,7 +56,7 @@ RSpec.describe Superset::Dataset::List do
       expect(subject.rows).to eq(
         [
           ["2", "birth_names", "{\"database_name\" => \"examples\", \"id\" => 1}", "public", "bob"],
-          ["3", "birth_days",  "{\"database_name\" => \"examples\", \"id\" => 1}", "public", "bob"]
+          ["3", "birth_days", "{\"database_name\" => \"examples\", \"id\" => 1}", "public", "bob"]
         ]
       )
     end
