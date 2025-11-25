@@ -57,7 +57,27 @@ module Superset
 
       rescue => e
         logger.error("#{e.message}")
+        remove_duplicated_objects
+        puts "------------------------------------------------------------------------------\n"
+        puts "DUPLICATE DASHBOARD FAILED - ERROR: #{e.message}\n"
+        puts "REMOVED DUPLICATED OBJECTS - Check log/superset-client.log for more details\n"
+        puts "------------------------------------------------------------------------------\n"
         raise e
+      end
+
+      # remove the confirmed duplicated objects if the process fails
+      # do not use Dashboard::BulkDeleteCascade here as it may remove datasets from the source dashboard as well
+      def remove_duplicated_objects
+        logger.info "Removing duplicated objects ..."
+
+        new_dataset_ids = dataset_duplication_tracker.map { |dataset| dataset[:new_dataset_id] }
+        Superset::Dataset::BulkDelete.new(dataset_ids: new_dataset_ids).perform if new_dataset_ids.any?
+
+        new_chart_ids = new_charts_list.map { |r| r['id'] }
+        Superset::Chart::BulkDelete.new(chart_ids: new_chart_ids).perform if new_chart_ids.any?
+
+        Superset::Dashboard::Delete.new(dashboard_id: new_dashboard.id).perform if new_dashboard.id.present?
+        logger.info "Removed duplicated objects successfully."
       end
 
       def new_dashboard_json_metadata_configuration
@@ -73,8 +93,8 @@ module Superset
         logger.info "  Added tags to dashboard #{new_dashboard.id}: #{tags}"
       rescue => e
         # catching tag error and display in log .. but also alowing the process to finish logs as tag error is fairly insignificant
-        logger.error("  FAILED to add tags to new dashboard id: #{new_dashboard.id}. Error is #{e.message}")
-        logger.error("  Missing Tags Values are #{tags}")
+        logger.error("  FAILED to add tags to new dashboard id: #{new_dashboard.id}. Error: #{e.message}")
+        raise ValidationError, "Failed to add tags to new dashboard id: #{new_dashboard.id}. #{e.message}. Missing Tags Values are #{tags}"
       end
 
       def created_embedded_config
@@ -123,10 +143,8 @@ module Superset
       def update_charts_with_new_datasets
         logger.info "Updating Charts to point to New Datasets and updating Dashboard json_metadata ..."
         # note dashboard json_metadata currently still points to the old chart ids and is updated here
-
         new_dashboard_json_metadata_json_string = new_dashboard_json_metadata_configuration.to_json # need to convert to string for gsub
-        # get all chart ids for the new dashboard
-        new_charts_list = Superset::Dashboard::Charts::List.new(new_dashboard.id).result
+
         new_chart_ids_list = new_charts_list&.map { |r| r['id'] }&.compact
         # get all chart details for the source dashboard
         original_charts = Superset::Dashboard::Charts::List.new(source_dashboard_id).result.map { |r| [r['slice_name'], r['id']] }.to_h
@@ -154,6 +172,11 @@ module Superset
 
         # convert back to hash .. and store in the new_dashboard_json_metadata_configuration
         @new_dashboard_json_metadata_configuration = JSON.parse(new_dashboard_json_metadata_json_string)
+      end
+
+      def new_charts_list
+        # get all chart ids for the new dashboard
+        @new_charts_list ||= Superset::Dashboard::Charts::List.new(new_dashboard.id).result
       end
 
       def duplicate_source_dashboard_filters
@@ -261,6 +284,7 @@ module Superset
       def target_schema_matching_dataset_names
         @target_schema_matching_dataset_names ||= source_dashboard_dataset_names.map do |source_dataset_name|
           source_dataset_name_with_suffix = new_dataset_name(source_dataset_name)
+          puts "source_dataset_name_with_suffix: #{source_dataset_name_with_suffix}"
           existing_names = Superset::Dataset::List.new(title_contains: source_dataset_name_with_suffix, database_id_eq: target_database_id, schema_equals: target_schema).result.map{|t|t['table_name']}.uniq # contains match to cover with suffix as well
           unless existing_names.flatten.empty?
             logger.error "  HALTING PROCESS: Schema #{target_schema} already has Dataset called #{existing_names}"

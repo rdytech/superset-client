@@ -18,7 +18,7 @@ module Superset
         raise InvalidParameterError, "chart_ids array of integers expected" unless chart_ids.is_a?(Array)
         raise InvalidParameterError, "chart_ids array must contain Integer only values" unless chart_ids.all? { |item| item.is_a?(Integer) }
 
-        logger.info("Attempting to delete charts with id: #{chart_ids.join(', ')}")
+        logger.info("Deleting charts with id: #{chart_ids.join(', ')}")
         response
       end
 

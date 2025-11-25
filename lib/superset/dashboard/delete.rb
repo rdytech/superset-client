@@ -16,7 +16,7 @@ module Superset
 
         confirm_zero_charts_on_dashboard if confirm_zero_charts
 
-        logger.info("Attempting to delete dashboard with id: #{dashboard_id}")
+        logger.info("Deleting dashboard with id: #{dashboard_id}")
         response
       end
 

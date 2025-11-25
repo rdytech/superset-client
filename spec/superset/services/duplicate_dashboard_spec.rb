@@ -292,6 +292,10 @@ RSpec.describe Superset::Services::DuplicateDashboard do
     end
 
     context 'with invalid params' do
+      before do
+        allow(subject).to receive(:remove_duplicated_objects).and_return(true)
+      end
+
       context 'source_dashboard_id is empty' do
         let(:source_dashboard_id) { nil }
 

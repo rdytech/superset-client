@@ -12,7 +12,7 @@ module Superset
       def perform
         raise InvalidParameterError, "dataset_id integer is required" unless dataset_id.present? && dataset_id.is_a?(Integer)
 
-        logger.info("Attempting to delete dataset with id: #{dataset_id}")
+        logger.info("Deleting dataset with id: #{dataset_id}")
         response
       end
 
