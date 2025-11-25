@@ -269,7 +269,7 @@ RSpec.describe Superset::Services::DuplicateDashboard do
         context 'when rollback on error is triggered' do
           before do
             allow(subject).to receive(:add_tags_to_new_dashboard).and_raise(Superset::Request::ValidationError, "Test Error")
-            expect(Superset::Dataset::©ulkDelete).to receive(:new).with(dataset_ids: [new_dataset_1, new_dataset_2]).and_return(double(perform: true))
+            expect(Superset::Dataset::BulkDelete).to receive(:new).with(dataset_ids: [new_dataset_1, new_dataset_2]).and_return(double(perform: true))
             expect(Superset::Chart::BulkDelete).to receive(:new).with(chart_ids: [new_chart_1, new_chart_2]).and_return(double(perform: true))
             expect(Superset::Dashboard::Delete).to receive(:new).with(dashboard_id: new_dashboard_id).and_return(double(perform: true))
           end
