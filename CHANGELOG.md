@@ -1,5 +1,12 @@
 ## Change Log
 
+## 0.3.0 - 2025-11-26
+* Rename reserved object_id to target_id in https://github.com/rdytech/superset-client/pull/58
+* Add dashboard cascade ownship in https://github.com/rdytech/superset-client/pull/59
+* allow dup dashboard dataset suffix naming override in https://github.com/rdytech/superset-client/pull/61
+* Bump ruby 3 bump gems by https://github.com/rdytech/superset-client/pull/60
+
+
 ## 0.2.7 - 2025-10-16
 * add to_h method to list classes for Hash output
 * add ids method to list classes for array of ids output
