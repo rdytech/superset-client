@@ -20,7 +20,7 @@ module Superset
         raise InvalidParameterError, "dashboard_ids array of integers expected" unless dashboard_ids.is_a?(Array)
         raise InvalidParameterError, "dashboard_ids array must contain Integer only values" unless dashboard_ids.all? { |item| item.is_a?(Integer) }
 
-        logger.info("Attempting to delete dashboards with id: #{dashboard_ids.join(', ')}")
+        logger.info("Deleting dashboards with id: #{dashboard_ids.join(', ')}")
         response
       end
 

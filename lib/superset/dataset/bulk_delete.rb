@@ -19,7 +19,7 @@ module Superset
         raise InvalidParameterError, "dataset_ids array of integers expected" unless dataset_ids.is_a?(Array)
         raise InvalidParameterError, "dataset_ids array must contain Integer only values" unless dataset_ids.all? { |item| item.is_a?(Integer) }
 
-        logger.info("Attempting to delete datasets with id: #{dataset_ids.join(', ')}")
+        logger.info("Deleting datasets with id: #{dataset_ids.join(', ')}")
         response
       end
 

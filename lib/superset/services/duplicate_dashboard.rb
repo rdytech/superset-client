@@ -9,15 +9,17 @@ module Superset
   module Services
     class DuplicateDashboard < Superset::Request
 
-      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :allowed_domains, :tags, :publish
+      attr_reader :source_dashboard_id, :target_schema, :target_database_id, :target_dataset_suffix_override, :allowed_domains, :tags, :publish, :target_catalog_name
 
-      def initialize(source_dashboard_id:, target_schema:, target_database_id: , allowed_domains: [], tags: [], publish: false)
+      def initialize(source_dashboard_id:, target_schema:, target_database_id: , target_dataset_suffix_override: nil, allowed_domains: [], tags: [], publish: false, target_catalog_name: nil)
         @source_dashboard_id = source_dashboard_id
         @target_schema = target_schema
         @target_database_id = target_database_id
+        @target_dataset_suffix_override = target_dataset_suffix_override
         @allowed_domains = allowed_domains
         @tags = tags
         @publish = publish
+        @target_catalog_name = target_catalog_name
       end
 
       def perform
@@ -55,6 +57,11 @@ module Superset
 
       rescue => e
         logger.error("#{e.message}")
+        remove_duplicated_objects
+        puts "------------------------------------------------------------------------------\n"
+        puts "DUPLICATE DASHBOARD FAILED - ERROR: #{e.message}\n"
+        puts "REMOVED DUPLICATED OBJECTS - Check log/superset-client.log for more details\n"
+        puts "------------------------------------------------------------------------------\n"
         raise e
       end
 
@@ -71,8 +78,8 @@ module Superset
         logger.info "  Added tags to dashboard #{new_dashboard.id}: #{tags}"
       rescue => e
         # catching tag error and display in log .. but also alowing the process to finish logs as tag error is fairly insignificant
-        logger.error("  FAILED to add tags to new dashboard id: #{new_dashboard.id}. Error is #{e.message}")
-        logger.error("  Missing Tags Values are #{tags}")
+        logger.error("  FAILED to add tags to new dashboard id: #{new_dashboard.id}. Error: #{e.message}")
+        raise ValidationError, "Failed to add tags to new dashboard id: #{new_dashboard.id}. #{e.message}. Missing Tags Values are #{tags}"
       end
 
       def created_embedded_config
@@ -90,35 +97,39 @@ module Superset
 
       def duplicate_source_dashboard_datasets
         source_dashboard_datasets.each do |dataset|
-          # duplicate the dataset, renaming to use of suffix as the target_schema
-          # reason: there is a bug(or feature) in the SS API where a dataset name must be uniq when duplicating.  
-          # (note however renaming in the GUI to a dup name works fine)
-          new_dataset_name = "#{dataset[:datasource_name]}-#{target_schema}"
-          existing_datasets = Superset::Dataset::List.new(title_equals: new_dataset_name, schema_equals: target_schema).result
+          # duplicate the dataset, renaming to use of suffix as the target_schema OR target_dataset_suffix_override value
+          # reason: there is a bug(or feature) in the SS where a dataset name must be uniq when duplicating
+          target_dataset_name = new_dataset_name(dataset[:datasource_name])
+          existing_datasets = Superset::Dataset::List.new(title_equals: target_dataset_name, schema_equals: target_schema).result
           if existing_datasets.any?
-            logger.info "Dataset #{existing_datasets[0]["table_name"]} already exists. Reusing it"
-            new_dataset_id = existing_datasets[0]["id"] # assuming that we do not name multiple datasets with same name in a single schema
+            logger.info "  Dataset #{target_dataset_name} already exists. Reusing it"
+            new_dataset_id = existing_datasets[0]["id"]
           else
-            new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: new_dataset_name).perform
+            new_dataset_id = Superset::Dataset::Duplicate.new(source_dataset_id: dataset[:id], new_dataset_name: target_dataset_name).perform
             # update the new dataset with the target schema, database, catalog
             Superset::Dataset::UpdateSchema.new(
               source_dataset_id:  new_dataset_id,
               target_database_id: target_database_id,
               target_schema:      target_schema,
-              target_catalog:     target_database_catalog).perform
+              target_catalog:     validated_target_database_catalog_name).perform
           end
           # keep track of the previous dataset and the matching new dataset_id
           dataset_duplication_tracker <<  { source_dataset_id: dataset[:id], new_dataset_id: new_dataset_id }
         end
       end
 
+      # if a suffix is provided, use it to suffix the dataset name
+      # if no suffix is provided, use the schema name as the suffix
+      def new_dataset_name(dataset_name)
+        return "#{dataset_name}-#{target_schema}" if target_dataset_suffix_override.blank?
+        "#{dataset_name}-#{target_dataset_suffix_override.downcase}"
+      end
+
       def update_charts_with_new_datasets
         logger.info "Updating Charts to point to New Datasets and updating Dashboard json_metadata ..."
         # note dashboard json_metadata currently still points to the old chart ids and is updated here
-
         new_dashboard_json_metadata_json_string = new_dashboard_json_metadata_configuration.to_json # need to convert to string for gsub
-        # get all chart ids for the new dashboard
-        new_charts_list = Superset::Dashboard::Charts::List.new(new_dashboard.id).result
+
         new_chart_ids_list = new_charts_list&.map { |r| r['id'] }&.compact
         # get all chart details for the source dashboard
         original_charts = Superset::Dashboard::Charts::List.new(source_dashboard_id).result.map { |r| [r['slice_name'], r['id']] }.to_h
@@ -146,6 +157,11 @@ module Superset
 
         # convert back to hash .. and store in the new_dashboard_json_metadata_configuration
         @new_dashboard_json_metadata_configuration = JSON.parse(new_dashboard_json_metadata_json_string)
+      end
+
+      def new_charts_list
+        # get all chart ids for the new dashboard
+        @new_charts_list ||= Superset::Dashboard::Charts::List.new(new_dashboard.id).result
       end
 
       def duplicate_source_dashboard_filters
@@ -209,7 +225,7 @@ module Superset
         raise ValidationError, "One or more source dashboard filters point to a different schema than the dashboard charts. Identified Unpermittied Filter Dataset Ids are #{unpermitted_filter_dataset_ids.to_s}" if unpermitted_filter_dataset_ids.any?
 
         # new dataset validations - Need to be commented for EU dashboard duplication as we are using the existing datasets for the new dashboard
-        raise ValidationError, "DATASET NAME CONFLICT: The Target Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
+        raise ValidationError, "DATASET NAME CONFLICT: The Target Database #{target_database_id} with Schema #{target_schema} already has existing datasets named: #{target_schema_matching_dataset_names.join(',')}" unless target_schema_matching_dataset_names.empty?
         validate_source_dashboard_datasets_sql_does_not_hard_code_schema
 
         # embedded allowed_domain validations
@@ -218,8 +234,8 @@ module Superset
 
       def validate_source_dashboard_datasets_sql_does_not_hard_code_schema
         errors = source_dashboard_datasets.map do |dataset|
-          "The Dataset ID #{dataset[:id]} SQL query is hard coded with the schema value and can not be duplicated cleanly.  " +
-            "Remove all direct embedded schema calls from the Dataset SQL query before continuing." if dataset[:sql].include?("#{dataset[:schema]}.")
+          "The Dataset ID #{dataset[:id]} SQL query is hard coded with the schema value: #{dataset[:schema]}. This indicates that the dataset can not be duplicated cleanly to point to the target schema.  " +
+            "Remove all direct embedded schema calls from the Dataset SQL query before continuing." if dataset[:sql]&.include?("#{dataset[:schema]}.")
         end.compact
         raise ValidationError, errors.join("\n") unless errors.empty?
       end
@@ -245,13 +261,15 @@ module Superset
         source_dashboard_datasets.map { |dataset| dataset[:datasource_name] }.uniq
       end
 
-      # identify any already existing datasets in the target schema that have the same name as the source dashboard datasets
+      # identify any already existing datasets in the target database and schema that have the same name as the source dashboard datasets + suffix
       # note this is prior to adding the (COPY) suffix
-      # here we will need to decide if we want to use the existing dataset or not see NEP-????
+      # here we will need to decide if we want to use the existing dataset or not
       # for now we will exit with an error if we find any existing datasets of the same name
       def target_schema_matching_dataset_names
         @target_schema_matching_dataset_names ||= source_dashboard_dataset_names.map do |source_dataset_name|
-          existing_names = Superset::Dataset::List.new(title_contains: source_dataset_name, schema_equals: target_schema).result.map{|t|t['table_name']}.uniq # contains match to cover with suffix as well
+          source_dataset_name_with_suffix = new_dataset_name(source_dataset_name)
+
+          existing_names = Superset::Dataset::List.new(title_contains: source_dataset_name_with_suffix, database_id_eq: target_database_id, schema_equals: target_schema).result.map{|t|t['table_name']}.uniq # contains match to cover with suffix as well
           unless existing_names.flatten.empty?
             logger.error "  HALTING PROCESS: Schema #{target_schema} already has Dataset called #{existing_names}"
           end
@@ -267,11 +285,13 @@ module Superset
         @filter_dataset_ids ||= source_dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact.uniq
       end
 
-      # currently does not support multiple catalogs, assumption is that 1 catalog is used per database
-      def target_database_catalog
+      # if multiple catalogs are present, the target_catalog_name must be provided, otherwise use the first catalog
+      def validated_target_database_catalog_name
         catalogs = Superset::Database::GetCatalogs.new(target_database_id).catalogs
-        raise ValidationError, "Target Database #{target_database_id} has multiple catalogs" if catalogs.size > 1
-        catalogs.first
+        return target_catalog_name if catalogs.include?(target_catalog_name)
+
+        raise ValidationError, "Target Database #{target_database_id} has multiple catalogs, must provide target_catalog_name" if catalogs.size > 1 && target_catalog_name.blank?
+        @validated_target_database_catalog_name ||= catalogs.find { |c| c['name'] == target_catalog_name } || catalogs.first
       end
 
       # Primary Assumption is that all charts datasets on the source dashboard are pointing to the same database schema
@@ -288,6 +308,21 @@ module Superset
             {  filter_dataset_id: filter_dataset, filter_schema: filter_dataset_schema  } if [filter_dataset_schema] != source_dashboard_schemas
           end.compact
         end
+      end
+
+      # remove the confirmed duplicated objects if the process fails
+      # do not use Dashboard::BulkDeleteCascade here as it may remove datasets from the source dashboard as well
+      def remove_duplicated_objects
+        logger.info "Removing duplicated objects ..."
+
+        new_dataset_ids = dataset_duplication_tracker&.map { |dataset| dataset[:new_dataset_id] }.compact
+        Superset::Dataset::BulkDelete.new(dataset_ids: new_dataset_ids).perform if new_dataset_ids.any?
+
+        new_chart_ids = new_charts_list&.map { |r| r['id'] }.compact
+        Superset::Chart::BulkDelete.new(chart_ids: new_chart_ids).perform if new_chart_ids.any?
+
+        Superset::Dashboard::Delete.new(dashboard_id: new_dashboard.id).perform if new_dashboard.id.present?
+        logger.info "Removed duplicated objects successfully."
       end
 
       def logger
