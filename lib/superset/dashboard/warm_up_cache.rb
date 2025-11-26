@@ -19,7 +19,7 @@ module Superset
           begin
             warm_up_dataset(dataset["datasource_name"], dataset["name"])
           rescue => e
-            Rollbar.error("Warm up cache failed for the dashboard #{dashboard_id.to_s} and for the dataset #{dataset["datasource_name"]} - #{e}")
+            Rollbar.error("Warm up cache failed for the dashboard #{dashboard_id.to_s} and for the dataset #{dataset["datasource_name"]} - #{e}") if defined?(Rollbar)
           end 
         end
       end

@@ -30,7 +30,7 @@ module Superset
             # For the current superset setup we will assume a dashboard datasets will point to EXACTLY one schema, their own.
             # if not .. we need to know about it. Potentially we could override this check if others do not consider it a problem.
             if all_dashboard_schemas.count > 1
-              Rollbar.error("SUPERSET DASHBOARD ERROR: Dashboard id #{id} has multiple dataset schema linked: #{all_dashboard_schemas.to_s}")
+              Rollbar.error("SUPERSET DASHBOARD ERROR: Dashboard id #{id} has multiple dataset schema linked: #{all_dashboard_schemas.to_s}") if defined?(Rollbar)
             end
             all_dashboard_schemas
           end
