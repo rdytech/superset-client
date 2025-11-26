@@ -33,7 +33,7 @@ RSpec.describe Superset::Chart::Get do
 
   describe '.call' do
     specify do
-      expect_any_instance_of(described_class).to receive(:list) 
+      expect_any_instance_of(described_class).to receive(:list)
       described_class.call(id)
     end
   end
@@ -42,8 +42,8 @@ RSpec.describe Superset::Chart::Get do
     specify do
       expect(subject.rows).to eq [
         "54507", 
-        "JRStg DoB per Year", 
-        "[{\"first_name\"=>\"Jay\", \"id\"=>9, \"last_name\"=>\"Bee\"}, {\"first_name\"=>\"Ron\", \"id\"=>8, \"last_name\"=>\"Vee\"}]"
+        "JRStg DoB per Year",
+        "[{\"first_name\" => \"Jay\", \"id\" => 9, \"last_name\" => \"Bee\"}, {\"first_name\" => \"Ron\", \"id\" => 8, \"last_name\" => \"Vee\"}]"
       ]
     end
   end
@@ -54,7 +54,7 @@ RSpec.describe Superset::Chart::Get do
         expect(subject.datasource_id).to eq(datasource_id)
       end
     end
- 
+
     context 'with query_context not containing the datasource_id' do
       let(:query_context) { "{}" }
       let(:datasource_id) { 300 }

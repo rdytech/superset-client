@@ -60,7 +60,7 @@ RSpec.describe Superset::Dashboard::Import do
             expect do
               subject.perform
             end.to raise_error(ArgumentError,
-                               "target database does not exist: [{:uuid=>\"a2dc77af-e654-49bb-b321-40f6b559a1ee\", :name=>\"examples\"}]")
+                               'target database does not exist: [{uuid: "a2dc77af-e654-49bb-b321-40f6b559a1ee", name: "examples"}]')
           end
         end
       end
@@ -131,7 +131,7 @@ RSpec.describe Superset::Dashboard::Import do
               expect do
                 subject.perform
               end.to raise_error(ArgumentError,
-                                 "target database does not exist: [{:uuid=>\"a2dc77af-e654-49bb-b321-40f6b559a1ee\", :name=>\"examples\"}]")
+                                 'target database does not exist: [{uuid: "a2dc77af-e654-49bb-b321-40f6b559a1ee", name: "examples"}]')
             end
           end
         end

@@ -14,16 +14,12 @@ GIT
 PATH
   remote: .
   specs:
-    superset (0.2.7)
-      dotenv (~> 2.7)
-      enumerate_it (~> 1.7.0)
+    superset (0.3.0)
+      enumerate_it (>= 1.7)
       faraday (~> 1.0)
       faraday-multipart (~> 1.0)
-      json (~> 2.6)
-      rake (~> 13.0)
-      require_all (~> 3.0)
-      rollbar (~> 3.4)
-      rubyzip (~> 1.0)
+      json (>= 2.0)
+      rubyzip (>= 1.3)
       terminal-table (~> 4.0)
 
 GEM
@@ -107,11 +103,10 @@ GEM
     racc (1.7.3)
     rack (3.0.8)
     rainbow (3.1.1)
-    rake (13.1.0)
+    rake (13.3.1)
     regexp_parser (2.8.3)
-    require_all (3.0.0)
     rexml (3.2.6)
-    rollbar (3.4.2)
+    rollbar (3.7.0)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
       rspec-expectations (~> 3.12.0)
@@ -154,10 +149,13 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  dotenv (>= 2.0)
   happi!
-  pry (~> 0.14)
-  rspec (~> 3.0)
-  rubocop (~> 1.5)
+  pry (>= 0.14)
+  rake (>= 13.0)
+  rollbar (>= 3.0)
+  rspec (>= 3.0)
+  rubocop (>= 1.0)
   superset!
 
 BUNDLED WITH
