@@ -1,5 +1,11 @@
 ## Change Log
 
+## 0.3.2 - 2025-11-28
+* Add require happi
+
+## 0.3.1 - 2025-11-27
+* Add require terminal table
+
 ## 0.3.0 - 2025-11-26
 * Rename reserved object_id to target_id in https://github.com/rdytech/superset-client/pull/58
 * Add dashboard cascade ownship in https://github.com/rdytech/superset-client/pull/59
