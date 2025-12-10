@@ -28,6 +28,12 @@ RSpec.describe Superset::Dashboard::Datasets::List do
     allow(subject).to receive(:title).and_return('1: Test Dashboard')
   end
 
+  describe '#databases' do
+    it 'returns a list of databases' do
+      expect(subject.databases).to eq([{'id' => 1, 'name' => 'DB1', 'backend' => 'postgres'}, {'id' => 2, 'name' => 'examples', 'backend' => 'postgres'}])
+    end
+  end
+
   describe '#schemas' do
     context 'when the dashboard has dastasets from multiple schemas' do
       it 'returns a list of schemas' do
