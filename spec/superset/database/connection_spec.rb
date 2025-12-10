@@ -6,11 +6,11 @@ RSpec.describe Superset::Database::Connection do
   let(:result) do
     {
       "backend" => "postgresql",
-      "database_name" => "Acme Client Staging",
+      "database_name" => "Acme Client Staging",             # User defined value to reference the database
       "driver" => "psycopg2",
       "id" => 21,
       "parameters" => {
-        "database" => "acme_staging",  
+        "database" => "acme_staging",                       # actual database name to connect to
         "host" => "some.host.com",
       }
     }
