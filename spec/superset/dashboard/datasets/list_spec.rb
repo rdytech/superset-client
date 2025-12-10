@@ -35,7 +35,7 @@ RSpec.describe Superset::Dashboard::Datasets::List do
   end
 
   describe '#schemas' do
-    context 'when the dashboard has dastasets from multiple schemas' do
+    context 'when the dashboard has datasets from multiple schemas' do
       it 'returns a list of schemas' do
 
         expect(subject.schemas).to eq(['acme', 'public'])
