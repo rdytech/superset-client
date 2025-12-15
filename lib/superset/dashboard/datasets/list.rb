@@ -23,6 +23,10 @@ module Superset
           self
         end
 
+        def databases
+          @databases ||= datasets_details.map {|d| d[:database] }.uniq
+        end
+
         def schemas
           @schemas ||= begin
             all_dashboard_schemas = datasets_details.map {|d| d[:schema] }.uniq
