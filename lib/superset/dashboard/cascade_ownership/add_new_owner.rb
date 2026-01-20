@@ -36,7 +36,7 @@ module Superset
         end
 
         def add_user_to_datasets_ownership
-          dataset_ids = Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id).ids
+          dataset_ids = Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id, include_filter_datasets: true).ids
           dataset_ids.each do |dataset_id|
             current_dataset_owner_ids = Superset::Dataset::Get.new(dataset_id).result['owners'].map{|c| c['id']}
             next if current_dataset_owner_ids.include?(user_id)
