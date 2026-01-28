@@ -7,14 +7,15 @@ module Superset
     class List < Superset::Request
       attr_reader :title_contains, :title_equals,
                   :tags_contain, :tags_equal,
-                  :ids_not_in, :include_filter_dataset_schemas
+                  :ids_not_in, :owner_id_eq, :include_filter_dataset_schemas
 
-      def initialize(title_contains: '', title_equals: '', tags_contain: [], tags_equal: [], ids_not_in: [], include_filter_dataset_schemas: false, **kwargs)
+      def initialize(title_contains: '', title_equals: '', tags_contain: [], tags_equal: [], ids_not_in: [], owner_id_eq: '', include_filter_dataset_schemas: false, **kwargs)
         @title_contains = title_contains
         @title_equals = title_equals
         @tags_contain = tags_contain
         @tags_equal = tags_equal
         @ids_not_in = ids_not_in
+        @owner_id_eq = owner_id_eq
         @include_filter_dataset_schemas = include_filter_dataset_schemas
         super(**kwargs)
       end
@@ -86,6 +87,7 @@ module Superset
         filter_set << tags_contain_filters if tags_contain.present?
         filter_set << tags_equal_filters if tags_equal.present?
         filter_set << ids_not_in_filters if ids_not_in.present?
+        filter_set << "(col:owners,opr:rel_m_m,value:#{owner_id_eq})" if owner_id_eq.present?
 
         unless filter_set.empty?
           "filters:!(" + filter_set.join(',') + "),"

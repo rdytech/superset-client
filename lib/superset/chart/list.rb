@@ -2,12 +2,13 @@ module Superset
   module Chart
     class List < Superset::Request
 
-      attr_reader :title_contains, :dashboard_id_eq, :dataset_id_eq
+      attr_reader :title_contains, :dashboard_id_eq, :dataset_id_eq, :owner_id_eq
 
-      def initialize(title_contains: '', dashboard_id_eq: '', dataset_id_eq: '', **kwargs)
+      def initialize(title_contains: '', dashboard_id_eq: '', dataset_id_eq: '', owner_id_eq: '', **kwargs)
         @title_contains = title_contains
         @dashboard_id_eq = dashboard_id_eq
         @dataset_id_eq = dataset_id_eq
+        @owner_id_eq = owner_id_eq
         super(**kwargs)
       end
 
@@ -41,6 +42,7 @@ module Superset
         filter_set << "(col:slice_name,opr:ct,value:'#{title_contains}')" if title_contains.present?
         filter_set << "(col:dashboards,opr:rel_m_m,value:#{dashboard_id_eq})" if dashboard_id_eq.present? # rel many to many
         filter_set << "(col:datasource_id,opr:eq,value:#{dataset_id_eq})" if dataset_id_eq.present?
+        filter_set << "(col:owners,opr:rel_m_m,value:#{owner_id_eq})" if owner_id_eq.present?
 
         unless filter_set.empty?
           "filters:!(" + filter_set.join(',') + "),"
