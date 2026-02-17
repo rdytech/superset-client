@@ -7,15 +7,12 @@ module Superset
   module Dashboard
     module Datasets
       class List < Superset::Request
-        attr_reader :id, :include_filter_datasets # id - dashboard id
+        attr_reader :id, :include_filter_datasets, :include_catalog_lookup # id - dashboard id
 
-        def self.call(id)
-          self.new(id).list
-        end
-
-        def initialize(dashboard_id:, include_filter_datasets: false)
+        def initialize(dashboard_id:, include_filter_datasets: false, include_catalog_lookup: false)
           @id = dashboard_id
           @include_filter_datasets = include_filter_datasets
+          @include_catalog_lookup = include_catalog_lookup
         end
 
         def perform
@@ -23,8 +20,20 @@ module Superset
           self
         end
 
+        def datasets_details
+          @datasets_details ||= begin
+            datasets_list = [ chart_datasets, additional_filter_datasets ].compact.flatten
+            datasets_list = include_catalog_details(datasets_list) if include_catalog_lookup
+            datasets_list
+          end
+        end
+
         def databases
           @databases ||= datasets_details.map {|d| d[:database] }.uniq
+        end
+
+        def catalogs
+          datasets_details.map {|d| d[:catalog] }.uniq
         end
 
         def schemas
@@ -38,18 +47,6 @@ module Superset
             end
             all_dashboard_schemas
           end
-        end
-
-        def datasets_details
-          chart_datasets = result.map do |details|
-            details.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => details['database'].slice('id', 'name', 'backend')).with_indifferent_access
-          end
-          return chart_datasets unless include_filter_datasets
-          chart_dataset_ids = chart_datasets.map{|d| d['id'] }
-          filter_dataset_ids_not_used_in_charts = filter_dataset_ids - chart_dataset_ids
-          return chart_datasets if filter_dataset_ids_not_used_in_charts.empty?
-          # returning chart and filter datasets
-          chart_datasets + filter_datasets(filter_dataset_ids_not_used_in_charts)
         end
 
         def rows
@@ -68,11 +65,31 @@ module Superset
 
         private
 
+        def include_catalog_details(datasets_list)
+          datasets_list.each {|d| d[:catalog] = Superset::Dataset::Get.new(d[:id]).result['catalog'] }
+        end
+
+        # list of chart dataset details on the 
+        def chart_datasets
+          result.map do |details|
+            details.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => details['database'].slice('id', 'name', 'backend')).with_indifferent_access
+          end
+        end
+
+        # list of any additional filter dataset details on the dashboard that are not used in charts
+        def additional_filter_datasets
+          if include_filter_datasets
+            chart_dataset_ids = chart_datasets.map{|d| d['id'] }
+            filter_dataset_ids_not_used_in_charts = filter_dataset_ids - chart_dataset_ids
+            retrieve_filter_datasets(filter_dataset_ids_not_used_in_charts) unless filter_dataset_ids_not_used_in_charts.empty?
+          end
+        end
+
         def filter_dataset_ids
           @filter_dataset_ids ||= dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact.uniq
         end
 
-        def filter_datasets(filter_dataset_ids_not_used_in_charts)
+        def retrieve_filter_datasets(filter_dataset_ids_not_used_in_charts)
           filter_dataset_ids_not_used_in_charts.map do |filter_dataset_id|
             filter_dataset = Superset::Dataset::Get.new(filter_dataset_id).result
             database_info = {
