@@ -7,15 +7,12 @@ module Superset
   module Dashboard
     module Datasets
       class List < Superset::Request
-        attr_reader :id, :include_filter_datasets # id - dashboard id
+        attr_reader :dashboard_id, :include_filter_datasets, :include_catalog_lookup # id - dashboard id
 
-        def self.call(id)
-          self.new(id).list
-        end
-
-        def initialize(dashboard_id:, include_filter_datasets: false)
-          @id = dashboard_id
+        def initialize(dashboard_id:, include_filter_datasets: false, include_catalog_lookup: false)
+          @dashboard_id = dashboard_id
           @include_filter_datasets = include_filter_datasets
+          @include_catalog_lookup = include_catalog_lookup
         end
 
         def perform
@@ -23,33 +20,24 @@ module Superset
           self
         end
 
+        def datasets_details
+          @datasets_details ||= begin
+            datasets_list = chart_datasets + additional_filter_datasets
+            datasets_list = include_catalog_details(datasets_list) if include_catalog_lookup
+            datasets_list.compact
+          end
+        end
+
         def databases
           @databases ||= datasets_details.map {|d| d[:database] }.uniq
         end
 
-        def schemas
-          @schemas ||= begin
-            all_dashboard_schemas = datasets_details.map {|d| d[:schema] }.uniq
-
-            # For the current superset setup we will assume a dashboard datasets will point to EXACTLY one schema, their own.
-            # if not .. we need to know about it. Potentially we could override this check if others do not consider it a problem.
-            if all_dashboard_schemas.count > 1
-              Rollbar.error("SUPERSET DASHBOARD ERROR: Dashboard id #{id} has multiple dataset schema linked: #{all_dashboard_schemas.to_s}") if defined?(Rollbar)
-            end
-            all_dashboard_schemas
-          end
+        def catalogs
+          datasets_details.map {|d| d[:catalog] }.compact.uniq
         end
 
-        def datasets_details
-          chart_datasets = result.map do |details|
-            details.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => details['database'].slice('id', 'name', 'backend')).with_indifferent_access
-          end
-          return chart_datasets unless include_filter_datasets
-          chart_dataset_ids = chart_datasets.map{|d| d['id'] }
-          filter_dataset_ids_not_used_in_charts = filter_dataset_ids - chart_dataset_ids
-          return chart_datasets if filter_dataset_ids_not_used_in_charts.empty?
-          # returning chart and filter datasets
-          chart_datasets + filter_datasets(filter_dataset_ids_not_used_in_charts)
+        def schemas
+          datasets_details.map {|d| d[:schema] }.compact.uniq
         end
 
         def rows
@@ -68,24 +56,47 @@ module Superset
 
         private
 
+        def include_catalog_details(datasets_list)
+          datasets_list.each {|d| d[:catalog] = Superset::Dataset::Get.new(d[:id].to_i).result['catalog'] }
+        end
+
+        # list of chart dataset details used in the dashboard
+        def chart_datasets
+          result.map do |details|
+            details.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => details['database'].slice('id', 'name', 'backend')).with_indifferent_access
+          end
+        end
+
+        # list of any additional filter dataset details on the dashboard that are not used in charts
+        def additional_filter_datasets
+          return [] unless include_filter_datasets
+
+          chart_dataset_ids = chart_datasets.map{|d| d['id'] }
+          filter_dataset_ids_not_used_in_charts = filter_dataset_ids - chart_dataset_ids
+          retrieve_filter_datasets(filter_dataset_ids_not_used_in_charts) unless filter_dataset_ids_not_used_in_charts.empty?
+        end
+
         def filter_dataset_ids
           @filter_dataset_ids ||= dashboard.filter_configuration.map { |c| c['targets'] }.flatten.compact.map { |c| c['datasetId'] }.flatten.compact.uniq
         end
 
-        def filter_datasets(filter_dataset_ids_not_used_in_charts)
+        def retrieve_filter_datasets(filter_dataset_ids_not_used_in_charts)
           filter_dataset_ids_not_used_in_charts.map do |filter_dataset_id|
             filter_dataset = Superset::Dataset::Get.new(filter_dataset_id).result
-            database_info = {
-              'id' => filter_dataset['database']['id'],
-              'name' => filter_dataset['database']['database_name'],
-              'backend' => filter_dataset['database']['backend']
-            }
-            filter_dataset.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => database_info, 'filter_only': true).with_indifferent_access
+            { id: filter_dataset_id,
+              datasource_name: filter_dataset['datasource_name'],
+              schema: filter_dataset['schema'],
+              sql: filter_dataset['sql'],
+              database: {
+                'id' => filter_dataset['database']['id'],
+                'name' => filter_dataset['database']['database_name'],
+                'backend' => filter_dataset['database']['backend'] },
+              filter_only: true }.with_indifferent_access
           end
         end
 
         def route
-          "dashboard/#{id}/datasets"
+          "dashboard/#{dashboard_id}/datasets"
         end
 
         def list_attributes
@@ -94,11 +105,11 @@ module Superset
 
         # when displaying a list of datasets, show dashboard title as well
         def title
-          @title ||= [id, dashboard.title].join(' ')
+          @title ||= [dashboard_id, dashboard.title].join(' ')
         end
 
         def dashboard
-          @dashboard ||= Superset::Dashboard::Get.new(id)
+          @dashboard ||= Superset::Dashboard::Get.new(dashboard_id)
         end
       end
     end

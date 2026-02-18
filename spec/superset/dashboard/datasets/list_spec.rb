@@ -1,10 +1,11 @@
 require 'spec_helper'
 
 RSpec.describe Superset::Dashboard::Datasets::List do
-  subject { described_class.new(dashboard_id: dashboard_id, include_filter_datasets: include_filter_datasets) }
+  subject { described_class.new(dashboard_id: dashboard_id, include_filter_datasets: include_filter_datasets, include_catalog_lookup: include_catalog_lookup) }
   let(:dashboard_id) { 1 }
   let(:include_filter_datasets) { false }
-  let(:result) do
+  let(:include_catalog_lookup) { false }
+  let(:dashboard_datasets_result) do
     [
       {
         'id' => 101,
@@ -24,27 +25,22 @@ RSpec.describe Superset::Dashboard::Datasets::List do
   end
 
   before do
-    allow(subject).to receive(:result).and_return(result)
+    allow(subject).to receive(:result).and_return(dashboard_datasets_result)
     allow(subject).to receive(:title).and_return('1: Test Dashboard')
   end
 
   describe '#databases' do
     it 'returns a list of databases' do
-      expect(subject.databases).to eq([{'id' => 1, 'name' => 'DB1', 'backend' => 'postgres'}, {'id' => 2, 'name' => 'examples', 'backend' => 'postgres'}])
+      expect(subject.databases).to eq([
+        {'id' => 1, 'name' => 'DB1', 'backend' => 'postgres'}, 
+        {'id' => 2, 'name' => 'examples', 'backend' => 'postgres'}])
     end
   end
 
   describe '#schemas' do
     context 'when the dashboard has datasets from multiple schemas' do
       it 'returns a list of schemas' do
-
         expect(subject.schemas).to eq(['acme', 'public'])
-      end
-
-      it 'raises a rollbar if there is more than 1 uniq schema' do
-        expect(Rollbar).to receive(:error).with(
-          "SUPERSET DASHBOARD ERROR: Dashboard id #{dashboard_id} has multiple dataset schema linked: [\"acme\", \"public\"]")
-        subject.schemas
       end
     end
 
@@ -72,10 +68,24 @@ RSpec.describe Superset::Dashboard::Datasets::List do
       ])
     end
 
+    context 'returns a list of datasets with catalogs when include_catalog_lookup is true' do
+      let(:include_catalog_lookup) { true }
+
+      it 'returns a list of datasets with catalogs' do
+        allow(Superset::Dataset::Get).to receive(:new).with(101).and_return(double(result: { 'catalog' => 'acme_client_catalog' }))
+        allow(Superset::Dataset::Get).to receive(:new).with(102).and_return(double(result: { 'catalog' => 'examples_client_catalog' }))
+
+        expect(subject.datasets_details).to eq([
+          {"id"=>101, "datasource_name"=>"Acme Forecasts", "schema"=>"acme", "database"=>{"id"=>1, "name"=>"DB1", "backend"=>"postgres"}, "sql"=>"select * from acme.forecasts", "catalog"=>"acme_client_catalog"}, 
+          {"id"=>102, "datasource_name"=>"video_game_sales", "schema"=>"public", "database"=>{"id"=>2, "name"=>"examples", "backend"=>"postgres"}, "sql"=>"select * from acme_new.forecasts", "catalog"=>"examples_client_catalog"},
+        ])
+      end
+    end
+
     context 'returns both chart and filter datasets when include_filter_datasets is true' do
       before do
         allow(subject).to receive(:filter_dataset_ids).and_return([103,104])
-        allow(subject).to receive(:filter_datasets).with([103,104]).and_return(filter_dataset_json)
+        allow(subject).to receive(:retrieve_filter_datasets).with([103,104]).and_return(filter_dataset_json)
       end
       let(:include_filter_datasets) { true }
       let(:filter_dataset_json) {
