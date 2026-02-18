@@ -33,20 +33,11 @@ module Superset
         end
 
         def catalogs
-          datasets_details.map {|d| d[:catalog] }.uniq
+          datasets_details.map {|d| d[:catalog] }.compact.uniq
         end
 
         def schemas
-          @schemas ||= begin
-            all_dashboard_schemas = datasets_details.map {|d| d[:schema] }.uniq
-
-            # For the current superset setup we will assume a dashboard datasets will point to EXACTLY one schema, their own.
-            # if not .. we need to know about it. Potentially we could override this check if others do not consider it a problem.
-            if all_dashboard_schemas.count > 1
-              Rollbar.error("SUPERSET DASHBOARD ERROR: Dashboard id #{dashboard_id} has multiple dataset schema linked: #{all_dashboard_schemas.to_s}") if defined?(Rollbar)
-            end
-            all_dashboard_schemas
-          end
+          datasets_details.map {|d| d[:schema] }.compact.uniq
         end
 
         def rows
@@ -69,7 +60,7 @@ module Superset
           datasets_list.each {|d| d[:catalog] = Superset::Dataset::Get.new(d[:id].to_i).result['catalog'] }
         end
 
-        # list of chart dataset details on the
+        # list of chart dataset details used in the dashboard
         def chart_datasets
           result.map do |details|
             details.slice('id', 'datasource_name', 'schema', 'sql').merge('database' => details['database'].slice('id', 'name', 'backend')).with_indifferent_access

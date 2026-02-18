@@ -5,7 +5,7 @@ RSpec.describe Superset::Dashboard::Datasets::List do
   let(:dashboard_id) { 1 }
   let(:include_filter_datasets) { false }
   let(:include_catalog_lookup) { false }
-  let(:result) do
+  let(:dashboard_datasets_result) do
     [
       {
         'id' => 101,
@@ -25,27 +25,22 @@ RSpec.describe Superset::Dashboard::Datasets::List do
   end
 
   before do
-    allow(subject).to receive(:result).and_return(result)
+    allow(subject).to receive(:result).and_return(dashboard_datasets_result)
     allow(subject).to receive(:title).and_return('1: Test Dashboard')
   end
 
   describe '#databases' do
     it 'returns a list of databases' do
-      expect(subject.databases).to eq([{'id' => 1, 'name' => 'DB1', 'backend' => 'postgres'}, {'id' => 2, 'name' => 'examples', 'backend' => 'postgres'}])
+      expect(subject.databases).to eq([
+        {'id' => 1, 'name' => 'DB1', 'backend' => 'postgres'}, 
+        {'id' => 2, 'name' => 'examples', 'backend' => 'postgres'}])
     end
   end
 
   describe '#schemas' do
     context 'when the dashboard has datasets from multiple schemas' do
       it 'returns a list of schemas' do
-
         expect(subject.schemas).to eq(['acme', 'public'])
-      end
-
-      it 'raises a rollbar if there is more than 1 uniq schema' do
-        expect(Rollbar).to receive(:error).with(
-          "SUPERSET DASHBOARD ERROR: Dashboard id #{dashboard_id} has multiple dataset schema linked: [\"acme\", \"public\"]")
-        subject.schemas
       end
     end
 
