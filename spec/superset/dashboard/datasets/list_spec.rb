@@ -126,8 +126,8 @@ RSpec.describe Superset::Dashboard::Datasets::List do
   describe '#table' do
     before do
       allow(subject).to receive(:datasets_details).and_return(([
-        {"id"=>101, "datasource_name"=>"Acme Forecasts", "schema"=>"acme", "database"=>{"id"=>1, "name"=>"DB1", "backend"=>"postgres"}, "sql"=>"select * from acme.forecasts"},
-        {"id"=>102, "datasource_name"=>"video_game_sales", "schema"=>"public", "database"=>{"id"=>2, "name"=>"examples", "backend"=>"postgres"}, "sql"=>"select * from acme_new.forecasts"}
+        {"id"=>101, "datasource_name"=>"Acme Forecasts", "schema"=>"acme", "database"=>{"id"=>1, "name"=>"DB1", "backend"=>"postgres"}, "sql"=>"select * from acme.forecasts", "catalog"=>"acme_client_catalog"},
+        {"id"=>102, "datasource_name"=>"video_game_sales", "schema"=>"public", "database"=>{"id"=>2, "name"=>"examples", "backend"=>"postgres"}, "sql"=>"select * from acme_new.forecasts", "catalog"=>"examples_client_catalog"}
       ]+ filter_dataset_json).map(&:with_indifferent_access))
     end
     let(:filter_dataset_json) { [] }
@@ -135,12 +135,12 @@ RSpec.describe Superset::Dashboard::Datasets::List do
       expect(subject.table.to_s).to eq(
         "+---------------------------------------------------------------------------------------------+\n" \
         "|                                      1: Test Dashboard                                      |\n" \
-        "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
-        "| Id  | Datasource name  | Database | Database name | Database backend | Schema | Filter only |\n" \
-        "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
-        "| 101 | Acme Forecasts   | 1        | DB1           | postgres         | acme   |             |\n" \
-        "| 102 | video_game_sales | 2        | examples      | postgres         | public |             |\n" \
-        "+-----+------------------+----------+---------------+------------------+--------+-------------+"
+        "+-----+------------------+------------------+----------+---------------+--------+-------------+\n" \
+        "| Id  | Datasource name  | Database backend | Database | Database name | Schema | Filter only |\n" \
+        "+-----+------------------+------------------+----------+---------------+--------+-------------+\n" \
+        "| 101 | Acme Forecasts   | postgres         | 1        | DB1           | acme   |             |\n" \
+        "| 102 | video_game_sales | postgres         | 2        | examples      | public |             |\n" \
+        "+-----+------------------+------------------+----------+---------------+--------+-------------+"
       )
     end
 
@@ -178,14 +178,31 @@ RSpec.describe Superset::Dashboard::Datasets::List do
         expect(subject.table.to_s).to eq(
           "+---------------------------------------------------------------------------------------------+\n" \
           "|                                      1: Test Dashboard                                      |\n" \
-          "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
-          "| Id  | Datasource name  | Database | Database name | Database backend | Schema | Filter only |\n" \
-          "+-----+------------------+----------+---------------+------------------+--------+-------------+\n" \
-          "| 101 | Acme Forecasts   | 1        | DB1           | postgres         | acme   |             |\n" \
-          "| 102 | video_game_sales | 2        | examples      | postgres         | public |             |\n" \
-          "| 103 | Filter 1         | 1        | DB1           | postgres         | acme   | true        |\n" \
-          "| 104 | Filter 2         | 2        | examples      | postgres         | public | true        |\n" \
-          "+-----+------------------+----------+---------------+------------------+--------+-------------+"
+          "+-----+------------------+------------------+----------+---------------+--------+-------------+\n" \
+          "| Id  | Datasource name  | Database backend | Database | Database name | Schema | Filter only |\n" \
+          "+-----+------------------+------------------+----------+---------------+--------+-------------+\n" \
+          "| 101 | Acme Forecasts   | postgres         | 1        | DB1           | acme   |             |\n" \
+          "| 102 | video_game_sales | postgres         | 2        | examples      | public |             |\n" \
+          "| 103 | Filter 1         | postgres         | 1        | DB1           | acme   | true        |\n" \
+          "| 104 | Filter 2         | postgres         | 2        | examples      | public | true        |\n" \
+          "+-----+------------------+------------------+----------+---------------+--------+-------------+"
+        )
+      end
+    end
+
+    context 'prints a table with the dashboard title with chart and filter datasets and catalogs' do
+      let(:include_catalog_lookup) { true }
+      let(:filter_dataset_json) { [] }
+      specify do
+        expect(subject.table.to_s).to eq(
+          "+-----------------------------------------------------------------------------------------------------------------------+\n" \
+          "|                                                   1: Test Dashboard                                                   |\n" \
+          "+-----+------------------+------------------+----------+---------------+-------------------------+--------+-------------+\n" \
+          "| Id  | Datasource name  | Database backend | Database | Database name | Catalog                 | Schema | Filter only |\n" \
+          "+-----+------------------+------------------+----------+---------------+-------------------------+--------+-------------+\n" \
+          "| 101 | Acme Forecasts   | postgres         | 1        | DB1           | acme_client_catalog     | acme   |             |\n" \
+          "| 102 | video_game_sales | postgres         | 2        | examples      | examples_client_catalog | public |             |\n" \
+          "+-----+------------------+------------------+----------+---------------+-------------------------+--------+-------------+"
         )
       end
     end
