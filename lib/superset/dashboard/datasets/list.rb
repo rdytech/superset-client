@@ -73,7 +73,7 @@ module Superset
 
           chart_dataset_ids = chart_datasets.map{|d| d['id'] }
           filter_dataset_ids_not_used_in_charts = filter_dataset_ids - chart_dataset_ids
-          retrieve_filter_datasets(filter_dataset_ids_not_used_in_charts) unless filter_dataset_ids_not_used_in_charts.empty?
+          filter_dataset_ids_not_used_in_charts.empty? ? [] : retrieve_filter_datasets(filter_dataset_ids_not_used_in_charts)
         end
 
         def filter_dataset_ids
