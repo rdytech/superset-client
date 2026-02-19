@@ -21,8 +21,8 @@ module Superset
 
         dashboard_ids.sort.each do |dashboard_id|
           logger.info("Dashboard Id: #{dashboard_id.to_s} Attempting CASCADE delete of dashboard, charts, datasets")
-          delete_datasets(dashboard_id)
           delete_charts(dashboard_id)
+          delete_datasets(dashboard_id)
           delete_dashboard(dashboard_id)
         end
         true
