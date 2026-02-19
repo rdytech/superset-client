@@ -9,7 +9,7 @@ module Superset
       class List < Superset::Request
         attr_reader :dashboard_id, :include_filter_datasets, :include_catalog_lookup # id - dashboard id
 
-        def initialize(dashboard_id:, include_filter_datasets: false, include_catalog_lookup: false)
+        def initialize(dashboard_id:, include_filter_datasets: true, include_catalog_lookup: true)
           @dashboard_id = dashboard_id
           @include_filter_datasets = include_filter_datasets
           @include_catalog_lookup = include_catalog_lookup
@@ -22,7 +22,7 @@ module Superset
 
         def datasets_details
           @datasets_details ||= begin
-            datasets_list = chart_datasets + additional_filter_datasets
+            datasets_list = chart_datasets + Array(additional_filter_datasets)
             datasets_list = include_catalog_details(datasets_list) if include_catalog_lookup
             datasets_list.compact
           end
@@ -42,15 +42,9 @@ module Superset
 
         def rows
           datasets_details.map do |d|
-            [
-              d[:id],
-              d[:datasource_name],
-              d[:database][:id],
-              d[:database][:name],
-              d[:database][:backend],
-              d[:schema],
-              d[:filter_only]
-            ]
+            row = [d[:id], d[:datasource_name], d[:database][:backend], d[:database][:id], d[:database][:name]]
+            row << d[:catalog] if include_catalog_lookup
+            row + [d[:schema], d[:filter_only]]
           end
         end
 
@@ -69,11 +63,11 @@ module Superset
 
         # list of any additional filter dataset details on the dashboard that are not used in charts
         def additional_filter_datasets
-          return [] unless include_filter_datasets
+          return unless include_filter_datasets
 
           chart_dataset_ids = chart_datasets.map{|d| d['id'] }
           filter_dataset_ids_not_used_in_charts = filter_dataset_ids - chart_dataset_ids
-          retrieve_filter_datasets(filter_dataset_ids_not_used_in_charts) unless filter_dataset_ids_not_used_in_charts.empty?
+          retrieve_filter_datasets(filter_dataset_ids_not_used_in_charts)
         end
 
         def filter_dataset_ids
@@ -100,7 +94,9 @@ module Superset
         end
 
         def list_attributes
-          ['id', 'datasource_name', 'database_id', 'database_name', 'database_backend', 'schema', 'filter_only'].map(&:to_sym)
+          base = %w[id datasource_name database_backend database_id database_name]
+          base << 'catalog' if include_catalog_lookup
+          (base + %w[schema filter_only]).map(&:to_sym)
         end
 
         # when displaying a list of datasets, show dashboard title as well
