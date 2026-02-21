@@ -37,7 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "json", ">= 2.0"
   spec.add_dependency "terminal-table", "~> 4.0"
   spec.add_dependency "require_all", ">= 3.0"
-  spec.add_dependency "rubyzip", ">= 1.3"
+  spec.add_dependency "rubyzip", ">= 3.0"
   spec.add_dependency "faraday", "~> 1.0"
   spec.add_dependency "faraday-multipart", "~> 1.0"
   spec.add_dependency "enumerate_it", ">= 1.7"

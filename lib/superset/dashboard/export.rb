@@ -27,7 +27,7 @@ module Superset
         create_tmp_dir
         save_exported_zip_file
         unzip_files
-        clean_destination_directory
+        #clean_destination_directory
         copy_export_files_to_destination_path if destination_path
 
         Dir.glob("#{destination_path_with_dash_id}/**/*").select { |f| File.file?(f) }
@@ -62,6 +62,7 @@ module Superset
 
       def unzip_files
         logger.info("Unzipping file: #{zip_file_name}")
+        binding.pry
         @extracted_files = unzip_file(zip_file_name, tmp_uniq_dashboard_path)
       end
 
@@ -132,7 +133,7 @@ module Superset
           zip_file.each do |entry|
             entry_path = File.join(destination, entry.name)
             FileUtils.mkdir_p(File.dirname(entry_path))
-            zip_file.extract(entry, entry_path) unless File.exist?(entry_path)
+            zip_file.extract(entry, entry_path, destination_directory: '/') unless File.exist?(entry_path)
             extracted_files << entry_path
           end
         end
