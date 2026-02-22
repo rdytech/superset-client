@@ -78,7 +78,7 @@ module Superset
       def source_zip_file
         return source if zip?
 
-        Zip::File.open(new_zip_file, Zip::File::CREATE) do |zipfile|
+        Zip::File.open(new_zip_file, create: true) do |zipfile|
           Dir[File.join(source, "**", "**")].each do |file|
             next unless File.file?(file)
 
