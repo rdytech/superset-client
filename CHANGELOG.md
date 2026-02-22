@@ -1,4 +1,20 @@
-## Change Log
+## Changelog
+
+## 0.3.6 - 2026-02-27
+
+* update to rubyzip 3.2.2 #73
+
+## 0.3.5 - 2026-02-26
+
+* allow for empty filter datasets #72
+
+## 0.3.4 - 2026-02-21
+
+* cascade ownership should also update datasets for filter only in #68
+* add owner filter #62
+* list dataset catalog db names #69
+* bump version to 0.3.4 #70
+* Adjust asset order for board cascade deletion #71
 
 ## 0.3.3 - 2025-12-11
 * Add databases method to Superset::Dashboard::Datasets::List
