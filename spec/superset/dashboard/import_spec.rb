@@ -17,7 +17,7 @@ RSpec.describe Superset::Dashboard::Import do
           zip_file.each do |f|
             fpath = File.join(tmp_dir, f.name)
             FileUtils.mkdir_p(File.dirname(fpath))
-            zip_file.extract(f, fpath) unless File.exist?(fpath)
+            zip_file.extract(f, f.name, destination_directory: tmp_dir) { true }
           end
         end
         "#{tmp_dir}/dashboard_export_20240321T214117"
