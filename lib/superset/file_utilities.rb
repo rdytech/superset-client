@@ -12,7 +12,7 @@ module Superset
           entries << entry_path
           FileUtils.mkdir_p(File.dirname(entry_path))
 
-          zip.extract(entry, entry_path, destination_directory: '/') unless File.exist?(entry_path)
+          zip.extract(entry, entry_path, destination_directory: '/') { true }
         rescue => e
           raise "Error extracting file #{entry.name}: #{e.message}"
         end
