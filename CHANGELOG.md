@@ -1,6 +1,6 @@
 ## Changelog
 
-## 0.3.6 - 2026-02-27
+## (WIP) 0.3.6 -
 
 * update to rubyzip 3.2.2 #73
 
