@@ -31,7 +31,7 @@ module Superset
         create_tmp_dir
         save_exported_zip_file
         unzip_files
-        #clean_destination_directory
+        clean_destination_directory
         copy_export_files_to_destination_path if destination_path
 
         Dir.glob("#{destination_path_with_dash_id}/**/*").select { |f| File.file?(f) }
