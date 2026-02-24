@@ -84,6 +84,31 @@ RSpec.describe Superset::FileUtilities do
         expect(result).to eq([File.join(destination, 'valid.txt')])
         expect(File.read(File.join(destination, 'valid.txt'))).to eq('ok')
       end
+
+      it 'skips entries whose name is empty (zip slip / malformed zip guard)' do
+        zip_path = File.join(destination, 'with_empty_name.zip')
+        Zip::File.open(zip_path, create: true) do |zip|
+          zip.get_output_stream('valid.txt') { |f| f.write('content') }
+        end
+
+        # Stub to simulate a zip that yields an entry with empty name before the real entry
+        empty_name_entry = double('Zip::Entry', name: '')
+        allow(Zip::File).to receive(:open).and_wrap_original do |method, path, *args, &block|
+          method.call(path, *args) do |z|
+            real_entries = z.entries
+            allow(z).to receive(:each) do |&iter_block|
+              iter_block.call(empty_name_entry)
+              real_entries.each(&iter_block)
+            end
+            block.call(z)
+          end
+        end
+
+        result = subject.unzip_file(zip_path, destination)
+
+        expect(result).to eq([File.join(destination, 'valid.txt')])
+        expect(File.read(File.join(destination, 'valid.txt'))).to eq('content')
+      end
     end
 
     context 'when zip file does not exist' do
