@@ -17,7 +17,7 @@ RSpec.describe Superset::Dashboard::Import do
           zip_file.each do |f|
             fpath = File.join(tmp_dir, f.name)
             FileUtils.mkdir_p(File.dirname(fpath))
-            zip_file.extract(f, fpath) unless File.exist?(fpath)
+            zip_file.extract(f, f.name, destination_directory: tmp_dir) { true }
           end
         end
         "#{tmp_dir}/dashboard_export_20240321T214117"
@@ -177,7 +177,7 @@ RSpec.describe Superset::Dashboard::Import do
 
         # Mock Zip::File.open to prevent actual zip creation
         zip_file_double = double("Zip::File")
-        allow(Zip::File).to receive(:open).with(new_zip_file, Zip::File::CREATE).and_yield(zip_file_double)
+        allow(Zip::File).to receive(:open).with(new_zip_file, create: true).and_yield(zip_file_double)
         allow(zip_file_double).to receive(:add)
 
         # Mock Dir[] to return a list of files
@@ -190,13 +190,13 @@ RSpec.describe Superset::Dashboard::Import do
       end
 
       it "creates a zip file and returns its path" do
-        expect(Zip::File).to receive(:open).with(new_zip_file, Zip::File::CREATE)
+        expect(Zip::File).to receive(:open).with(new_zip_file, create: true)
         expect(subject.send(:source_zip_file)).to eq(new_zip_file)
       end
 
       it "adds directory content to the zip file" do
         zip_file_double = double("Zip::File")
-        expect(Zip::File).to receive(:open).with(new_zip_file, Zip::File::CREATE).and_yield(zip_file_double)
+        expect(Zip::File).to receive(:open).with(new_zip_file, create: true).and_yield(zip_file_double)
 
         expect(zip_file_double).to receive(:add).with(
           "dashboard_import_#{subject.send(:timestamp)}/file1.yaml", "#{source}/file1.yaml"

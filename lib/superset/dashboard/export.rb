@@ -3,8 +3,12 @@
 # Will then unzip and copy the files into the destination_path with the dashboard_id as a subfolder
 #
 # Usage
-# Superset::Dashboard::Export.new(dashboard_id: 15, destination_path: '/tmp/superset_dashboard_backups/').perform
-#
+=begin
+  Superset::Dashboard::Export.new(
+    dashboard_id: 15,
+    destination_path: '/superset_dashboard_backups/'
+  ).perform
+=end
 
 require 'superset/file_utilities'
 
@@ -13,7 +17,7 @@ module Superset
     class Export < Request
       include FileUtilities
 
-      TMP_SUPERSET_DASHBOARD_PATH = '/tmp/superset_dashboard_exports'
+      TMP_SUPERSET_DASHBOARD_PATH = '/tmp/superset_dashboard_exports'.freeze
 
       attr_reader :dashboard_id, :destination_path
 
@@ -124,21 +128,6 @@ module Superset
 
       def datestamp
         @datestamp ||= Time.now.strftime('%Y%m%d')
-      end
-
-      def unzip_file(zip_path, destination)
-        extracted_files = []
-        Zip::File.open(zip_path) do |zip_file|
-          zip_file.each do |entry|
-            entry_path = File.join(destination, entry.name)
-            FileUtils.mkdir_p(File.dirname(entry_path))
-            zip_file.extract(entry, entry_path) unless File.exist?(entry_path)
-            extracted_files << entry_path
-          end
-        end
-        extracted_files
-      rescue => e
-        raise
       end
     end
 
