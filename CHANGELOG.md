@@ -1,10 +1,11 @@
 ## Changelog
 
-## (WIP) 0.3.6 -
+## 0.3.6 - 2026-02-26
 
+* add dry_run to dashboard bulk delete cascade #74
 * update to rubyzip 3.2.2 #73
 
-## 0.3.5 - 2026-02-26
+## 0.3.5 - 2026-02-24
 
 * allow for empty filter datasets #72
 
