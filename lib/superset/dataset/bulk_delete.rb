@@ -16,10 +16,10 @@ module Superset
       end
 
       def perform
-        raise InvalidParameterError, "dataset_ids array of integers expected" unless dataset_ids.is_a?(Array)
+        raise InvalidParameterError, "dataset_ids array of integers expected" unless dataset_ids.is_a?(Array) && dataset_ids.any?
         raise InvalidParameterError, "dataset_ids array must contain Integer only values" unless dataset_ids.all? { |item| item.is_a?(Integer) }
 
-        logger.info("Deleting datasets with id: #{dataset_ids.join(', ')}")
+        logger.info("Deleting datasets with id: #{dataset_ids&.sort&.join(',')}")
         response
       end
 
@@ -30,7 +30,8 @@ module Superset
       private
 
       def params
-        { q: "!(#{dataset_ids.join(',')})" }
+        dataset_ids_str = dataset_ids&.sort&.join(',')
+        { q: "!(#{dataset_ids_str})" }
       end
 
       def route
