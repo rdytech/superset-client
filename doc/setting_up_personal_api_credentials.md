@@ -4,6 +4,8 @@ Superset API Credentials are essentially the username, password and host of the 
 
 If you know these already, plug them and your host value into the `.env` and it should all just work.  A sample env.sample is provided as a template.
 
+Note: `.env` files are for local development only—do not store production credentials in a `.env` file (or commit it to git). In production, inject secrets at runtime via your platform's environment variables or a secret manager.
+
 Create your own .env file with
 
 ```
@@ -59,9 +61,17 @@ Scroll down to the 'Security Users' area and find the PUT request that will upda
 
 PUT `/api/v1/security/users/{pk}`
 
-Click 'Try it Out' and add your users ID in the PK input box.  
+Click 'Try it Out' and add your users ID in the PK input box.
 
-Edit the params to only consist of only the password field and the value of your new password.  
+Generate a secure random password with your preferred tool ... or in ruby with something like:
+```ruby
+# ruby SecureRandom code to provide 32 random bytes
+require 'securerandom'
+SecureRandom.urlsafe_base64(32)
+```
+
+Edit the params to only consist of only the password field and the value of your new password.
+
 
 ```
 {
