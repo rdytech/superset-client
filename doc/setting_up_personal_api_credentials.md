@@ -169,5 +169,15 @@ Superset::GuestToken.new(embedded_dashboard_id: '15').guest_token
 => "eyJ0eXAiOi............VV4mrMfsvg"
 ```
 
+## Troubleshooting tips
 
+### Password or token expired
 
+If your Superset password has expired (or your auth token is no longer valid), API calls may fail with an error like:
+
+```ruby
+Superset::Dashboard::List.call
+ArgumentError: Can't build an Authorization Bearer header from nil
+```
+
+Fix: refresh your credentials via swagger interface then update your credentials in .env and try again.
