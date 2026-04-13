@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# sse - Switch Superset Environment
+# Lists available .env-* files and starts bin/console with the selected environment
+# Selecting and env option will set the SUPERSET_ENVIRONMENT value and start a bin/console
+
+# Handy to add an alias to enable running sse from anywhere
+# alias sse='cd ~/your-path-to/superset-client; bin/sse'
+
+envs=($(ls .env-* 2>/dev/null | sed 's/^\.env-//'))
+
+if [ ${#envs[@]} -eq 0 ]; then
+  echo "No .env-* files found. Starting with default .env..."
+  bin/console
+  exit
+fi
+
+echo "------ Switch Superset Environment ------"
+echo "Available environments:"
+for i in "${!envs[@]}"; do
+  echo "  $((i+1))) ${envs[$i]}"
+done
+
+read -p "Select environment (or press Enter for default .env): " choice
+
+if [ -z "$choice" ]; then
+  bin/console
+elif [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#envs[@]}" ]; then
+  selected="${envs[$((choice-1))]}"
+  echo "Loading .env-${selected}..."
+  SUPERSET_ENVIRONMENT=$selected bin/console
+else
+  echo "Invalid selection."
+  exit 1
+fi

@@ -66,13 +66,43 @@ def superset_class_list
   puts " ---- Listing Superset ruby client API Classes ----- "
   list_classes(Superset)
 end
-alias :sshelp :superset_class_list
+# Superset aliases - shorthand commands for common operations
+SS_ALIASES = {
+  "sshelp" => { description: "List Superset client classes", command: "superset_class_list" },
+  "ssd"    => { description: "List accessible dashboards",       command: "Superset::Dashboard::List.call" },
+  "ssc"    => { description: "List accessible charts",           command: "Superset::Chart::List.call"     },
+}
 
-puts "\n  >>> Welcome to the Superset Ruby API Client <<< \n\n"
-puts "\n  >>> list all available classes with 'sshelp' <<< \n\n"
+def ssaliases
+  puts "\n  --- Superset Aliases ---"
+  SS_ALIASES.each do |alias_name, info|
+    puts "  #{alias_name.ljust(8)} #{info[:description].ljust(25)} => #{info[:command]}"
+  end
+  puts ""
+end
+
+SS_ALIASES.each do |alias_name, info|
+  define_method(alias_name) { eval(info[:command]) }
+end
+
+puts "\n  >>> Welcome to the Superset Ruby API Client <<< \n"
+ssaliases
 puts "Your accessible Superset Database connections are: Superset::Database::List.call"
 
-Superset::Database::List.call
+def list_databases
+  Superset::Database::List.call
+rescue Faraday::ConnectionFailed => e
+  puts "\n>>> CONNECTION FAILED: #{e.message} <<<"
+  puts ">>> Check that SUPERSET_HOST is correct and the server is reachable. <<<\n\n"
+  exit
+rescue => e
+  puts "\n>>> FAILED TO LIST DATABASES: #{e.message} <<<"
+  puts ">>> check your credentials in your .env file and/or <<<"
+  puts ">>> reset your credentials in swagger UI at: #{ENV['SUPERSET_HOST']}/swagger/v1 <<<\n\n"
+  exit
+end
+
+list_databases
 
 # Auto-logout functionality.  Can override default timeout by setting CONSOLE_TIMEOUT env var (in seconds)
 TIMEOUT_SECONDS = ENV.fetch('CONSOLE_TIMEOUT', 1800).to_i # Default 30 minutes
