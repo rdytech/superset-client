@@ -20,9 +20,9 @@ module Superset
           raise 'ERROR: only one filter supported currently' if  email_contains.present? && username_equals.present?
 
           if email_contains.present?
-            "filters:!((col:email,opr:ct,value:#{email_contains})),"
+            "filters:!((col:email,opr:ct,value:'#{email_contains}')),"
           elsif username_equals.present?
-            "filters:!((col:username,opr:eq,value:#{username_equals})),"
+            "filters:!((col:username,opr:eq,value:'#{username_equals}')),"
           else
             ''
           end

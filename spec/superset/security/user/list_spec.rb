@@ -70,7 +70,17 @@ RSpec.describe Superset::Security::User::List do
       subject { described_class.new(email_contains: 'mymail') }
 
       specify do
-        expect(subject.query_params).to eq("filters:!((col:email,opr:ct,value:mymail)),page:0,page_size:100")
+        expect(subject.query_params).to eq("filters:!((col:email,opr:ct,value:'mymail')),page:0,page_size:100")
+      end
+    end
+
+    context 'with username filter (Rison-quoted so digit-leading values parse as strings)' do
+      subject { described_class.new(username_equals: '5f62175e9b92') }
+
+      specify do
+        expect(subject.query_params).to eq(
+          "filters:!((col:username,opr:eq,value:'5f62175e9b92')),page:0,page_size:100"
+        )
       end
     end
   end
