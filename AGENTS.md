@@ -31,7 +31,11 @@ Docker equivalents: prefix commands with `docker-compose run --rm app`.
 
 ### Environment Setup
 
-Copy `env.sample` to `.env` and fill in:
+**IMPORTANT**
+
+ALWAYS follow deny settings in `.claude/settings.json`.
+
+User setup is to copy `env.sample` to `.env` and fill in:
 - `SUPERSET_HOST` — API base URL (required)
 - `SUPERSET_API_USERNAME` / `SUPERSET_API_PASSWORD` — API credentials (required)
 - `SUPERSET_ENVIRONMENT` — optional; loads `.env-{ENVIRONMENT}` instead
