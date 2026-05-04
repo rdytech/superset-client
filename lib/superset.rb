@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'json'
 require 'require_all'
 require 'terminal-table'
 require 'happi'
