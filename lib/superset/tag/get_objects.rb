@@ -6,6 +6,7 @@ module Superset
 
       def initialize(id)
         @id = id
+        super()
       end
 
       def self.call(id)
