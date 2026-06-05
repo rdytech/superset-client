@@ -1,5 +1,10 @@
 ## Changelog
 
+## 0.4.0 - 2026-06-05
+
+* send X-CSRFToken (and replay the session cookie) on state-changing requests so writes work against a CSRF-protected Superset (NEP-21211)
+* add faraday-cookie_jar dependency
+
 ## 0.3.6 - 2026-02-26
 
 * add dry_run to dashboard bulk delete cascade #74
