@@ -24,4 +24,37 @@ RSpec.describe Superset::Client, type: :service do
       expect(subject.superset_host).to eq(host)
     end
   end
+
+  describe "CSRF token handling (NEP-21211)" do
+    let(:headers) { {} }
+    let(:connection) { instance_double(Faraday::Connection, headers: headers) }
+
+    before do
+      # Any request returns a body carrying a csrf token; the write's own response
+      # body is irrelevant to these assertions.
+      allow(connection).to receive(:send).and_return(double(status: 200, body: { 'result' => 'THE-TOKEN' }))
+      allow(subject).to receive(:connection).and_return(connection)
+    end
+
+    %i[post put patch delete].each do |verb|
+      it "fetches a CSRF token and sets X-CSRFToken before a #{verb.upcase}" do
+        subject.public_send(verb, 'chart/', { 'name' => 'x' })
+        expect(headers['X-CSRFToken']).to eq('THE-TOKEN')
+      end
+    end
+
+    it "does not set X-CSRFToken for a GET (reads are never CSRF-checked)" do
+      subject.get('chart/')
+      expect(headers).not_to have_key('X-CSRFToken')
+    end
+
+    it "fetches the token from the security/csrf_token endpoint" do
+      expect(connection).to receive(:send)
+        .with(:get, '/api/v1/security/csrf_token/', {})
+        .and_return(double(status: 200, body: { 'result' => 'THE-TOKEN' }))
+      allow(connection).to receive(:send).with(:post, anything, anything)
+        .and_return(double(status: 201, body: {}))
+      subject.post('chart/', { 'name' => 'x' })
+    end
+  end
 end

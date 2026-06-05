@@ -40,6 +40,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rubyzip", ">= 3.0"
   spec.add_dependency "faraday", "~> 1.0"
   spec.add_dependency "faraday-multipart", "~> 1.0"
+  spec.add_dependency "faraday-cookie_jar", "~> 0.0.7"  # replay the Flask session cookie for CSRF (NEP-21211)
   spec.add_dependency "enumerate_it", ">= 1.7"
 
   spec.add_development_dependency "dotenv", ">= 2.0"
