@@ -87,6 +87,7 @@ module Superset
       end
 
       def create_new_dashboard_zip
+        require 'zip'  # lazy: only import/export needs rubyzip (NEP-21211)
         Zip::File.open(new_zip_file, create: true) do |zipfile|
           Dir[File.join(dashboard_export_root_path, '**', '**')].each do |file|
             zipfile.add(file.sub(dashboard_export_root_path + '/', File.basename(dashboard_export_root_path) + '/' ), file) if File.file?(file)

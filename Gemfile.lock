@@ -21,7 +21,6 @@ PATH
       faraday-multipart (~> 1.0)
       json (>= 2.0)
       require_all (>= 3.0)
-      rubyzip (>= 3.0)
       terminal-table (~> 4.0)
 
 GEM
@@ -165,6 +164,7 @@ DEPENDENCIES
   rollbar (>= 3.0)
   rspec (>= 3.0)
   rubocop (>= 1.0)
+  rubyzip (>= 3.0)
   superset!
 
 BUNDLED WITH
