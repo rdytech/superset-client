@@ -1,3 +1,5 @@
+require 'faraday-cookie_jar'
+
 module Superset
   class GuestToken
     include Credential::EmbeddedUser
@@ -52,13 +54,27 @@ module Superset
       'api/v1/security/guest_token/'
     end
 
+    # The guest_token endpoint is CSRF-protected (it is NOT in Superset's CSRF
+    # exempt list), so this POST needs the same treatment as Client writes
+    # (NEP-21211): an X-CSRFToken bound to the session cookie, plus a same-origin
+    # Referer for WTF_CSRF_SSL_STRICT over HTTPS. The csrf_token GET also sets the
+    # session cookie that the cookie jar replays on the POST.
     def response
-      @response ||= connection.post(route, params.to_json)
+      @response ||= begin
+        connection.headers['X-CSRFToken'] = csrf_token
+        connection.headers['Referer'] = authenticator.superset_host
+        connection.post(route, params.to_json)
+      end
+    end
+
+    def csrf_token
+      @csrf_token ||= connection.get('api/v1/security/csrf_token/').env.body['result']
     end
 
     def connection
       @connection ||= Faraday.new(authenticator.superset_host) do |f|
         f.authorization :Bearer, access_token
+        f.use :cookie_jar  # replay the Flask session cookie from the csrf_token GET on the POST
         f.use FaradayMiddleware::ParseJson, content_type: 'application/json'
         f.request :json
         f.adapter :net_http

@@ -4,6 +4,7 @@
 
 * send X-CSRFToken (and replay the session cookie) on state-changing requests so writes work against a CSRF-protected Superset (NEP-21211)
 * send a same-origin Referer on state-changing requests to satisfy Flask-WTF WTF_CSRF_SSL_STRICT over HTTPS (NEP-21211)
+* GuestToken: send X-CSRFToken + Referer (and replay the session cookie) on the guest_token POST — that endpoint is CSRF-protected too, so embedded dashboards broke without it (NEP-21211)
 * add faraday-cookie_jar dependency
 
 ## 0.3.6 - 2026-02-26
