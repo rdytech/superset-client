@@ -56,11 +56,17 @@ module Superset
 
     private
 
-    # Set the CSRF token header for the upcoming write. The token is session-bound:
-    # GET /api/v1/security/csrf_token/ returns it and sets the Flask session cookie it
-    # is validated against; the cookie jar on this connection replays that cookie.
+    # Set the CSRF headers for the upcoming write:
+    #   * X-CSRFToken — session-bound token; GET /api/v1/security/csrf_token/ returns it
+    #     and sets the Flask session cookie it is validated against (the cookie jar on
+    #     this connection replays that cookie on the write).
+    #   * Referer — over HTTPS, Flask-WTF's WTF_CSRF_SSL_STRICT (default True) also
+    #     requires a Referer matching the Superset host (same-origin check), else the
+    #     write fails with "400 The referrer header is missing." Browsers send this
+    #     automatically; an API client must set it explicitly. NEP-21211.
     def set_csrf_token
       connection.headers['X-CSRFToken'] = csrf_token
+      connection.headers['Referer'] = superset_host
     end
 
     def csrf_token

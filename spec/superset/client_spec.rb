@@ -41,11 +41,17 @@ RSpec.describe Superset::Client, type: :service do
         subject.public_send(verb, 'chart/', { 'name' => 'x' })
         expect(headers['X-CSRFToken']).to eq('THE-TOKEN')
       end
+
+      it "sets a same-origin Referer before a #{verb.upcase} (WTF_CSRF_SSL_STRICT)" do
+        subject.public_send(verb, 'chart/', { 'name' => 'x' })
+        expect(headers['Referer']).to eq(host)
+      end
     end
 
-    it "does not set X-CSRFToken for a GET (reads are never CSRF-checked)" do
+    it "does not set X-CSRFToken or Referer for a GET (reads are never CSRF-checked)" do
       subject.get('chart/')
       expect(headers).not_to have_key('X-CSRFToken')
+      expect(headers).not_to have_key('Referer')
     end
 
     it "fetches the token from the security/csrf_token endpoint" do
