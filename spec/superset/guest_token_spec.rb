@@ -15,7 +15,7 @@ RSpec.describe Superset::GuestToken do
       expect(subject.guest_token).to eq('some-token')
     end
 
-    # guest_token/ is CSRF-protected (NEP-21211); the POST must carry an
+    # guest_token/ is CSRF-protected; the POST must carry an
     # X-CSRFToken and a same-origin Referer, like Client writes.
     context 'CSRF handling on the POST' do
       let(:headers) { {} }

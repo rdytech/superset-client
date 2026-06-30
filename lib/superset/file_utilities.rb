@@ -1,7 +1,7 @@
 module Superset
   module FileUtilities
     # rubyzip is loaded lazily so the gem can be required without it; only
-    # consumers that actually import/export need rubyzip installed (NEP-21211).
+    # consumers that actually import/export need rubyzip installed.
     def unzip_file(zip_file, destination)
       require 'zip'
       entries = []

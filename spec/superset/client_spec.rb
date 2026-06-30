@@ -25,7 +25,7 @@ RSpec.describe Superset::Client, type: :service do
     end
   end
 
-  describe "CSRF token handling (NEP-21211)" do
+  describe "CSRF token handling" do
     let(:headers) { {} }
     let(:connection) { instance_double(Faraday::Connection, headers: headers) }
 

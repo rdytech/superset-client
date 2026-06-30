@@ -78,7 +78,7 @@ module Superset
       def source_zip_file
         return source if zip?
 
-        require 'zip'  # lazy: only import/export needs rubyzip (NEP-21211)
+        require 'zip'  # lazy: only import/export needs rubyzip
         Zip::File.open(new_zip_file, create: true) do |zipfile|
           Dir[File.join(source, "**", "**")].each do |file|
             next unless File.file?(file)

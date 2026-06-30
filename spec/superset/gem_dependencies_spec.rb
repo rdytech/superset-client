@@ -3,8 +3,8 @@ require 'spec_helper'
 # rubyzip is only used by the dashboard import/export feature, which is loaded
 # lazily (require 'zip' happens inside those methods, not at gem load). Keeping
 # it OUT of the runtime dependencies means consumers that only embed / read /
-# write (Neptune, Ready STA, Ready Apprentice) don't inherit the gem's rubyzip
-# >= 3 pin, which otherwise cascades roo/docx major upgrades on them (NEP-21211).
+# write don't inherit the gem's rubyzip >= 3 pin, which otherwise cascades
+# roo/docx major upgrades on them.
 RSpec.describe 'superset.gemspec dependencies' do
   let(:gemspec) do
     Gem::Specification.load(File.expand_path('../../superset.gemspec', __dir__))

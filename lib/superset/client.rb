@@ -4,8 +4,8 @@ module Superset
   class Client < Happi::Client
     include Credential::ApiUser
 
-    # Superset enforces CSRF on state-changing requests once WTF_CSRF_ENABLED is on
-    # (NEP-21211); GETs are never CSRF-checked. Bearer-token auth is not sufficient,
+    # Superset enforces CSRF on state-changing requests once WTF_CSRF_ENABLED is on;
+    # GETs are never CSRF-checked. Bearer-token auth is not sufficient,
     # so these verbs must carry an X-CSRFToken header (see #call / #csrf_token).
     CSRF_PROTECTED_METHODS = %i[post put patch delete].freeze
 
@@ -27,7 +27,7 @@ module Superset
     # All verbs funnel through Happi::Client#call. Before any state-changing request,
     # attach a CSRF token; fetching one also sets the Flask session cookie that the
     # token is validated against, which the cookie jar on this connection replays on
-    # the write. NEP-21211.
+    # the write.
     def call(method, url, params = {})
       set_csrf_token if CSRF_PROTECTED_METHODS.include?(method)
       super
@@ -63,7 +63,7 @@ module Superset
     #   * Referer — over HTTPS, Flask-WTF's WTF_CSRF_SSL_STRICT (default True) also
     #     requires a Referer matching the Superset host (same-origin check), else the
     #     write fails with "400 The referrer header is missing." Browsers send this
-    #     automatically; an API client must set it explicitly. NEP-21211.
+    #     automatically; an API client must set it explicitly.
     def set_csrf_token
       connection.headers['X-CSRFToken'] = csrf_token
       connection.headers['Referer'] = superset_host

@@ -55,8 +55,8 @@ module Superset
     end
 
     # The guest_token endpoint is CSRF-protected (it is NOT in Superset's CSRF
-    # exempt list), so this POST needs the same treatment as Client writes
-    # (NEP-21211): an X-CSRFToken bound to the session cookie, plus a same-origin
+    # exempt list), so this POST needs the same treatment as Client writes:
+    # an X-CSRFToken bound to the session cookie, plus a same-origin
     # Referer for WTF_CSRF_SSL_STRICT over HTTPS. The csrf_token GET also sets the
     # session cookie that the cookie jar replays on the POST.
     def response
