@@ -37,11 +37,17 @@ Gem::Specification.new do |spec|
   spec.add_dependency "json", ">= 2.0"
   spec.add_dependency "terminal-table", "~> 4.0"
   spec.add_dependency "require_all", ">= 3.0"
-  spec.add_dependency "rubyzip", ">= 3.0"
   spec.add_dependency "faraday", "~> 1.0"
   spec.add_dependency "faraday-multipart", "~> 1.0"
+  spec.add_dependency "faraday-cookie_jar", "~> 0.0.7"  # replay the Flask session cookie for CSRF
   spec.add_dependency "enumerate_it", ">= 1.7"
 
+  # rubyzip is only needed by the dashboard import/export feature, which lazily
+  # `require 'zip'` at call time. Kept as a dev dependency so those specs run here,
+  # but NOT a runtime dependency — consumers that don't import/export (embedders,
+  # read/write API clients) shouldn't inherit its rubyzip >= 3 pin.
+  # Apps that DO use import/export must declare rubyzip (>= 3.0) themselves.
+  spec.add_development_dependency "rubyzip", ">= 3.0"
   spec.add_development_dependency "dotenv", ">= 2.0"
   spec.add_development_dependency "rake", ">= 13.0"
   spec.add_development_dependency "rspec", ">= 3.0"
