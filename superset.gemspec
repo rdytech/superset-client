@@ -37,7 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "json", ">= 2.0"
   spec.add_dependency "terminal-table", "~> 4.0"
   spec.add_dependency "require_all", ">= 3.0"
-  spec.add_dependency "faraday", "~> 1.0"
+  spec.add_dependency "faraday", ">= 1", "< 3"
   spec.add_dependency "faraday-multipart", "~> 1.0"
   spec.add_dependency "faraday-cookie_jar", "~> 0.0.7"  # replay the Flask session cookie for CSRF
   spec.add_dependency "enumerate_it", ">= 1.7"
