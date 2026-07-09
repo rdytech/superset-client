@@ -3,7 +3,7 @@ module Superset
     class WarmUpCache < Superset::Request
 
       attr_reader :dashboard_id
-      
+
       def initialize(dashboard_id:)
         @dashboard_id = dashboard_id
       end
@@ -19,8 +19,8 @@ module Superset
           begin
             warm_up_dataset(dataset["datasource_name"], dataset["name"])
           rescue => e
-            Rollbar.error("Warm up cache failed for the dashboard #{dashboard_id.to_s} and for the dataset #{dataset["datasource_name"]} - #{e}") if defined?(Rollbar)
-          end 
+            logger.error("Warm up cache failed for dashboard #{dashboard_id} and dataset #{dataset["datasource_name"]} - #{e}\n#{e.backtrace.join("\n")}")
+          end
         end
       end
 
@@ -29,13 +29,17 @@ module Superset
       end
 
       private
-      
+
       def validate_dashboard_id
         raise InvalidParameterError, "dashboard_id must be present and must be an integer" unless dashboard_id.present? && dashboard_id.is_a?(Integer)
       end
 
       def fetch_dataset_details(dashboard_id)
         Superset::Dashboard::Datasets::List.new(dashboard_id: dashboard_id).datasets_details.map { |dataset| dataset['database'].slice('name').merge(dataset.slice('datasource_name'))}
+      end
+
+      def logger
+        @logger ||= Superset::Logger.new
       end
     end
   end
