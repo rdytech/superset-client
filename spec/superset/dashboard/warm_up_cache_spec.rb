@@ -44,12 +44,28 @@ RSpec.describe Superset::Dashboard::WarmUpCache do
       end
       let(:api_response) { "Datasets warmed up" }
       before do
-        allow(subject).to receive(:fetch_dataset_details).with(dashboard_id) { dataset_details } 
+        allow(subject).to receive(:fetch_dataset_details).with(dashboard_id) { dataset_details }
         allow(subject).to receive(:warm_up_dataset).and_return(api_response)
       end
       it 'warms up all the datasets' do
         subject.response
         expect(subject).to have_received(:warm_up_dataset).exactly(dataset_details.count).times
+      end
+    end
+
+    context 'when a dataset warm-up raises an error' do
+      let(:dataset_details) do
+        [{"name" => "db1", "datasource_name" => "ds_101"}]
+      end
+      let(:boom) { StandardError.new("boom") }
+
+      before do
+        allow(subject).to receive(:fetch_dataset_details).with(dashboard_id) { dataset_details }
+        allow(subject).to receive(:warm_up_dataset).and_raise(boom)
+      end
+
+      it 'propagates the error to the caller' do
+        expect { subject.response }.to raise_error(StandardError, "boom")
       end
     end
   end

@@ -52,11 +52,6 @@ RSpec.describe Superset::Dashboard::Datasets::List do
       it 'returns a single schemas' do
         expect(subject.schemas).to eq(['acme'])
       end
-
-      it 'does not raise a rollbar if there is 1 uniq schema' do
-        expect(Rollbar).to_not receive(:error)
-        subject.schemas
-      end
     end
   end
 

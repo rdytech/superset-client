@@ -4,7 +4,6 @@ require 'pry'
 require "faraday"
 require "happi"
 require "terminal-table"
-require "rollbar"
 require "enumerate_it"
 require "superset/credential/api_user"
 require "superset/credential/embedded_user"

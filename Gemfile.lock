@@ -14,7 +14,7 @@ GIT
 PATH
   remote: .
   specs:
-    superset (0.4.0)
+    superset (0.5.0)
       enumerate_it (>= 1.7)
       faraday (~> 1.0)
       faraday-cookie_jar (~> 0.0.7)
@@ -114,7 +114,6 @@ GEM
     regexp_parser (2.8.3)
     require_all (3.0.0)
     rexml (3.4.2)
-    rollbar (3.7.0)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
       rspec-expectations (~> 3.12.0)
@@ -161,7 +160,6 @@ DEPENDENCIES
   happi!
   pry (>= 0.14)
   rake (>= 13.0)
-  rollbar (>= 3.0)
   rspec (>= 3.0)
   rubocop (>= 1.0)
   rubyzip (>= 3.0)
