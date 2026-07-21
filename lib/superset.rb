@@ -4,6 +4,7 @@ require 'require_all'
 require 'terminal-table'
 require 'happi'
 require 'logger'
+require 'json'
 
 require_relative "superset/configuration"
 require_rel "superset/credential"
