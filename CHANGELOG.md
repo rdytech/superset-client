@@ -1,5 +1,14 @@
 ## Changelog
 
+## 0.5.0 - 2026-07-21
+
+* Decouple from Rollbar — remove the `Rollbar.error(...) if defined?(Rollbar)` call in `WarmUpCache`; exceptions now propagate to the caller so consumers' own error handling can react
+* Introduce configurable logger via `Superset.configure { |c| c.logger = ... }` — any object responding to `#info` and `#error` (default remains `log/superset-client.log`)
+* **Breaking:** `Superset::Dashboard::WarmUpCache.new(...).perform` now raises on per-dataset failures instead of swallowing them; wrap the call in your own `rescue` if you need the previous silent behavior
+* Remove unused `DuplicateDashboardLogger` module (dead code)
+* Drop `rollbar` dev dependency; drop `require "rollbar"` from `spec_helper.rb` and `bin/console`
+* Add explicit `require 'json'` (the gem uses `to_json` in 8+ places and was relying on rollbar to transitively load it)
+
 ## 0.4.0 - 2026-06-05
 
 * send X-CSRFToken (and replay the session cookie) on state-changing requests so writes work against a CSRF-protected Superset
