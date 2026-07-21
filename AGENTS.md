@@ -98,7 +98,7 @@ Common operations: `ct` (contains), `eq` (equals), `neq` (not equals), `rel_o_m`
 - `response` — raw (cached) HTTP response
 - `result` — extracts `response['result']`
 - Constructor filter params follow naming: `title_contains:`, `title_equals:`, etc.
-- Logging goes to `log/superset-client.log` via `Superset::Logger`
+- Logging goes through `Superset.logger`; by default writes to `log/superset-client.log`. Consumers can inject any `::Logger`-compatible object via `Superset.configure { |c| c.logger = your_logger }`.
 
 ### Console Helpers
 
