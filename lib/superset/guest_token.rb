@@ -75,7 +75,7 @@ module Superset
       @connection ||= Faraday.new(authenticator.superset_host) do |f|
         f.authorization :Bearer, access_token
         f.use :cookie_jar  # replay the Flask session cookie from the csrf_token GET on the POST
-        f.use FaradayMiddleware::ParseJson, content_type: 'application/json'
+        f.response :json, content_type: 'application/json'
         f.request :json
         f.adapter :net_http
       end
