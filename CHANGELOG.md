@@ -1,5 +1,12 @@
 ## Changelog
 
+## 0.5.1 - 2026-08-27
+
+* **Fix:** `Superset::Client` and `Superset::GuestToken` raised `NameError: uninitialized constant FaradayMiddleware::ParseJson` on every request. Both connections used `FaradayMiddleware::ParseJson`, but this gem has never declared or required `faraday_middleware` — the constant only reached the bundle transitively via happi, and happi 1.0.0 dropped it. Replaced with Faraday's own `f.response :json`, which is equivalent (same `content_type:` option, same `respond_to?(:to_str)` guard, same `Faraday::ParsingError` on bad bodies)
+* Raise the `faraday` floor from `~> 1.0` to `~> 1.10` — `Faraday::Response::Json` only ships from 1.10
+* Pin the development `happi` to v1.0.0 so `faraday_middleware` is absent from this gem's own bundle and CI catches any reintroduction
+* Add `#connection` specs to both classes asserting the handler stack, which the previous suite never exercised
+
 ## 0.5.0 - 2026-07-21
 
 * Decouple from Rollbar — remove the `Rollbar.error(...) if defined?(Rollbar)` call in `WarmUpCache`; exceptions now propagate to the caller so consumers' own error handling can react
