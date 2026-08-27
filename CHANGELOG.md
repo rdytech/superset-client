@@ -1,5 +1,10 @@
 ## Changelog
 
+## 0.5.2 - 2026-08-28
+
+* Add tag-triggered release workflow (`.github/workflows/release.yml`) that publishes to RubyGems.org via OIDC trusted publishing and to GitHub Packages via the Actions `GITHUB_TOKEN` — no long-lived credentials stored anywhere. Refuses to publish unless the pushed tag's commit is reachable from `develop`. See `RELEASING.md` for the release steps and one-time RubyGems.org Trusted Publisher setup
+* Loosen the `faraday` dependency from `~> 1.10` to `>= 1.10` so consumers aren't held back from newer Faraday releases
+
 ## 0.5.1 - 2026-08-27
 
 * **Fix:** `Superset::Client` and `Superset::GuestToken` raised `NameError: uninitialized constant FaradayMiddleware::ParseJson` on every request. Both connections used `FaradayMiddleware::ParseJson`, but this gem has never declared or required `faraday_middleware` — the constant only reached the bundle transitively via happi, and happi 1.0.0 dropped it. Replaced with Faraday's own `f.response :json`, which is equivalent (same `content_type:` option, same `respond_to?(:to_str)` guard, same `Faraday::ParsingError` on bad bodies)

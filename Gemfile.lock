@@ -12,9 +12,9 @@ GIT
 PATH
   remote: .
   specs:
-    superset (0.5.1)
+    superset (0.5.2)
       enumerate_it (>= 1.7)
-      faraday (~> 1.10)
+      faraday (>= 1.10)
       faraday-cookie_jar (~> 0.0.7)
       faraday-multipart (~> 1.0)
       json (>= 2.0)
