@@ -77,7 +77,7 @@ module Superset
       @connection ||= Faraday.new(superset_host) do |f|
         f.authorization :Bearer, access_token
         f.use :cookie_jar  # persist the Flask session cookie across the csrf_token GET and the write
-        f.use FaradayMiddleware::ParseJson, content_type: 'application/json'
+        f.response :json, content_type: 'application/json'
 
         if self.config.use_json
           f.request :json

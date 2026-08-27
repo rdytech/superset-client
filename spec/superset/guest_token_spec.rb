@@ -141,4 +141,30 @@ RSpec.describe Superset::GuestToken do
       end
     end
   end
+
+  # The connection block is only evaluated on the first request, so a middleware
+  # constant that no longer resolves surfaces as a runtime NameError rather than a
+  # load-time failure. FaradayMiddleware::ParseJson used to sit here and only ever
+  # reached the bundle transitively through happi; once happi dropped
+  # faraday_middleware, every guest token request raised.
+  describe '#connection' do
+    let(:handler_classes) { subject.send(:connection).builder.handlers.map(&:klass) }
+
+    before do
+      allow(subject).to receive(:authenticator)
+        .and_return(double(superset_host: 'https://superset.example.com', access_token: 'bearer'))
+    end
+
+    it 'builds without raising' do
+      expect { subject.send(:connection) }.not_to raise_error
+    end
+
+    it "parses JSON with Faraday's own response middleware" do
+      expect(handler_classes).to include(Faraday::Response::Json)
+    end
+
+    it 'registers no FaradayMiddleware handler' do
+      expect(handler_classes.select { |k| k.name.to_s.start_with?("FaradayMiddleware") }).to be_empty
+    end
+  end
 end
