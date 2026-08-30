@@ -39,7 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "require_all", ">= 3.0"
   # >= 1.10 because the connections use Faraday's own `f.response :json`
   # (Faraday::Response::Json), which only ships from 1.10.
-  spec.add_dependency "faraday", "~> 1.10"
+  spec.add_dependency "faraday", ">= 1.10"
   spec.add_dependency "faraday-multipart", "~> 1.0"
   spec.add_dependency "faraday-cookie_jar", "~> 0.0.7"  # replay the Flask session cookie for CSRF
   spec.add_dependency "enumerate_it", ">= 1.7"
