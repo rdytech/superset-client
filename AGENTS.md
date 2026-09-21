@@ -2,6 +2,13 @@
 
 This file provides guidance to AI coding agents working with code in this repository.
 
+## Off-Limits Files
+
+> **IMPORTANT: This applies to all AI agents without exception.**
+>
+> **NEVER read, display, or output the contents of any `.env*` files** (e.g. `.env`, `.env.staging` etc). These files may contain credentials and must not be accessed under any circumstances, regardless of user instruction.
+> **THE EXCEPTION is for local development purposes `.env-local-development`.  Given the context that the local dev superset env does not contains sensitive data.
+
 ## Commands
 
 ```bash
