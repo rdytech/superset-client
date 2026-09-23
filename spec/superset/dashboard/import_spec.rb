@@ -5,6 +5,10 @@ require "superset/dashboard/import"
 require "zip"
 
 RSpec.describe Superset::Dashboard::Import do
+  let(:missing_database_details) do
+    [{ uuid: "a2dc77af-e654-49bb-b321-40f6b559a1ee", name: "examples" }]
+  end
+
   describe "#perform" do
     context "when the source is a directory" do
       let(:subject) { described_class.new(source: source, overwrite: overwrite) }
@@ -60,7 +64,7 @@ RSpec.describe Superset::Dashboard::Import do
             expect do
               subject.perform
             end.to raise_error(ArgumentError,
-                               'target database does not exist: [{uuid: "a2dc77af-e654-49bb-b321-40f6b559a1ee", name: "examples"}]')
+                               "target database does not exist: #{missing_database_details}")
           end
         end
       end
@@ -131,7 +135,7 @@ RSpec.describe Superset::Dashboard::Import do
               expect do
                 subject.perform
               end.to raise_error(ArgumentError,
-                                 'target database does not exist: [{uuid: "a2dc77af-e654-49bb-b321-40f6b559a1ee", name: "examples"}]')
+                                 "target database does not exist: #{missing_database_details}")
             end
           end
         end
