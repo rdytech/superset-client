@@ -49,8 +49,7 @@ module Superset
         response.body
       end
 
-      puts "API Error: #{message}"  # display the error message for console debugging
-      # binding.pry                 # helpfull to debug the response
+      Superset.logger.error("API Error: #{message}")
 
       raise errors[response.status].new(message, response)  # message is not being surfaced from Happi correctly, :(
     end

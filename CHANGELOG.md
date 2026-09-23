@@ -13,6 +13,7 @@
 * Raise `required_ruby_version` from `>= 3` to `>= 3.2`. The old floor was never true: `Superset::Client` subclasses `Happi::Client`, and happi v1.0.0 requires ruby >= 3.2, so a bundle cannot resolve on 3.0 or 3.1. Nothing in `lib/` needs syntax newer than 3.0 — the floor is entirely happi's
 * Make eight specs ruby-version agnostic. They hardcoded ruby 3.4's `Hash#inspect` output (`"k" => v`, not `"k"=>v`), so the suite only passed on the one ruby the strings were pasted from — leaving the declared `>= 3.2` floor untested. Expectations are now derived from the same source data the code stringifies
 * Add `.github/workflows/ci.yml`, running the suite across ruby 3.2/3.3/3.4 and both ends of the declared faraday range (`gemfiles/faraday_1.gemfile`, `gemfiles/faraday_2.gemfile`). Buildkite already ran rspec on every PR, but against the committed `Gemfile.lock`, so CI only ever exercised faraday 1.10.3 — a single point inside the declared `>= 1.10` range, which is how 0.5.2 shipped a Faraday 2 break with a green build
+* **Fix:** `Superset::Client#raise_error` no longer `puts` to stdout on every failed API call. A library should not write to its consumer's console, and the message is already carried by the raised exception; it now goes to `Superset.logger` (configurable since 0.5.0). The dead `binding.pry` comment beside it is gone, and `#raise_error` has specs for the first time
 
 ## 0.5.2 - 2026-08-28
 

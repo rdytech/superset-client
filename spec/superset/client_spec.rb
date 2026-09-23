@@ -84,4 +84,41 @@ RSpec.describe Superset::Client, type: :service do
       expect(handler_classes.select { |k| k.name.to_s.start_with?("FaradayMiddleware") }).to be_empty
     end
   end
+
+  describe "#raise_error" do
+    let(:logger) { instance_double(::Logger, info: nil, error: nil) }
+    let(:response) { double(status: 404, body: body) }
+
+    before { Superset.configure { |config| config.logger = logger } }
+    after { Superset.configure { |config| config.logger = nil } }
+
+    context "when the body carries errors" do
+      let(:body) { { "errors" => [{ "message" => "Dashboard not found." }] } }
+
+      it "raises the error mapped to the response status" do
+        expect { subject.raise_error(response) }.to raise_error(Happi::Error::NotFound)
+      end
+
+      it "logs the error rather than printing it to stdout" do
+        expect(logger).to receive(:error).with("API Error: #{body['errors']}")
+
+        expect { subject.raise_error(response) }.to raise_error(Happi::Error::NotFound)
+      end
+
+      it "writes nothing to stdout" do
+        expect { expect { subject.raise_error(response) }.to raise_error(Happi::Error::NotFound) }
+          .not_to output.to_stdout
+      end
+    end
+
+    context "when the body carries no errors key" do
+      let(:body) { { "msg" => "Token has expired" } }
+
+      it "falls back to the whole body" do
+        expect(logger).to receive(:error).with("API Error: #{body}")
+
+        expect { subject.raise_error(response) }.to raise_error(Happi::Error::NotFound)
+      end
+    end
+  end
 end
