@@ -25,7 +25,15 @@ rubocop
 
 # Run specs + rubocop together
 rake
+
+# Run the suite against a specific end of the declared faraday range
+# (CI runs both; the gemspec allows faraday >= 1.10)
+BUNDLE_GEMFILE=gemfiles/faraday_1.gemfile bundle exec rspec
+BUNDLE_GEMFILE=gemfiles/faraday_2.gemfile bundle exec rspec
 ```
+
+`Gemfile.lock` is deliberately not tracked — this is a library, and a committed
+lockfile hides breakage elsewhere in the declared dependency range.
 
 Docker equivalents: prefix commands with `docker-compose run --rm app`.
 
