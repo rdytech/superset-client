@@ -7,6 +7,7 @@
 * Use `Faraday::Multipart::FilePart` instead of `Faraday::UploadIO` in `Dashboard::Import#payload`. Not a live break (faraday-multipart 1.x still aliases `UploadIO` to the same class once loaded), but FilePart is the maintained name and does not depend on that legacy alias
 * Add `Dashboard::Import#payload` specs. Every existing import example stubbed `#response`, so `#payload` had never executed under test
 * **Fix:** `require 'ostruct'` in `Dashboard::List` and `Services::DashboardLoader`. Both use `OpenStruct` but it only ever loaded transitively via activesupport <= 7.1; on activesupport 8.x the gem failed to load at all. Also declared as a gemspec dependency, since ostruct becomes a bundled gem in Ruby 3.5
+* Stop tracking `Gemfile.lock`. This is a library; the committed lockfile pinned faraday 1.10.3 and is the direct reason the widened constraint was never exercised locally
 
 ## 0.5.2 - 2026-08-28
 
