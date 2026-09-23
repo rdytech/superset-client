@@ -8,6 +8,7 @@
 * Add `Dashboard::Import#payload` specs. Every existing import example stubbed `#response`, so `#payload` had never executed under test
 * **Fix:** `require 'ostruct'` in `Dashboard::List` and `Services::DashboardLoader`. Both use `OpenStruct` but it only ever loaded transitively via activesupport <= 7.1; on activesupport 8.x the gem failed to load at all. Also declared as a gemspec dependency, since ostruct becomes a bundled gem in Ruby 3.5
 * Stop tracking `Gemfile.lock`. This is a library; the committed lockfile pinned faraday 1.10.3 and is the direct reason the widened constraint was never exercised locally
+* **Fix:** declare `happi` (`~> 1.0`) as a runtime dependency in the gemspec. `Superset::Client` subclasses `Happi::Client`, but happi was declared only in the `Gemfile` as a git ref — so the published gem listed no happi at all and raised `NameError` on first require for anyone installing it from a package host. happi 1.0.0 is on RubyGems and is byte-identical to the git tag this gem was developed against; the `Gemfile` git pin is now redundant and has been removed
 
 ## 0.5.2 - 2026-08-28
 
