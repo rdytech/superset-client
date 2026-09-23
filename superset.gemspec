@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
     "lib"
   ]
 
+  spec.add_dependency "activesupport", ">= 7.1"
   spec.add_dependency "happi", "~> 1.0"
   spec.add_dependency "json", ">= 2.0"
   spec.add_dependency "ostruct", ">= 0.5"
