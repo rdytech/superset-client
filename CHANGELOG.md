@@ -14,6 +14,8 @@
 * Make eight specs ruby-version agnostic. They hardcoded ruby 3.4's `Hash#inspect` output (`"k" => v`, not `"k"=>v`), so the suite only passed on the one ruby the strings were pasted from — leaving the declared `>= 3.2` floor untested. Expectations are now derived from the same source data the code stringifies
 * Add `.github/workflows/ci.yml`, running the suite across ruby 3.2/3.3/3.4 and both ends of the declared faraday range (`gemfiles/faraday_1.gemfile`, `gemfiles/faraday_2.gemfile`). Buildkite already ran rspec on every PR, but against the committed `Gemfile.lock`, so CI only ever exercised faraday 1.10.3 — a single point inside the declared `>= 1.10` range, which is how 0.5.2 shipped a Faraday 2 break with a green build
 * **Fix:** `Superset::Client#raise_error` no longer `puts` to stdout on every failed API call. A library should not write to its consumer's console, and the message is already carried by the raised exception; it now goes to `Superset.logger` (configurable since 0.5.0). The dead `binding.pry` comment beside it is gone, and `#raise_error` has specs for the first time
+* Populate gem metadata (`homepage_uri`, `source_code_uri`, `changelog_uri`, `bug_tracker_uri`, `documentation_uri`, `rubygems_mfa_required`) — these were all commented out, so the rubygems.org page showed no links
+* Stop shipping development scaffolding in the packaged gem. Installs previously included `Dockerfile`, `docker-compose*.yml`, `.buildkite/`, `.github/`, `gemfiles/`, `Rakefile`, `AGENTS.md`, `CLAUDE.md`, `RELEASING.md` and `env.sample`; the gem now contains `lib/`, the docs, README, CHANGELOG and LICENSE
 
 ## 0.5.2 - 2026-08-28
 
