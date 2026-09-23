@@ -3,6 +3,7 @@
 require 'require_all'
 require 'terminal-table'
 require 'happi'
+require 'enumerate_it'
 require 'logger'
 require 'json'
 
