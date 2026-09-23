@@ -35,6 +35,7 @@ Gem::Specification.new do |spec|
   ]
 
   spec.add_dependency "json", ">= 2.0"
+  spec.add_dependency "ostruct", ">= 0.5"
   spec.add_dependency "terminal-table", "~> 4.0"
   spec.add_dependency "require_all", ">= 3.0"
   # >= 1.10 because the connections use Faraday's own `f.response :json`

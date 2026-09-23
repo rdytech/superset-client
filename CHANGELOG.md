@@ -6,6 +6,7 @@
 * **Fix:** `require 'faraday/multipart'` in `Superset::Client` and `Superset::Dashboard::Import`. Faraday stopped autoloading faraday-multipart in 2.0, so `f.request :multipart` raised ":multipart is not registered on Faraday::Request"; it resolved only because happi happened to require it first — the same transitive-dependency trap as the `FaradayMiddleware::ParseJson` bug in 0.5.1. This gem declares faraday-multipart itself, so it now requires it itself
 * Use `Faraday::Multipart::FilePart` instead of `Faraday::UploadIO` in `Dashboard::Import#payload`. Not a live break (faraday-multipart 1.x still aliases `UploadIO` to the same class once loaded), but FilePart is the maintained name and does not depend on that legacy alias
 * Add `Dashboard::Import#payload` specs. Every existing import example stubbed `#response`, so `#payload` had never executed under test
+* **Fix:** `require 'ostruct'` in `Dashboard::List` and `Services::DashboardLoader`. Both use `OpenStruct` but it only ever loaded transitively via activesupport <= 7.1; on activesupport 8.x the gem failed to load at all. Also declared as a gemspec dependency, since ostruct becomes a bundled gem in Ruby 3.5
 
 ## 0.5.2 - 2026-08-28
 
