@@ -1,5 +1,12 @@
 ## Changelog
 
+## 0.5.4 - 2026-09-23
+
+* **Fix:** `require 'enumerate_it'` in `lib/superset.rb`. `require "superset"` raised `RequireAll::LoadError: ... uninitialized constant EnumerateIt` — `ObjectType` (in `lib/superset/enumerations/object_type.rb`) subclasses `EnumerateIt::Base`, and enumerate_it has been a declared gemspec dependency since it was introduced, but nothing ever required it. **0.5.3 installs but cannot be loaded**; upgrade straight to 0.5.4
+* **Fix the reason it was missed:** `spec/spec_helper.rb` required the gem's own dependencies (happi, enumerate_it, faraday, terminal-table) and then loaded `lib/` by globbing `Dir["./lib/**/*.rb"]`, so the suite supplied the requires that `lib/` was missing and never loaded `lib/superset.rb` at all. 341 examples passed against a gem that could not be required. spec_helper now does only `require "superset"`, exactly as a consumer does
+* Add `spec/superset_load_spec.rb`, asserting the public surface resolves from a plain `require "superset"` along with the activesupport, ostruct and enumerate_it core extensions — each of which has caused a load-time `NameError` at some point
+* Add a `package` CI job that builds the gem, installs it standalone and requires it from outside the repo. The spec suite runs with `lib/` on the load path, so it cannot catch a file excluded from `spec.files` or a dependency missing from the gemspec
+
 ## 0.5.3 - 2026-09-23
 
 * **Fix:** make the gem actually work on Faraday 2. 0.5.2 loosened the `faraday` constraint from `~> 1.10` to `>= 1.10` but adapted none of the code, so any consumer resolving Faraday 2 hit `NoMethodError: undefined method 'authorization' for an instance of Faraday::Connection` on every request through `Superset::Client` and `Superset::GuestToken`. Replaced `f.authorization :Bearer, token` with `f.request :authorization, 'Bearer', token`, which works on both Faraday 1.10+ and 2.x
