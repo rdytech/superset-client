@@ -10,6 +10,7 @@
 * Stop tracking `Gemfile.lock`. This is a library; the committed lockfile pinned faraday 1.10.3 and is the direct reason the widened constraint was never exercised locally
 * **Fix:** declare `happi` (`~> 1.0`) as a runtime dependency in the gemspec. `Superset::Client` subclasses `Happi::Client`, but happi was declared only in the `Gemfile` as a git ref — so the published gem listed no happi at all and raised `NameError` on first require for anyone installing it from a package host. happi 1.0.0 is on RubyGems and is byte-identical to the git tag this gem was developed against; the `Gemfile` git pin is now redundant and has been removed
 * **Fix:** declare and require `activesupport` (`>= 7.1`). `lib/` calls it in ~96 places — `present?`, `blank?`, `with_indifferent_access`, `deep_symbolize_keys`, and `humanize` in `Display#table` — but the gem neither declared nor required it; it loaded only because happi depends on activesupport. Requires the four core extensions actually used rather than `active_support/all`
+* Raise `required_ruby_version` from `>= 3` to `>= 3.2`. The old floor was never true: `Superset::Client` subclasses `Happi::Client`, and happi v1.0.0 requires ruby >= 3.2, so a bundle cannot resolve on 3.0 or 3.1. Nothing in `lib/` needs syntax newer than 3.0 — the floor is entirely happi's
 
 ## 0.5.2 - 2026-08-28
 
