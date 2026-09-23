@@ -47,3 +47,30 @@ jobs:
       # rspec only — `rake` also runs rubocop, which has thousands of pre-existing
       # offenses and would make CI red on day one.
       - run: bundle exec rspec
+
+  package:
+    name: packaged gem loads
+    runs-on: ubuntu-latest
+
+    # The spec suite runs against lib/ on the load path, so it cannot catch a file
+    # wrongly excluded from `spec.files`, or a dependency missing from the gemspec.
+    # This builds the gem, installs it on its own, and requires it from outside the
+    # repo — the first thing a consumer does, and what 0.5.3 failed at.
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+
+      - name: Build
+        run: gem build superset.gemspec
+
+      - name: Install the built gem, resolving its declared dependencies
+        run: gem install --no-document ./superset-*.gem
+
+      - name: Require it from outside the repo
+        run: cd "$RUNNER_TEMP" && ruby -e 'require "superset"; puts Superset::VERSION'
