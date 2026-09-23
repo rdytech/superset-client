@@ -5,6 +5,10 @@ require "superset/dashboard/import"
 require "zip"
 
 RSpec.describe Superset::Dashboard::Import do
+  let(:missing_database_details) do
+    [{ uuid: "a2dc77af-e654-49bb-b321-40f6b559a1ee", name: "examples" }]
+  end
+
   describe "#perform" do
     context "when the source is a directory" do
       let(:subject) { described_class.new(source: source, overwrite: overwrite) }
@@ -60,7 +64,7 @@ RSpec.describe Superset::Dashboard::Import do
             expect do
               subject.perform
             end.to raise_error(ArgumentError,
-                               'target database does not exist: [{uuid: "a2dc77af-e654-49bb-b321-40f6b559a1ee", name: "examples"}]')
+                               "target database does not exist: #{missing_database_details}")
           end
         end
       end
@@ -131,7 +135,7 @@ RSpec.describe Superset::Dashboard::Import do
               expect do
                 subject.perform
               end.to raise_error(ArgumentError,
-                                 'target database does not exist: [{uuid: "a2dc77af-e654-49bb-b321-40f6b559a1ee", name: "examples"}]')
+                                 "target database does not exist: #{missing_database_details}")
             end
           end
         end
@@ -280,6 +284,41 @@ RSpec.describe Superset::Dashboard::Import do
       it "creates a zip file path using the source directory" do
         expected_path = "#{source}/dashboard_import_#{subject.send(:timestamp)}.zip"
         expect(subject.send(:new_zip_file)).to eq(expected_path)
+      end
+    end
+  end
+
+  describe "#payload" do
+    let(:subject) { described_class.new(source: source, overwrite: overwrite) }
+    let(:source) { "spec/fixtures/dashboard_18_export_20240322.zip" }
+    let(:overwrite) { true }
+    let(:payload) { subject.send(:payload) }
+
+    it "builds without raising" do
+      expect { payload }.not_to raise_error
+    end
+
+    it "wraps the zip in a multipart file part" do
+      expect(payload[:formData]).to be_a(Faraday::Multipart::FilePart)
+    end
+
+    it "sends the zip as application/zip" do
+      expect(payload[:formData].content_type).to eq("application/zip")
+    end
+
+    it "sends the source zip file" do
+      expect(payload[:formData].local_path).to end_with("dashboard_18_export_20240322.zip")
+    end
+
+    it "stringifies overwrite" do
+      expect(payload[:overwrite]).to eq("true")
+    end
+
+    context "when overwrite is false" do
+      let(:overwrite) { false }
+
+      it "stringifies overwrite" do
+        expect(payload[:overwrite]).to eq("false")
       end
     end
   end

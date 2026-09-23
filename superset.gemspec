@@ -11,20 +11,28 @@ Gem::Specification.new do |spec|
   spec.summary = "A Ruby Client for Apache Superset API"
   spec.homepage = "https://github.com/rdytech/superset-client"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3"
+  spec.required_ruby_version = ">= 3.2"
 
   #spec.metadata["allowed_push_host"] = ""
 
-  #spec.metadata["homepage_uri"] = spec.homepage
-  #spec.metadata["source_code_uri"] = ""
-  #spec.metadata["changelog_uri"] = ""
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = "#{spec.homepage}/tree/develop"
+  spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/develop/CHANGELOG.md"
+  spec.metadata["bug_tracker_uri"] = "#{spec.homepage}/issues"
+  spec.metadata["documentation_uri"] = "#{spec.homepage}/blob/develop/README.md"
+  spec.metadata["rubygems_mfa_required"] = "true"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
   spec.files = Dir.chdir(__dir__) do
     `git ls-files -z`.split("\x0").reject do |f|
       (File.expand_path(f) == __FILE__) ||
-        f.start_with?(*%w[bin/ test/ spec/ features/ .git appveyor Gemfile])
+        f.start_with?(*%w[
+          bin/ test/ spec/ features/ gemfiles/ doc/development
+          .git .github .buildkite .rspec .rubocop .ruby-version
+          appveyor Gemfile Dockerfile docker-compose Rakefile log/
+          AGENTS.md CLAUDE.md RELEASING.md env.sample
+        ])
     end
   end
 
@@ -34,7 +42,10 @@ Gem::Specification.new do |spec|
     "lib"
   ]
 
+  spec.add_dependency "activesupport", ">= 7.1"
+  spec.add_dependency "happi", "~> 1.0"
   spec.add_dependency "json", ">= 2.0"
+  spec.add_dependency "ostruct", ">= 0.5"
   spec.add_dependency "terminal-table", "~> 4.0"
   spec.add_dependency "require_all", ">= 3.0"
   # >= 1.10 because the connections use Faraday's own `f.response :json`

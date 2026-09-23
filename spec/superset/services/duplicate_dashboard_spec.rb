@@ -349,10 +349,11 @@ RSpec.describe Superset::Services::DuplicateDashboard do
           # additional filter checks for validations on unpermitted_filter_dataset_ids
           expect(Superset::Dataset::Get).to receive(:new).with(invalid_filter_dataset_id).and_return(double(schema: invalid_filter_dataset_schema))
 
+          expected_ids = [{ filter_dataset_id: invalid_filter_dataset_id, filter_schema: invalid_filter_dataset_schema }]
+
           expect { subject.perform }.to raise_error(Superset::Request::ValidationError,
             "One or more source dashboard filters point to a different schema than the dashboard charts. " \
-            "Identified Unpermittied Filter Dataset Ids are " \
-            "[{filter_dataset_id: #{invalid_filter_dataset_id}, filter_schema: \"#{invalid_filter_dataset_schema}\"}]")
+            "Identified Unpermittied Filter Dataset Ids are #{expected_ids}")
         end
       end
 
@@ -369,11 +370,14 @@ RSpec.describe Superset::Services::DuplicateDashboard do
           expect(Superset::Dataset::Get).to receive(:new).with(invalid_filter_dataset_id).and_return(double(schema: invalid_filter_dataset_schema))
           expect(Superset::Dataset::Get).to receive(:new).with(invalid_filter_dataset_id_2).and_return(double(schema: invalid_filter_dataset_schema_2))
 
+          expected_ids = [
+            { filter_dataset_id: invalid_filter_dataset_id, filter_schema: invalid_filter_dataset_schema },
+            { filter_dataset_id: invalid_filter_dataset_id_2, filter_schema: invalid_filter_dataset_schema_2 }
+          ]
+
           expect { subject.perform }.to raise_error(Superset::Request::ValidationError,
             "One or more source dashboard filters point to a different schema than the dashboard charts. " \
-            "Identified Unpermittied Filter Dataset Ids are " \
-            "[{filter_dataset_id: #{invalid_filter_dataset_id}, filter_schema: \"#{invalid_filter_dataset_schema}\"}, " \
-            "{filter_dataset_id: #{invalid_filter_dataset_id_2}, filter_schema: \"#{invalid_filter_dataset_schema_2}\"}]")
+            "Identified Unpermittied Filter Dataset Ids are #{expected_ids}")
         end
       end
 

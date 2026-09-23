@@ -24,23 +24,25 @@ RSpec.describe Superset::Security::PermissionsResources::List do
     allow(subject).to receive(:response).and_return(response)
   end
 
-  describe '#list' do
-    specify do
-      expect(subject.table.to_s).to eq(
-        <<~TABLE.chomp
-          +-------------------------------------------------------------+
-          |       Superset::Security::PermissionsResources::List        |
-          +----+-------------------------+------------------------------+
-          | Id | Permission              | View menu                    |
-          +----+-------------------------+------------------------------+
-          | 1  | {"name" => "can_read"}  | {"name" => "SavedQuery"}     |
-          | 2  | {"name" => "can_write"} | {"name" => "SavedQuery"}     |
-          | 3  | {"name" => "can_read"}  | {"name" => "CssTemplate"}    |
-          | 4  | {"name" => "can_write"} | {"name" => "CssTemplate"}    |
-          | 5  | {"name" => "can_read"}  | {"name" => "ReportSchedule"} |
-          +----+-------------------------+------------------------------+
-        TABLE
+  describe '#table' do
+    specify 'titles the table with the class name' do
+      expect(subject.table.title).to eq('Superset::Security::PermissionsResources::List')
+    end
+
+    specify 'humanizes list_attributes into headings' do
+      expect(subject.table.headings.first.cells.map(&:value)).to eq(%w[Id Permission View\ menu])
+    end
+
+    specify 'stringifies each list_attribute into a row' do
+      expect(subject.rows).to eq(
+        response[:result].map do |permission|
+          [permission[:id].to_s, permission[:permission].to_s, permission[:view_menu].to_s]
+        end
       )
+    end
+
+    specify 'renders' do
+      expect { subject.table.to_s }.not_to raise_error
     end
   end
 end

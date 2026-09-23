@@ -20,6 +20,8 @@
 # Superset::Dashboard::Import.new(source: '/tmp/dashboard').perform
 #
 
+require 'faraday/multipart'
+
 module Superset
   module Dashboard
     class Import < Request
@@ -58,7 +60,7 @@ module Superset
 
       def payload
         {
-          formData: Faraday::UploadIO.new(source_zip_file, "application/zip"),
+          formData: Faraday::Multipart::FilePart.new(source_zip_file, "application/zip"),
           overwrite: overwrite.to_s
         }
       end

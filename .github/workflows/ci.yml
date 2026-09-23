@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  spec:
+    name: rspec (ruby ${{ matrix.ruby }}, ${{ matrix.gemfile }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # The gemspec declares `faraday >= 1.10`, so both ends of that range are
+        # tested. 0.5.2 widened the constraint without testing past the floor and
+        # shipped a gem that raised on every request under Faraday 2.
+        #
+        # Ruby covers the whole declared range: the gemspec says
+        # `required_ruby_version >= 3.2` (happi v1.0.0's floor), so 3.2 is tested.
+        ruby: ["3.2", "3.3", "3.4"]
+        gemfile:
+          - gemfiles/faraday_1.gemfile
+          - gemfiles/faraday_2.gemfile
+
+    env:
+      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Report resolved dependency versions
+        run: bundle list
+
+      # rspec only — `rake` also runs rubocop, which has thousands of pre-existing
+      # offenses and would make CI red on day one.
+      - run: bundle exec rspec

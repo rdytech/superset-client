@@ -20,3 +20,6 @@ log/superset-client.log
 
 # ignore local ./tmp directory
 ./tmp/
+
+Gemfile.lock
+gemfiles/*.lock

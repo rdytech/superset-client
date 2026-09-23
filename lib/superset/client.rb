@@ -1,3 +1,4 @@
+require 'faraday/multipart'
 require 'faraday-cookie_jar'
 
 module Superset
@@ -48,8 +49,7 @@ module Superset
         response.body
       end
 
-      puts "API Error: #{message}"  # display the error message for console debugging
-      # binding.pry                 # helpfull to debug the response
+      Superset.logger.error("API Error: #{message}")
 
       raise errors[response.status].new(message, response)  # message is not being surfaced from Happi correctly, :(
     end
@@ -75,7 +75,7 @@ module Superset
 
     def connection
       @connection ||= Faraday.new(superset_host) do |f|
-        f.authorization :Bearer, access_token
+        f.request :authorization, 'Bearer', access_token
         f.use :cookie_jar  # persist the Flask session cookie across the csrf_token GET and the write
         f.response :json, content_type: 'application/json'
 
