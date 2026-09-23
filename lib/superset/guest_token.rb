@@ -73,7 +73,7 @@ module Superset
 
     def connection
       @connection ||= Faraday.new(authenticator.superset_host) do |f|
-        f.authorization :Bearer, access_token
+        f.request :authorization, 'Bearer', access_token
         f.use :cookie_jar  # replay the Flask session cookie from the csrf_token GET on the POST
         f.response :json, content_type: 'application/json'
         f.request :json

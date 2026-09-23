@@ -1,5 +1,11 @@
 ## Changelog
 
+## 0.5.3 - 2026-09-23
+
+* **Fix:** make the gem actually work on Faraday 2. 0.5.2 loosened the `faraday` constraint from `~> 1.10` to `>= 1.10` but adapted none of the code, so any consumer resolving Faraday 2 hit `NoMethodError: undefined method 'authorization' for an instance of Faraday::Connection` on every request through `Superset::Client` and `Superset::GuestToken`. Replaced `f.authorization :Bearer, token` with `f.request :authorization, 'Bearer', token`, which works on both Faraday 1.10+ and 2.x
+* **Fix:** `require 'faraday/multipart'` in `Superset::Client` and `Superset::Dashboard::Import`. Faraday stopped autoloading faraday-multipart in 2.0, so `f.request :multipart` raised ":multipart is not registered on Faraday::Request"; it resolved only because happi happened to require it first — the same transitive-dependency trap as the `FaradayMiddleware::ParseJson` bug in 0.5.1. This gem declares faraday-multipart itself, so it now requires it itself
+* Use `Faraday::Multipart::FilePart` instead of `Faraday::UploadIO` in `Dashboard::Import#payload`. Not a live break (faraday-multipart 1.x still aliases `UploadIO` to the same class once loaded), but FilePart is the maintained name and does not depend on that legacy alias
+
 ## 0.5.2 - 2026-08-28
 
 * Add tag-triggered release workflow (`.github/workflows/release.yml`) that publishes to RubyGems.org via OIDC trusted publishing and to GitHub Packages via the Actions `GITHUB_TOKEN` — no long-lived credentials stored anywhere. Refuses to publish unless the pushed tag's commit is reachable from `develop`. See `RELEASING.md` for the release steps and one-time RubyGems.org Trusted Publisher setup
