@@ -1,18 +1,15 @@
 # frozen_string_literal: true
 
 require 'pry'
-require "faraday"
-require "happi"
-require "terminal-table"
-require "rollbar"
-require "enumerate_it"
-require "superset/credential/api_user"
-require "superset/credential/embedded_user"
-require "superset/client"
-require "superset/display"
-require "superset/request"
 
-Dir["./lib/**/*.rb"].each { |f| require f }
+# Load the gem exactly as a consumer does, through its own entry point.
+#
+# This used to require the gem's dependencies here (happi, enumerate_it, faraday,
+# terminal-table) and then glob `Dir["./lib/**/*.rb"]`. Both hid real bugs: the
+# suite supplied requires that lib/ was missing, and it never loaded lib/superset.rb
+# at all. 0.5.3 shipped unloadable — `uninitialized constant EnumerateIt` — with the
+# whole suite green. Nothing may be required here that the gem should require itself.
+require "superset"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

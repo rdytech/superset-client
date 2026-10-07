@@ -1,7 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe Superset::Security::User::List do
-  subject { described_class.new }
+  subject { described_class.new( **params ) }
+  let(:params) { {} }
   let(:superset_host) { 'https://test.superset.host.com' }
   let(:result) do
     [{
@@ -42,20 +43,20 @@ RSpec.describe Superset::Security::User::List do
   end
 
   describe '#list' do
-    before { stub_const("Superset::Request::PAGE_SIZE", "3") }
+    let(:params) { { page_size: 3 } }
 
     specify do
       expect(subject.table.to_s).to eq(
-       "+----+------------+-----------+----------------------+--------+-------------+----------------------------+\n" +
-       "|                       45 Matching Users for Host: https://test.superset.host.com                       |\n" +
-       "|                                3 Users listed with: page:0,page_size:3                                 |\n" +
-       "+----+------------+-----------+----------------------+--------+-------------+----------------------------+\n" +
-       "| Id | First name | Last name | Email                | Active | Login count | Last login                 |\n" +
-       "+----+------------+-----------+----------------------+--------+-------------+----------------------------+\n" +
-       "| 99 | Ben        | Barrow    | ben.barrow@mymail.io | true   | 7           | 2023-11-07T01:20:52.690091 |\n" +
-       "| 44 | Em         | Vier      | em.vier@mymail.io    | true   | 2           | 2023-09-12T07:36:07.115849 |\n" +
-       "| 55 | Raf        | Zar       | raf.zar@mymail.io    | true   | 2           | 2023-10-27T03:32:44.185404 |\n" +
-       "+----+------------+-----------+----------------------+--------+-------------+----------------------------+"
+        "+--------------------------------------------------------------------------------------------------------+\n" +
+        "|                       45 Matching Users for Host: https://test.superset.host.com                       |\n" +
+        "|                                3 Users listed with: page:0,page_size:3                                 |\n" +
+        "+----+------------+-----------+----------------------+--------+-------------+----------------------------+\n" +
+        "| Id | First name | Last name | Email                | Active | Login count | Last login                 |\n" +
+        "+----+------------+-----------+----------------------+--------+-------------+----------------------------+\n" +
+        "| 99 | Ben        | Barrow    | ben.barrow@mymail.io | true   | 7           | 2023-11-07T01:20:52.690091 |\n" +
+        "| 44 | Em         | Vier      | em.vier@mymail.io    | true   | 2           | 2023-09-12T07:36:07.115849 |\n" +
+        "| 55 | Raf        | Zar       | raf.zar@mymail.io    | true   | 2           | 2023-10-27T03:32:44.185404 |\n" +
+        "+----+------------+-----------+----------------------+--------+-------------+----------------------------+"
       )
     end
   end

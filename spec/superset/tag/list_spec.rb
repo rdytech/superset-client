@@ -34,4 +34,30 @@ RSpec.describe Superset::Tag::List do
       )
     end
   end
+
+  describe '#query_params' do
+    context 'for pagination' do
+      context 'with defaults' do
+        specify do
+          expect(subject.query_params).to eq("page:0,page_size:100")
+        end
+      end
+
+      context 'with name_contains filters' do
+        subject { described_class.new(name_contains: 'acme') }
+
+        specify do
+          expect(subject.query_params).to eq("filters:!((col:name,opr:ct,value:'acme')),page:0,page_size:100")
+        end
+      end
+
+      context 'with name_equals filters' do
+        subject { described_class.new(name_equals: 'acme') }
+
+        specify do
+          expect(subject.query_params).to eq("filters:!((col:name,opr:eq,value:'acme')),page:0,page_size:100")
+        end
+      end
+    end
+  end
 end

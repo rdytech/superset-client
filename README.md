@@ -22,11 +22,14 @@ Build, bundle and open a ruby console
 docker-compose build
 docker-compose run --rm app bundle install
 docker-compose run --rm app bin/console
+
+# note .. windows users may need to call ruby the bin/console file
+docker-compose run --rm app ruby bin/console
 ```
 
-## Setup Locally ( no docker ) 
+## Setup Locally ( no docker )
 
-Requires Ruby >= 2.6.0 
+Requires Ruby >= 3
 
 Bundle install and open a ruby console.
 
@@ -37,9 +40,26 @@ bin/console
 
 ## Including in a Ruby app
 
-Add to your Gemfile `gem 'superset'`  
+Add to your Gemfile `gem 'superset'`
 And then execute: `bundle install`  
 Or install it yourself as `gem install superset`
+
+## Configuration
+
+The gem writes logs (dashboard duplication progress, API failures, etc.) through `Superset.logger`. By default it writes to `log/superset-client.log` relative to the working directory.
+
+To route logs elsewhere — for example, STDOUT for a background worker, a null sink for tests, or your application's existing logger — configure it once at boot:
+
+```ruby
+require 'logger'
+require 'superset'
+
+Superset.configure do |config|
+  config.logger = ::Logger.new($stdout)  # or any object responding to #info(msg) and #error(msg)
+end
+```
+
+Any object that responds to `#info(msg)` and `#error(msg)` will work — a stdlib `::Logger`, a `SemanticLogger` instance, a framework-provided logger, or a custom wrapper that forwards to your error-reporting service. The gem does not assume any particular framework.
 
 ## Run specs
 

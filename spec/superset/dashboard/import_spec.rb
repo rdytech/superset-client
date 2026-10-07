@@ -5,6 +5,10 @@ require "superset/dashboard/import"
 require "zip"
 
 RSpec.describe Superset::Dashboard::Import do
+  let(:missing_database_details) do
+    [{ uuid: "a2dc77af-e654-49bb-b321-40f6b559a1ee", name: "examples" }]
+  end
+
   describe "#perform" do
     context "when the source is a directory" do
       let(:subject) { described_class.new(source: source, overwrite: overwrite) }
@@ -17,7 +21,7 @@ RSpec.describe Superset::Dashboard::Import do
           zip_file.each do |f|
             fpath = File.join(tmp_dir, f.name)
             FileUtils.mkdir_p(File.dirname(fpath))
-            zip_file.extract(f, fpath) unless File.exist?(fpath)
+            zip_file.extract(f, f.name, destination_directory: tmp_dir) { true }
           end
         end
         "#{tmp_dir}/dashboard_export_20240321T214117"
@@ -60,7 +64,7 @@ RSpec.describe Superset::Dashboard::Import do
             expect do
               subject.perform
             end.to raise_error(ArgumentError,
-                               "target database does not exist: [{:uuid=>\"a2dc77af-e654-49bb-b321-40f6b559a1ee\", :name=>\"examples\"}]")
+                               "target database does not exist: #{missing_database_details}")
           end
         end
       end
@@ -131,7 +135,7 @@ RSpec.describe Superset::Dashboard::Import do
               expect do
                 subject.perform
               end.to raise_error(ArgumentError,
-                                 "target database does not exist: [{:uuid=>\"a2dc77af-e654-49bb-b321-40f6b559a1ee\", :name=>\"examples\"}]")
+                                 "target database does not exist: #{missing_database_details}")
             end
           end
         end
@@ -177,7 +181,7 @@ RSpec.describe Superset::Dashboard::Import do
 
         # Mock Zip::File.open to prevent actual zip creation
         zip_file_double = double("Zip::File")
-        allow(Zip::File).to receive(:open).with(new_zip_file, Zip::File::CREATE).and_yield(zip_file_double)
+        allow(Zip::File).to receive(:open).with(new_zip_file, create: true).and_yield(zip_file_double)
         allow(zip_file_double).to receive(:add)
 
         # Mock Dir[] to return a list of files
@@ -190,18 +194,19 @@ RSpec.describe Superset::Dashboard::Import do
       end
 
       it "creates a zip file and returns its path" do
-        expect(Zip::File).to receive(:open).with(new_zip_file, Zip::File::CREATE)
+        expect(Zip::File).to receive(:open).with(new_zip_file, create: true)
         expect(subject.send(:source_zip_file)).to eq(new_zip_file)
       end
 
       it "adds directory content to the zip file" do
         zip_file_double = double("Zip::File")
-        expect(Zip::File).to receive(:open).with(new_zip_file, Zip::File::CREATE).and_yield(zip_file_double)
+        expect(Zip::File).to receive(:open).with(new_zip_file, create: true).and_yield(zip_file_double)
+
         expect(zip_file_double).to receive(:add).with(
-          "dashboard_export_20240321T214117/file1.yaml", "#{source}/file1.yaml"
+          "dashboard_import_#{subject.send(:timestamp)}/file1.yaml", "#{source}/file1.yaml"
         )
         expect(zip_file_double).to receive(:add).with(
-          "dashboard_export_20240321T214117/subdirectory/file2.yaml", "#{source}/subdirectory/file2.yaml"
+          "dashboard_import_#{subject.send(:timestamp)}/subdirectory/file2.yaml", "#{source}/subdirectory/file2.yaml"
         )
 
         subject.send(:source_zip_file)
@@ -235,7 +240,7 @@ RSpec.describe Superset::Dashboard::Import do
       end
 
       it "creates a zip file in the source directory" do
-        expected_path = "#{source}/dashboard_import.zip"
+        expected_path = "#{source}/dashboard_import_#{subject.send(:timestamp)}.zip"
         expect(subject.send(:source_zip_file)).to eq(expected_path)
       end
     end
@@ -277,8 +282,43 @@ RSpec.describe Superset::Dashboard::Import do
       end
 
       it "creates a zip file path using the source directory" do
-        expected_path = "#{source}/dashboard_import.zip"
+        expected_path = "#{source}/dashboard_import_#{subject.send(:timestamp)}.zip"
         expect(subject.send(:new_zip_file)).to eq(expected_path)
+      end
+    end
+  end
+
+  describe "#payload" do
+    let(:subject) { described_class.new(source: source, overwrite: overwrite) }
+    let(:source) { "spec/fixtures/dashboard_18_export_20240322.zip" }
+    let(:overwrite) { true }
+    let(:payload) { subject.send(:payload) }
+
+    it "builds without raising" do
+      expect { payload }.not_to raise_error
+    end
+
+    it "wraps the zip in a multipart file part" do
+      expect(payload[:formData]).to be_a(Faraday::Multipart::FilePart)
+    end
+
+    it "sends the zip as application/zip" do
+      expect(payload[:formData].content_type).to eq("application/zip")
+    end
+
+    it "sends the source zip file" do
+      expect(payload[:formData].local_path).to end_with("dashboard_18_export_20240322.zip")
+    end
+
+    it "stringifies overwrite" do
+      expect(payload[:overwrite]).to eq("true")
+    end
+
+    context "when overwrite is false" do
+      let(:overwrite) { false }
+
+      it "stringifies overwrite" do
+        expect(payload[:overwrite]).to eq("false")
       end
     end
   end

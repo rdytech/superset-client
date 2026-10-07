@@ -2,18 +2,24 @@
 # Usage: Superset::Dashboard::List.new(page_num: 1, title_contains: 'Test').list
 # Usage: Superset::Dashboard::List.new(tags_equal: ['embedded', 'product:acme']).list
 
+require 'ostruct'
+
 module Superset
   module Dashboard
     class List < Superset::Request
-      attr_reader :title_contains, :title_equals, :tags_equal, :ids_not_in, :include_filter_dataset_schemas
+      attr_reader :title_contains, :title_equals,
+                  :tags_contain, :tags_equal,
+                  :ids_not_in, :owner_id_eq, :include_filter_dataset_schemas
 
-      def initialize(page_num: 0, title_contains: '', title_equals: '', tags_equal: [], ids_not_in: [], include_filter_dataset_schemas: false)
+      def initialize(title_contains: '', title_equals: '', tags_contain: [], tags_equal: [], ids_not_in: [], owner_id_eq: '', include_filter_dataset_schemas: false, **kwargs)
         @title_contains = title_contains
         @title_equals = title_equals
+        @tags_contain = tags_contain
         @tags_equal = tags_equal
         @ids_not_in = ids_not_in
+        @owner_id_eq = owner_id_eq
         @include_filter_dataset_schemas = include_filter_dataset_schemas
-        super(page_num: page_num)
+        super(**kwargs)
       end
 
       def self.call
@@ -57,8 +63,16 @@ module Superset
         end
       end
 
+      def to_h
+        result.map do |d|
+          list_attributes.to_h do |la|
+            la == :url ? [la, "#{superset_host}#{d[la]}"] : [la, d[la]]
+          end
+        end
+      end
+
       def ids
-        result.map { |d| d[:id] }
+        result.is_a?(Hash) ? [result[:id]] : result.map { |d| d[:id] }
       end
 
       private
@@ -72,15 +86,31 @@ module Superset
         filter_set = []
         filter_set << "(col:dashboard_title,opr:ct,value:'#{title_contains}')" if title_contains.present?
         filter_set << "(col:dashboard_title,opr:eq,value:'#{title_equals}')" if title_equals.present?
-        filter_set << tag_filters if tags_equal.present?
+        filter_set << tags_contain_filters if tags_contain.present?
+        filter_set << tags_equal_filters if tags_equal.present?
         filter_set << ids_not_in_filters if ids_not_in.present?
+        filter_set << "(col:owners,opr:rel_m_m,value:#{owner_id_eq})" if owner_id_eq.present?
+
         unless filter_set.empty?
           "filters:!(" + filter_set.join(',') + "),"
         end
       end
 
-      def tag_filters
-        tags_equal.map {|tag| "(col:tags,opr:dashboard_tags,value:'#{tag}')"}.join(',')
+      def tags_equal_filters
+        tags_equal_ids.map { |id| "(col:tags,opr:dashboard_tag_id,value:#{id})" }.join(',')
+      end
+
+      def tags_equal_ids
+        tags_equal.map do |tag_name|
+          ids = Superset::Tag::List.new(name_equals: tag_name).rows.map(&:first)
+          raise "No ID found for tag: #{tag_name}" if ids.empty?
+          raise "Multiple IDs found for tag: #{tag_name}" if ids.size > 1
+          ids.first
+        end
+      end
+
+      def tags_contain_filters
+        tags_contain.map {|tag| "(col:tags,opr:dashboard_tags,value:'#{tag}')"}.join(',')
       end
 
       def ids_not_in_filters
@@ -94,8 +124,8 @@ module Superset
       def validate_constructor_args
         raise InvalidParameterError, "title_contains must be a String type" unless title_contains.is_a?(String)
         raise InvalidParameterError, "title_equals must be a String type" unless title_equals.is_a?(String)
-        raise InvalidParameterError, "tags_equal must be an Array type" unless tags_equal.is_a?(Array)
-        raise InvalidParameterError, "tags_equal array must contain string only values" unless tags_equal.all? { |item| item.is_a?(String) }
+        raise InvalidParameterError, "tags_contain must be an Array type of String values" unless tags_contain.is_a?(Array) && tags_contain.all? { |item| item.is_a?(String) }
+        raise InvalidParameterError, "tags_equal must be an Array type of String values" unless tags_equal.is_a?(Array) && tags_equal.all? { |item| item.is_a?(String) }
         raise InvalidParameterError, "ids_not_in must be an Array type" unless ids_not_in.is_a?(Array)
       end
     end

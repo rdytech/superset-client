@@ -97,7 +97,8 @@ RSpec.describe Superset::Chart::List do
       expect(subject.rows_with_dashboards).to eq(
         [
           ["54672", "Top 10 Placement Managed by", "[]"],
-          ["54689", "Bryan's Test A", "[{\"dashboard_title\"=>\"Embedded Test 1 (COPY)\", \"id\"=>118}]"]
+          ["54689", "Bryan's Test A",
+           [{ "dashboard_title" => "Embedded Test 1 (COPY)", "id" => 118 }].to_s]
         ]
       )
     end
@@ -109,8 +110,8 @@ RSpec.describe Superset::Chart::List do
       expect(subject.query_params).to eq("page:0,page_size:100")
     end
 
-    context 'with name_contains filters' do
-      subject { described_class.new(name_contains: 'birth') }
+    context 'with title_contains filters' do
+      subject { described_class.new(title_contains: 'birth') }
 
       specify do
         expect(subject.query_params).to eq("filters:!((col:slice_name,opr:ct,value:'birth')),page:0,page_size:100")
@@ -118,7 +119,7 @@ RSpec.describe Superset::Chart::List do
     end
 
     context 'with multiple filter set' do
-      subject { described_class.new(name_contains: 'birth', dashboard_id_eq: 3) }
+      subject { described_class.new(title_contains: 'birth', dashboard_id_eq: 3) }
 
       specify do
         expect(subject.query_params).to eq(

@@ -63,7 +63,8 @@ RSpec.describe Superset::Services::DashboardLoader do
       expect(charts.first[:content].keys).to match_array([
         :cache_timeout, :certification_details, :certified_by, :dataset_uuid, :description, :params, :query_context, 
         :slice_name, :uuid, :version, :viz_type])
-      expect(charts.first[:content][:slice_name]).to eq('Boy Name Cloud')
+      expect(charts.map{|c| c[:content][:slice_name]}.sort).to match_array(
+        ["Boy Name Cloud", "Names Sorted by Num in California", "Number of Girls", "Pivot Table", "Top 10 Girl Name Share"])
     end
   end
 end

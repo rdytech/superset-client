@@ -1,4 +1,105 @@
-## Change Log
+## Changelog
+
+## 0.5.4 - 2026-09-23
+
+* **Fix:** `require 'enumerate_it'` in `lib/superset.rb`. `require "superset"` raised `RequireAll::LoadError: ... uninitialized constant EnumerateIt` — `ObjectType` (in `lib/superset/enumerations/object_type.rb`) subclasses `EnumerateIt::Base`, and enumerate_it has been a declared gemspec dependency since it was introduced, but nothing ever required it. **0.5.3 installs but cannot be loaded**; upgrade straight to 0.5.4
+* **Fix the reason it was missed:** `spec/spec_helper.rb` required the gem's own dependencies (happi, enumerate_it, faraday, terminal-table) and then loaded `lib/` by globbing `Dir["./lib/**/*.rb"]`, so the suite supplied the requires that `lib/` was missing and never loaded `lib/superset.rb` at all. 341 examples passed against a gem that could not be required. spec_helper now does only `require "superset"`, exactly as a consumer does
+* Add `spec/superset_load_spec.rb`, asserting the public surface resolves from a plain `require "superset"` along with the activesupport, ostruct and enumerate_it core extensions — each of which has caused a load-time `NameError` at some point
+* Add a `package` CI job that builds the gem, installs it standalone and requires it from outside the repo. The spec suite runs with `lib/` on the load path, so it cannot catch a file excluded from `spec.files` or a dependency missing from the gemspec
+
+## 0.5.3 - 2026-09-23
+
+* **Fix:** make the gem actually work on Faraday 2. 0.5.2 loosened the `faraday` constraint from `~> 1.10` to `>= 1.10` but adapted none of the code, so any consumer resolving Faraday 2 hit `NoMethodError: undefined method 'authorization' for an instance of Faraday::Connection` on every request through `Superset::Client` and `Superset::GuestToken`. Replaced `f.authorization :Bearer, token` with `f.request :authorization, 'Bearer', token`, which works on both Faraday 1.10+ and 2.x
+* **Fix:** `require 'faraday/multipart'` in `Superset::Client` and `Superset::Dashboard::Import`. Faraday stopped autoloading faraday-multipart in 2.0, so `f.request :multipart` raised ":multipart is not registered on Faraday::Request"; it resolved only because happi happened to require it first — the same transitive-dependency trap as the `FaradayMiddleware::ParseJson` bug in 0.5.1. This gem declares faraday-multipart itself, so it now requires it itself
+* Use `Faraday::Multipart::FilePart` instead of `Faraday::UploadIO` in `Dashboard::Import#payload`. Not a live break (faraday-multipart 1.x still aliases `UploadIO` to the same class once loaded), but FilePart is the maintained name and does not depend on that legacy alias
+* Add `Dashboard::Import#payload` specs. Every existing import example stubbed `#response`, so `#payload` had never executed under test
+* **Fix:** `require 'ostruct'` in `Dashboard::List` and `Services::DashboardLoader`. Both use `OpenStruct` but it only ever loaded transitively via activesupport <= 7.1; on activesupport 8.x the gem failed to load at all. Also declared as a gemspec dependency, since ostruct becomes a bundled gem in Ruby 3.5
+* Stop tracking `Gemfile.lock`. This is a library; the committed lockfile pinned faraday 1.10.3 and is the direct reason the widened constraint was never exercised locally
+* **Fix:** declare `happi` (`~> 1.0`) as a runtime dependency in the gemspec. `Superset::Client` subclasses `Happi::Client`, but happi was declared only in the `Gemfile` as a git ref — so the published gem listed no happi at all and raised `NameError` on first require for anyone installing it from a package host. happi 1.0.0 is on RubyGems and is byte-identical to the git tag this gem was developed against; the `Gemfile` git pin is now redundant and has been removed
+* **Fix:** declare and require `activesupport` (`>= 7.1`). `lib/` calls it in ~96 places — `present?`, `blank?`, `with_indifferent_access`, `deep_symbolize_keys`, and `humanize` in `Display#table` — but the gem neither declared nor required it; it loaded only because happi depends on activesupport. Requires the four core extensions actually used rather than `active_support/all`
+* Raise `required_ruby_version` from `>= 3` to `>= 3.2`. The old floor was never true: `Superset::Client` subclasses `Happi::Client`, and happi v1.0.0 requires ruby >= 3.2, so a bundle cannot resolve on 3.0 or 3.1. Nothing in `lib/` needs syntax newer than 3.0 — the floor is entirely happi's
+* Make eight specs ruby-version agnostic. They hardcoded ruby 3.4's `Hash#inspect` output (`"k" => v`, not `"k"=>v`), so the suite only passed on the one ruby the strings were pasted from — leaving the declared `>= 3.2` floor untested. Expectations are now derived from the same source data the code stringifies
+* Add `.github/workflows/ci.yml`, running the suite across ruby 3.2/3.3/3.4 and both ends of the declared faraday range (`gemfiles/faraday_1.gemfile`, `gemfiles/faraday_2.gemfile`). Buildkite already ran rspec on every PR, but against the committed `Gemfile.lock`, so CI only ever exercised faraday 1.10.3 — a single point inside the declared `>= 1.10` range, which is how 0.5.2 shipped a Faraday 2 break with a green build
+* **Fix:** `Superset::Client#raise_error` no longer `puts` to stdout on every failed API call. A library should not write to its consumer's console, and the message is already carried by the raised exception; it now goes to `Superset.logger` (configurable since 0.5.0). The dead `binding.pry` comment beside it is gone, and `#raise_error` has specs for the first time
+* Populate gem metadata (`homepage_uri`, `source_code_uri`, `changelog_uri`, `bug_tracker_uri`, `documentation_uri`, `rubygems_mfa_required`) — these were all commented out, so the rubygems.org page showed no links
+* Stop shipping development scaffolding in the packaged gem. Installs previously included `Dockerfile`, `docker-compose*.yml`, `.buildkite/`, `.github/`, `gemfiles/`, `Rakefile`, `AGENTS.md`, `CLAUDE.md`, `RELEASING.md` and `env.sample`; the gem now contains `lib/`, the docs, README, CHANGELOG and LICENSE
+
+## 0.5.2 - 2026-08-28
+
+* Add tag-triggered release workflow (`.github/workflows/release.yml`) that publishes to RubyGems.org via OIDC trusted publishing and to GitHub Packages via the Actions `GITHUB_TOKEN` — no long-lived credentials stored anywhere. Refuses to publish unless the pushed tag's commit is reachable from `develop`. See `RELEASING.md` for the release steps and one-time RubyGems.org Trusted Publisher setup
+* Loosen the `faraday` dependency from `~> 1.10` to `>= 1.10` so consumers aren't held back from newer Faraday releases
+
+## 0.5.1 - 2026-08-27
+
+* **Fix:** `Superset::Client` and `Superset::GuestToken` raised `NameError: uninitialized constant FaradayMiddleware::ParseJson` on every request. Both connections used `FaradayMiddleware::ParseJson`, but this gem has never declared or required `faraday_middleware` — the constant only reached the bundle transitively via happi, and happi 1.0.0 dropped it. Replaced with Faraday's own `f.response :json`, which is equivalent (same `content_type:` option, same `respond_to?(:to_str)` guard, same `Faraday::ParsingError` on bad bodies)
+* Raise the `faraday` floor from `~> 1.0` to `~> 1.10` — `Faraday::Response::Json` only ships from 1.10
+* Pin the development `happi` to v1.0.0 so `faraday_middleware` is absent from this gem's own bundle and CI catches any reintroduction
+* Add `#connection` specs to both classes asserting the handler stack, which the previous suite never exercised
+
+## 0.5.0 - 2026-07-21
+
+* Decouple from Rollbar — remove the `Rollbar.error(...) if defined?(Rollbar)` call in `WarmUpCache`; exceptions now propagate to the caller so consumers' own error handling can react
+* Introduce configurable logger via `Superset.configure { |c| c.logger = ... }` — any object responding to `#info` and `#error` (default remains `log/superset-client.log`)
+* **Breaking:** `Superset::Dashboard::WarmUpCache.new(...).perform` now raises on per-dataset failures instead of swallowing them; wrap the call in your own `rescue` if you need the previous silent behavior
+* Remove unused `DuplicateDashboardLogger` module (dead code)
+* Drop `rollbar` dev dependency; drop `require "rollbar"` from `spec_helper.rb` and `bin/console`
+* Add explicit `require 'json'` (the gem uses `to_json` in 8+ places and was relying on rollbar to transitively load it)
+
+## 0.4.0 - 2026-06-05
+
+* send X-CSRFToken (and replay the session cookie) on state-changing requests so writes work against a CSRF-protected Superset
+* send a same-origin Referer on state-changing requests to satisfy Flask-WTF WTF_CSRF_SSL_STRICT over HTTPS
+* GuestToken: send X-CSRFToken + Referer (and replay the session cookie) on the guest_token POST — that endpoint is CSRF-protected too, so embedded dashboards broke without it
+* add faraday-cookie_jar dependency
+
+## 0.3.6 - 2026-02-26
+
+* add dry_run to dashboard bulk delete cascade #74
+* update to rubyzip 3.2.2 #73
+
+## 0.3.5 - 2026-02-24
+
+* allow for empty filter datasets #72
+
+## 0.3.4 - 2026-02-21
+
+* cascade ownership should also update datasets for filter only in #68
+* add owner filter #62
+* list dataset catalog db names #69
+* bump version to 0.3.4 #70
+* Adjust asset order for board cascade deletion #71
+
+## 0.3.3 - 2025-12-11
+* Add databases method to Superset::Dashboard::Datasets::List
+* New class to get Superset::Database::Connection details
+
+## 0.3.2 - 2025-11-28
+* Add require happi
+
+## 0.3.1 - 2025-11-27
+* Add require terminal table
+
+## 0.3.0 - 2025-11-26
+* Rename reserved object_id to target_id in https://github.com/rdytech/superset-client/pull/58
+* Add dashboard cascade ownship in https://github.com/rdytech/superset-client/pull/59
+* allow dup dashboard dataset suffix naming override in https://github.com/rdytech/superset-client/pull/61
+* Bump ruby 3 bump gems by https://github.com/rdytech/superset-client/pull/60
+
+
+## 0.2.7 - 2025-10-16
+* add to_h method to list classes for Hash output
+* add ids method to list classes for array of ids output
+* add ability to over ride default page_size
+* add ruby console auto timeout set to 30 mins by default
+* add GetCatalogs endpoint caller
+* fix catalog bug related to dashboard export and import across env
+* add tag_equals param to dashboard list class
+
+## 0.2.6 - 2025-08-05
+* Bump terminal-table from 1.8.0 to 4.0.0
+
+## 0.2.5 - 2025-05-22
+* add refresh dataset call in `Superset::Dataset::Refresh.call(id)`
 
 ## 0.2.4 - 2025-01-29
 * modifies the `Superset::Dashboard::Datasets::List.new(id).schemas` to optionally include filter datasets as well.
@@ -76,6 +177,3 @@
 - add security/user endpoints
 - add security/role endpoints
 - add security/role/permission endpoints
-
-
-

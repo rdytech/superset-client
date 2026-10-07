@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Superset::Dashboard::Put do
-  subject { described_class.new(target_dashboard_id: dashboard_id, params: params) }
+  subject { described_class.new(target_id: dashboard_id, params: params) }
   let(:dashboard_id) { 1 }
   let(:params) {{
     "json_metadata" => { 
@@ -23,19 +23,19 @@ RSpec.describe Superset::Dashboard::Put do
     end
 
     context 'with invalid params' do
-      context 'when source_dashboard_id is not an integer' do
+      context 'when target_id is not an integer' do
         let(:dashboard_id) { 'q' }
         
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: target_dashboard_id integer is required")
+          expect { subject.perform }.to raise_error("Error: target_id integer is required")
         end
       end
 
-      context 'when source_dashboard_id is not present' do
+      context 'when target_id is not present' do
         let(:dashboard_id) { nil }
         
         it 'raises an error' do
-          expect { subject.perform }.to raise_error("Error: target_dashboard_id integer is required")
+          expect { subject.perform }.to raise_error("Error: target_id integer is required")
         end
       end
 

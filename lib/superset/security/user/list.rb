@@ -4,10 +4,10 @@ module Superset
       class List < Superset::Request
         attr_reader :email_contains, :username_equals
 
-        def initialize(page_num: 0, email_contains: '', username_equals: '')
+        def initialize(email_contains: '', username_equals: '', **kwargs)
           @email_contains = email_contains
           @username_equals = username_equals
-          super(page_num: page_num)
+          super(**kwargs)
         end
 
         private

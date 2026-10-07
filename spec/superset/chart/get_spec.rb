@@ -7,7 +7,7 @@ RSpec.describe Superset::Chart::Get do
   let(:params) { "{\"datasource\":\"#{datasource_id}__table\"}" }
   let(:query_context) { "{\"datasource\":{\"id\":#{datasource_id},\"type\":\"table\"}}" }
   let(:result) do
-    [{
+    {
       "cache_timeout"=>nil,
       "certification_details"=>nil,
       "certified_by"=>nil,
@@ -24,7 +24,7 @@ RSpec.describe Superset::Chart::Get do
       "thumbnail_url"=>"/api/v1/chart/54507/thumbnail/1595a10937091faff0aed5df628a1292/",
       "url"=>"/explore/?slice_id=54507",
       "viz_type"=>"echarts_timeseries_bar"
-    }]
+    }
   end
 
   before do
@@ -33,18 +33,19 @@ RSpec.describe Superset::Chart::Get do
 
   describe '.call' do
     specify do
-      expect_any_instance_of(described_class).to receive(:list) 
+      expect_any_instance_of(described_class).to receive(:list)
       described_class.call(id)
     end
   end
 
   describe '#rows' do
     specify do
-      expect(subject.rows).to eq [[
+      expect(subject.rows).to eq [
         "54507", 
-        "JRStg DoB per Year", 
-        "[{\"first_name\"=>\"Jay\", \"id\"=>9, \"last_name\"=>\"Bee\"}, {\"first_name\"=>\"Ron\", \"id\"=>8, \"last_name\"=>\"Vee\"}]"
-      ]]
+        "JRStg DoB per Year",
+        [{ "first_name" => "Jay", "id" => 9, "last_name" => "Bee" },
+         { "first_name" => "Ron", "id" => 8, "last_name" => "Vee" }].to_s
+      ]
     end
   end
 
@@ -54,7 +55,7 @@ RSpec.describe Superset::Chart::Get do
         expect(subject.datasource_id).to eq(datasource_id)
       end
     end
- 
+
     context 'with query_context not containing the datasource_id' do
       let(:query_context) { "{}" }
       let(:datasource_id) { 300 }

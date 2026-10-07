@@ -12,7 +12,7 @@ module Superset
       def perform
         raise InvalidParameterError, "chart_id integer is required" unless chart_id.present? && chart_id.is_a?(Integer)
 
-        logger.info("Attempting to delete chart with id: #{chart_id}")
+        logger.info("Deleting chart with id: #{chart_id}")
         response
       end
 

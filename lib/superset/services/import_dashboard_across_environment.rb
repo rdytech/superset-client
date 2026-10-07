@@ -56,6 +56,7 @@ module Superset
 
       def remove_source_database_config
         return if dashboard_config[:databases].blank?
+
         previous_database_name = dashboard_config[:databases]&.first[:content][:database_name]
         File.delete(dashboard_config[:databases].first[:filename])
 
@@ -78,13 +79,16 @@ module Superset
         dashboard_config[:datasets].each do |dataset|
           dataset[:content][:database_uuid] = dashboard_config[:databases].first[:content][:uuid]
           dataset[:content][:schema]        = target_database_schema
+          dataset[:content][:catalog]       = nil # reset target to use default catalog if applicable
+
           stringified_content = deep_transform_keys_to_strings(dataset[:content])
           File.open(dataset[:filename], 'w') { |f| f.write stringified_content.to_yaml }
         end
       end
 
       def create_new_dashboard_zip
-        Zip::File.open(new_zip_file, Zip::File::CREATE) do |zipfile|
+        require 'zip'  # lazy: only import/export needs rubyzip
+        Zip::File.open(new_zip_file, create: true) do |zipfile|
           Dir[File.join(dashboard_export_root_path, '**', '**')].each do |file|
             zipfile.add(file.sub(dashboard_export_root_path + '/', File.basename(dashboard_export_root_path) + '/' ), file) if File.file?(file)
           end

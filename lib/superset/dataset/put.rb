@@ -2,7 +2,7 @@
 #
 # Usage:
 # params = { owners: [ 58, 3 ] }
-# Superset::Dataset::Put.new(object_id: 101, params: params ).perform
+# Superset::Dataset::Put.new(target_id: 101, params: params ).perform
 
 module Superset
   module Dataset
@@ -11,7 +11,7 @@ module Superset
       private
 
       def route
-        "dataset/#{object_id}"
+        "dataset/#{target_id}"
       end
     end
   end

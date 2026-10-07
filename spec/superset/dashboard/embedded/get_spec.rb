@@ -39,7 +39,7 @@ RSpec.describe Superset::Dashboard::Embedded::Get, type: :service do
     describe '#table' do
       it 'prints a table with the dashboard title and charts' do
         expect(subject.table.to_s).to eq(
-          "+-----------+--------------------------------------+----------------------------+----------------------------+\n" \
+          "+------------------------------------------------------------------------------------------------------------+\n" \
           "|                                             1: Test Dashboard                                              |\n" \
           "+-----------+--------------------------------------+----------------------------+----------------------------+\n" \
           "| Dashboard | Uuid                                 | Allowed domains            | Changed on                 |\n" \
@@ -84,12 +84,12 @@ RSpec.describe Superset::Dashboard::Embedded::Get, type: :service do
     describe '#table' do
       it 'prints a table with zero rows' do
         expect(subject.table.to_s).to eq(
-          "+-----------+------+-----------------+------------+\n" \
+          "+-------------------------------------------------+\n" \
           "|                1: Test Dashboard                |\n" \
           "+-----------+------+-----------------+------------+\n" \
           "| Dashboard | Uuid | Allowed domains | Changed on |\n" \
           "+-----------+------+-----------------+------------+\n" \
-          "+-----------+------+-----------------+------------+"
+          "+-------------------------------------------------+"
         )
       end
     end

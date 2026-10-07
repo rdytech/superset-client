@@ -3,14 +3,14 @@ require 'spec_helper'
 RSpec.shared_examples :base_put_request_shared_examples do
   describe "#perform" do
     subject { described_class.new(
-                object_id: object_id,
+                target_id: target_id,
                 params: params) }
 
-    let(:object_id) { 226 }
+    let(:target_id) { 226 }
     let(:params) { { owners: [ 1, 2, 3 ] } }
     let(:response) do
       {
-        id: object_id, 
+        id: target_id, 
         result: { owners: [1, 2, 3] }
       }
     end
@@ -27,11 +27,11 @@ RSpec.shared_examples :base_put_request_shared_examples do
       end
 
       context 'with invalid params' do
-        context 'object_id is empty' do
-          let(:object_id) { nil }
+        context 'target_id is empty' do
+          let(:target_id) { nil }
           
           specify do
-            expect { subject.perform }.to raise_error(RuntimeError, "Error: object_id integer is required")
+            expect { subject.perform }.to raise_error(RuntimeError, "Error: target_id integer is required")
           end
         end
 

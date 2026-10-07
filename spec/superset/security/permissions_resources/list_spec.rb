@@ -24,21 +24,25 @@ RSpec.describe Superset::Security::PermissionsResources::List do
     allow(subject).to receive(:response).and_return(response)
   end
 
-  describe '#list' do
-    specify do
-      expect(subject.table.to_s).to eq(
-        "+----+-----------------------+----------------------------+\n" \
-        "|     Superset::Security::PermissionsResources::List      |\n" \
-        "+----+-----------------------+----------------------------+\n" \
-        "| Id | Permission            | View menu                  |\n" \
-        "+----+-----------------------+----------------------------+\n" \
-        "| 1  | {\"name\"=>\"can_read\"}  | {\"name\"=>\"SavedQuery\"}     |\n" \
-        "| 2  | {\"name\"=>\"can_write\"} | {\"name\"=>\"SavedQuery\"}     |\n" \
-        "| 3  | {\"name\"=>\"can_read\"}  | {\"name\"=>\"CssTemplate\"}    |\n" \
-        "| 4  | {\"name\"=>\"can_write\"} | {\"name\"=>\"CssTemplate\"}    |\n" \
-        "| 5  | {\"name\"=>\"can_read\"}  | {\"name\"=>\"ReportSchedule\"} |\n" \
-        "+----+-----------------------+----------------------------+"
+  describe '#table' do
+    specify 'titles the table with the class name' do
+      expect(subject.table.title).to eq('Superset::Security::PermissionsResources::List')
+    end
+
+    specify 'humanizes list_attributes into headings' do
+      expect(subject.table.headings.first.cells.map(&:value)).to eq(%w[Id Permission View\ menu])
+    end
+
+    specify 'stringifies each list_attribute into a row' do
+      expect(subject.rows).to eq(
+        response[:result].map do |permission|
+          [permission[:id].to_s, permission[:permission].to_s, permission[:view_menu].to_s]
+        end
       )
+    end
+
+    specify 'renders' do
+      expect { subject.table.to_s }.not_to raise_error
     end
   end
 end

@@ -11,20 +11,28 @@ Gem::Specification.new do |spec|
   spec.summary = "A Ruby Client for Apache Superset API"
   spec.homepage = "https://github.com/rdytech/superset-client"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = ">= 3.2"
 
   #spec.metadata["allowed_push_host"] = ""
 
-  #spec.metadata["homepage_uri"] = spec.homepage
-  #spec.metadata["source_code_uri"] = ""
-  #spec.metadata["changelog_uri"] = ""
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = "#{spec.homepage}/tree/develop"
+  spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/develop/CHANGELOG.md"
+  spec.metadata["bug_tracker_uri"] = "#{spec.homepage}/issues"
+  spec.metadata["documentation_uri"] = "#{spec.homepage}/blob/develop/README.md"
+  spec.metadata["rubygems_mfa_required"] = "true"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
   spec.files = Dir.chdir(__dir__) do
     `git ls-files -z`.split("\x0").reject do |f|
       (File.expand_path(f) == __FILE__) ||
-        f.start_with?(*%w[bin/ test/ spec/ features/ .git appveyor Gemfile])
+        f.start_with?(*%w[
+          bin/ test/ spec/ features/ gemfiles/ doc/development
+          .git .github .buildkite .rspec .rubocop .ruby-version
+          appveyor Gemfile Dockerfile docker-compose Rakefile log/
+          AGENTS.md CLAUDE.md RELEASING.md env.sample
+        ])
     end
   end
 
@@ -34,21 +42,30 @@ Gem::Specification.new do |spec|
     "lib"
   ]
 
-  # Uncomment to register a new dependency of your gem
-  spec.add_dependency "dotenv", "~> 2.7"
-  spec.add_dependency "json", "~> 2.6"
-  spec.add_dependency "terminal-table", "~> 1.8"
-  spec.add_dependency "rake", "~> 13.0"
-  spec.add_dependency "rollbar", "~> 3.4"
-  spec.add_dependency "require_all", "~> 3.0"
-  spec.add_dependency "rubyzip", "~> 1.0"
-  spec.add_dependency "faraday", "~> 1.0"
+  spec.add_dependency "activesupport", ">= 7.1"
+  spec.add_dependency "happi", "~> 1.0"
+  spec.add_dependency "json", ">= 2.0"
+  spec.add_dependency "ostruct", ">= 0.5"
+  spec.add_dependency "terminal-table", "~> 4.0"
+  spec.add_dependency "require_all", ">= 3.0"
+  # >= 1.10 because the connections use Faraday's own `f.response :json`
+  # (Faraday::Response::Json), which only ships from 1.10.
+  spec.add_dependency "faraday", ">= 1.10"
   spec.add_dependency "faraday-multipart", "~> 1.0"
-  spec.add_dependency "enumerate_it", "~> 1.7.0"
+  spec.add_dependency "faraday-cookie_jar", "~> 0.0.7"  # replay the Flask session cookie for CSRF
+  spec.add_dependency "enumerate_it", ">= 1.7"
 
-  spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "rubocop", "~> 1.5"
-  spec.add_development_dependency "pry", "~> 0.14"
+  # rubyzip is only needed by the dashboard import/export feature, which lazily
+  # `require 'zip'` at call time. Kept as a dev dependency so those specs run here,
+  # but NOT a runtime dependency — consumers that don't import/export (embedders,
+  # read/write API clients) shouldn't inherit its rubyzip >= 3 pin.
+  # Apps that DO use import/export must declare rubyzip (>= 3.0) themselves.
+  spec.add_development_dependency "rubyzip", ">= 3.0"
+  spec.add_development_dependency "dotenv", ">= 2.0"
+  spec.add_development_dependency "rake", ">= 13.0"
+  spec.add_development_dependency "rspec", ">= 3.0"
+  spec.add_development_dependency "rubocop", ">= 1.0"
+  spec.add_development_dependency "pry", ">= 0.14"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
