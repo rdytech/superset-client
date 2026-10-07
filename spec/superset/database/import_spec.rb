@@ -175,7 +175,7 @@ RSpec.describe Superset::Database::Import do
 
         # Mock Zip::File.open to prevent actual zip creation
         zip_file_double = double("Zip::File")
-        allow(Zip::File).to receive(:open).with(new_zip_file, Zip::File::CREATE).and_yield(zip_file_double)
+        allow(Zip::File).to receive(:open).with(new_zip_file, create: true).and_yield(zip_file_double)
         allow(zip_file_double).to receive(:add)
 
         # Mock Dir[] to return a list of files
@@ -188,13 +188,13 @@ RSpec.describe Superset::Database::Import do
       end
 
       it "creates a zip file and returns its path" do
-        expect(Zip::File).to receive(:open).with(new_zip_file, Zip::File::CREATE)
+        expect(Zip::File).to receive(:open).with(new_zip_file, create: true)
         expect(subject.send(:source_zip_file)).to eq(new_zip_file)
       end
 
       it "adds directory content to the zip file" do
         zip_file_double = double("Zip::File")
-        expect(Zip::File).to receive(:open).with(new_zip_file, Zip::File::CREATE).and_yield(zip_file_double)
+        expect(Zip::File).to receive(:open).with(new_zip_file, create: true).and_yield(zip_file_double)
         expect(zip_file_double).to receive(:add).with(
           "database_export_20240903/file1.yaml", "#{source}/file1.yaml"
         )
@@ -255,7 +255,7 @@ RSpec.describe Superset::Database::Import do
 
     before do
       allow(subject).to receive(:source_zip_file).and_return(source)
-      allow(Faraday::UploadIO).to receive(:new).with(source, "application/zip").and_return("mock_upload_io")
+      allow(Faraday::Multipart::FilePart).to receive(:new).with(source, "application/zip").and_return("mock_upload_io")
     end
 
     it "includes all required parameters in the payload" do

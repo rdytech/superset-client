@@ -64,7 +64,7 @@ module Superset
 
       def payload
         {
-          formData: Faraday::UploadIO.new(source_zip_file, "application/zip"),
+          formData: Faraday::Multipart::FilePart.new(source_zip_file, "application/zip"),
           overwrite: overwrite.to_s,
           passwords: passwords.to_json,
           ssh_tunnel_passwords: ssh_tunnel_passwords.to_json,
@@ -88,7 +88,7 @@ module Superset
       def source_zip_file
         return source if zip?
 
-        Zip::File.open(new_zip_file, Zip::File::CREATE) do |zipfile|
+        Zip::File.open(new_zip_file, create: true) do |zipfile|
           Dir[File.join(source, "**", "**")].each do |file|
             zipfile.add(file.sub("#{source}/", "#{File.basename(source)}/"), file) if File.file?(file)
           end
