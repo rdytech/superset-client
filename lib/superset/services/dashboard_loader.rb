@@ -1,6 +1,7 @@
 # Given a path, load all yaml files
 
 require 'superset/file_utilities'
+require 'ostruct'
 require 'yaml'
 
 module Superset

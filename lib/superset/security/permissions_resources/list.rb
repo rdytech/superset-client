@@ -3,8 +3,8 @@ module Superset
     module PermissionsResources
       class List < Superset::Request
 
-        def initialize(page_num: 0)         
-          super(page_num: page_num)
+        def initialize(**kwargs)
+          super(**kwargs)
         end
 
         private

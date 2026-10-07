@@ -1,9 +1,9 @@
 module Superset
   class BasePutRequest < Superset::Request
-    attr_reader :object_id, :params
+    attr_reader :target_id, :params
 
-    def initialize(object_id: ,params: )
-      @object_id = object_id
+    def initialize(target_id: ,params: )
+      @target_id = target_id
       @params = params
     end
 
@@ -19,7 +19,7 @@ module Superset
     private
 
     def validate
-      raise "Error: object_id integer is required" unless object_id.present? && object_id.is_a?(Integer)
+      raise "Error: target_id integer is required" unless target_id.present? && target_id.is_a?(Integer)
       raise "Error: params hash is required" unless params.present? && params.is_a?(Hash)
     end
 

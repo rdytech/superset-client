@@ -29,7 +29,7 @@ RSpec.describe Superset::Security::Role::Permission::Get do
 
     specify do
       expect(subject.table.to_s).to eq(
-        "+-----+-----------------+----------------+\n" \
+        "+----------------------------------------+\n" \
         "|         9: DB1 Acme vs Coyote          |\n" \
         "+-----+-----------------+----------------+\n" \
         "| Id  | Permission name | View menu name |\n" \

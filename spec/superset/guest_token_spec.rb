@@ -15,6 +15,34 @@ RSpec.describe Superset::GuestToken do
       expect(subject.guest_token).to eq('some-token')
     end
 
+    # guest_token/ is CSRF-protected; the POST must carry an
+    # X-CSRFToken and a same-origin Referer, like Client writes.
+    context 'CSRF handling on the POST' do
+      let(:headers) { {} }
+      let(:host) { 'https://superset.example.com' }
+      let(:connection) { instance_double(Faraday::Connection, headers: headers) }
+      let(:csrf_response) { double(env: double(body: { 'result' => 'THE-TOKEN' })) }
+      let(:post_response) { double(env: double(body: { 'token' => 'some-token' })) }
+
+      before do
+        allow(subject).to receive(:response_body).and_call_original
+        allow(subject).to receive(:connection).and_return(connection)
+        allow(subject).to receive(:authenticator).and_return(double(superset_host: host, access_token: 'bearer'))
+        allow(connection).to receive(:get).with('api/v1/security/csrf_token/').and_return(csrf_response)
+        allow(connection).to receive(:post).and_return(post_response)
+      end
+
+      it 'fetches a CSRF token and sets X-CSRFToken before the POST' do
+        subject.guest_token
+        expect(headers['X-CSRFToken']).to eq('THE-TOKEN')
+      end
+
+      it 'sets a same-origin Referer before the POST' do
+        subject.guest_token
+        expect(headers['Referer']).to eq(host)
+      end
+    end
+
     context 'when invalid rls clause is passed' do
       before { allow(subject).to receive(:rls_clause).and_return(rls_clause) }
       context 'when rls_clause is nil' do
@@ -111,6 +139,32 @@ RSpec.describe Superset::GuestToken do
           }
         )
       end
+    end
+  end
+
+  # The connection block is only evaluated on the first request, so a middleware
+  # constant that no longer resolves surfaces as a runtime NameError rather than a
+  # load-time failure. FaradayMiddleware::ParseJson used to sit here and only ever
+  # reached the bundle transitively through happi; once happi dropped
+  # faraday_middleware, every guest token request raised.
+  describe '#connection' do
+    let(:handler_classes) { subject.send(:connection).builder.handlers.map(&:klass) }
+
+    before do
+      allow(subject).to receive(:authenticator)
+        .and_return(double(superset_host: 'https://superset.example.com', access_token: 'bearer'))
+    end
+
+    it 'builds without raising' do
+      expect { subject.send(:connection) }.not_to raise_error
+    end
+
+    it "parses JSON with Faraday's own response middleware" do
+      expect(handler_classes).to include(Faraday::Response::Json)
+    end
+
+    it 'registers no FaradayMiddleware handler' do
+      expect(handler_classes.select { |k| k.name.to_s.start_with?("FaradayMiddleware") }).to be_empty
     end
   end
 end

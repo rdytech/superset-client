@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write   # rake release (via rubygems/release-gem) pushes the tag; no-op here since it's already pushed
+  id-token: write   # RubyGems.org OIDC trusted publishing
+  packages: write   # GitHub Packages push
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify tag is reachable from develop
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/develop; then
+            echo "::error::$GITHUB_REF_NAME is not reachable from develop. Refusing to publish."
+            exit 1
+          fi
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: "3.4"
+
+      - name: Publish to RubyGems.org
+        uses: rubygems/release-gem@v1

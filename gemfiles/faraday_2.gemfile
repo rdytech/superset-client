@@ -1,0 +1,6 @@
+# frozen_string_literal: true
+
+# Current major of the declared `faraday >= 1.10` range.
+eval_gemfile File.expand_path("../Gemfile", __dir__)
+
+gem "faraday", "~> 2.0"
