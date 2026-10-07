@@ -19,7 +19,6 @@
 #
 
 require "json"
-require "zip"
 require "superset/file_utilities"
 
 module Superset
@@ -88,6 +87,7 @@ module Superset
       def source_zip_file
         return source if zip?
 
+        require "zip"  # lazy: only import/export needs rubyzip
         Zip::File.open(new_zip_file, create: true) do |zipfile|
           Dir[File.join(source, "**", "**")].each do |file|
             zipfile.add(file.sub("#{source}/", "#{File.basename(source)}/"), file) if File.file?(file)
